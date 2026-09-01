@@ -3,7 +3,7 @@
 ; 
 ; 
 ; ~chewygumxx/dotfiles.git
-; ::: :/dot_config/nvim/queries/markdown_inline/highlights.scm
+; ::: :/home/dot_config/nvim/queries/markdown_inline/highlights.scm
 ; 
 ; 
 

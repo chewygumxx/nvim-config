@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/util/visual_traversal.lua
+-- ::: :/home/dot_config/nvim/lua/util/visual_traversal.lua
 --
 --
 

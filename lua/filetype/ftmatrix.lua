@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/util/ftmatrix.lua
+-- ::: :/home/dot_config/nvim/lua/filetype/ftmatrix.lua
 --
 --
 

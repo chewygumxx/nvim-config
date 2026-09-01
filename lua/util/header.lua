@@ -4,7 +4,7 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/util/header.lua
+-- ::: :/home/dot_config/nvim/lua/util/header.lua
 --
 --
 

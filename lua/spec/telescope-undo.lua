@@ -5,7 +5,7 @@
 -- 
 -- 
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/spec/telescope-undo.lua
+-- ::: :/home/dot_config/nvim/lua/spec/telescope-undo.lua
 -- 
 -- 
 

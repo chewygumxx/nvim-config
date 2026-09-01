@@ -4,7 +4,7 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/filetype/kdl.lua
+-- ::: :/home/dot_config/nvim/lua/filetype/kdl.lua
 --
 --
 

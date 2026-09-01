@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/snippet/header/markdown.lua
+-- ::: :/home/dot_config/nvim/lua/snippet/header/markdown.lua
 --
 --
 

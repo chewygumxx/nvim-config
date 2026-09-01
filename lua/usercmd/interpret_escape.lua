@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/usercmd/interpret_escape.lua
+-- ::: :/home/dot_config/nvim/lua/usercmd/interpret_escape.lua
 --
 --
 

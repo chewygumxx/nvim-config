@@ -4,7 +4,7 @@
 -- 
 -- 
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lsp/marksman.lua
+-- ::: :/home/dot_config/nvim/lsp/marksman.lua
 -- 
 -- 
 

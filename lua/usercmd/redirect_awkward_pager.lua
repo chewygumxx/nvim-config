@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/usercmd/redirect_awkward_pager.lua
+-- ::: :/home/dot_config/nvim/lua/usercmd/redirect_awkward_pager.lua
 --
 --
 

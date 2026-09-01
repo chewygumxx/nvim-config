@@ -5,7 +5,7 @@
 -- 
 -- 
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/spec/noice.nvim.lua
+-- ::: :/home/dot_config/nvim/lua/spec/noice.nvim.lua
 -- 
 -- 
 

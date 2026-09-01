@@ -4,7 +4,7 @@
 -- 
 -- 
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/spec/blink.cmp.lua
+-- ::: :/home/dot_config/nvim/lua/spec/blink.cmp.lua
 -- 
 -- 
 
