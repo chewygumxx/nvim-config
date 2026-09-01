@@ -1,0 +1,10 @@
+{
+    "name": "chewygumxx",
+    "contributes": {
+        "snippets": [
+            { "language": "lua", "path": "./lua.json" },
+            { "language": "zsh", "path": "./zsh.json" },
+            { "language": "all", "path": "./all.json" }
+        ]
+    }
+}

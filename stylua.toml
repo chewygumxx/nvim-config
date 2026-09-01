@@ -1,0 +1,15 @@
+# vim: expandtab:shiftwidth=4:filetype=toml:
+
+# 
+# 
+# ~chewygumxx/dotfiles.git
+# ::: :/dot_config/nvim/stylua.toml
+# 
+# 
+
+# 
+# 
+# 
+
+indent_type = "Spaces"
+indent_width = 4

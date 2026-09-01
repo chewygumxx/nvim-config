@@ -1,0 +1,7 @@
+{
+    "__this_file": {
+        "prefix": "__this_file",
+        "body":   [ "__this_file=\"\\${(D)\\${\\${(%):-%N}:A}}\"" ],
+        "description": "File identifier"
+    }
+}
