@@ -1,5 +1,6 @@
 #!/bin/false
 -- vim:set expandtab shiftwidth=4 filetype=lua:
+-- luacheck: globals vim
 
 --
 --

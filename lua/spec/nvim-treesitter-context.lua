@@ -1,4 +1,5 @@
 -- vim:
+-- luacheck: globals vim
 
 --
 --

@@ -1,4 +1,5 @@
 -- vim: foldlevel=1:foldmethod=expr
+-- luacheck: globals vim
 
 --
 --

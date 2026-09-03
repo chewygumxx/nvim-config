@@ -1,5 +1,6 @@
 #!/bin/false
 -- vim: expandtab:shiftwidth=4:filetype=lua:
+-- luacheck: globals vim
 
 --
 --
@@ -28,6 +29,10 @@ local opts = {
     --textwidth = 80,
     linebreak = true, -- Break at word
     virtualedit = "block",
+
+    -- Continue comment leader on <CR>/o/O; default is "tcqj" (missing r/o).
+    -- Filetype ftplugins that set their own formatoptions still override this.
+    formatoptions = "tcqjro",
 
     -- Search:
     -- Ignore case unless uppercase provided.
