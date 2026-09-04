@@ -9,14 +9,24 @@
 --
 --
 
--- Merged (deep) with nvim-lspconfig's own bundled lsp/lua_ls.lua (cmd,
--- filetypes, root_markers, settings.Lua.codeLens/hint) via Neovim's
--- runtimepath-based config merge; only the delta needed here goes in
--- this file. checkThirdParty is off because lazydev.nvim (see
--- spec/lazydev.nvim.lua) already supplies vim global / runtime library
--- types, so lua_ls's own third-party-library popup would be redundant
--- noise every time this config, or any other Neovim plugin repo (e.g.
--- ~/dev/header-metadata.nvim), is opened.
+
+-- Rescan post-lazyloaded library inclusion
+local rescanned = {} ---@type table<integer, true>
+
+---@param client vim.lsp.Client
+local nudge_library_rescan = function(client)
+    if not client.root_dir or rescanned[client.id] then
+        return
+    end
+    rescanned[client.id] = true
+    vim.defer_fn(function()
+        if not vim.lsp.get_client_by_id(client.id) then
+            return
+        end
+        client:_remove_workspace_folder(client.root_dir)
+        client:_add_workspace_folder(client.root_dir)
+    end, 500)
+end
 
 ---@type vim.lsp.Config
 local M = {
@@ -27,6 +37,9 @@ local M = {
             },
         },
     },
+    on_attach = function(client)
+        nudge_library_rescan(client)
+    end,
 }
 
 return M
