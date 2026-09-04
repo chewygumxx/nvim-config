@@ -8,4 +8,4 @@
 #
 #
 
-.luacheckrc  -sync-header-metadata
+/.luacheckrc  -sync-header-metadata
