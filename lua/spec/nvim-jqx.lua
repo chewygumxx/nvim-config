@@ -1,15 +1,21 @@
--- luacheck: globals vim
---
+#!/bin/false
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
--- ~/.config/nvim/lua/spec/nvim-jqx.lua
+-- ~chewygumxx/dotfiles.git
+-- ::: :/home/dot_config/nvim/lua/spec/nvim-jqx.lua
 --
 --
 
-return {
+---@module "lazy"
+---@type LazySpec
+local M = {
     "gennaro-tedesco/nvim-jqx",
-    
-    --event = { "BufReadPost" },
+
     ft = { "json", "yaml" },
+    --event = { "BufReadPost" },
 }
+
+return M

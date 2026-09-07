@@ -10,9 +10,7 @@
 --
 --
 
----@module "vim"
 ---@module "lazy"
-
 ---@type LazySpec
 local M = {
     "mikavilpas/yazi.nvim",

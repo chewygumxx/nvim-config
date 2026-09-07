@@ -1,47 +1,48 @@
 #!/bin/false
 -- vim:set expandtab shiftwidth=4 filetype=lua:
--- luacheck: globals vim
 -- SPDX-License-Identifier: GPL-3.0-only
+-- luacheck: globals vim
 
--- 
--- 
+--
+--
 -- ~chewygumxx/dotfiles.git
 -- ::: :/home/dot_config/nvim/lua/spec/noice.nvim.lua
--- 
--- 
+--
+--
 
+--
+-- https://github.com/folke/noice.nvim
+--
+
+---@module "lazy"
+---@type LazySpec
 local M = {
     "folke/noice.nvim",
     enabled = false,
     event = "VeryLazy",
 
     dependencies = {
-        -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
         "MunifTanjim/nui.nvim",
-        -- OPTIONAL:
-        --   `nvim-notify` is only needed, if you want to use the notification view.
-        --   If not available, we use `mini` as the fallback
         "rcarriga/nvim-notify",
     },
 
-    opts = {
-        lsp = {
-            -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
-            override = {
-                ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-                ["vim.lsp.util.stylize_markdown"] = true,
-            },
-        },
+    opts = {},
+}
 
-        -- you can enable a preset for easier configuration
-        presets = {
-            bottom_search = true, -- use a classic bottom cmdline for search
-            command_palette = true, -- position the cmdline and popupmenu together
-            long_message_to_split = true, -- long messages will be sent to a split
-            inc_rename = false, -- enables an input dialog for inc-rename.nvim
-            lsp_doc_border = false, -- add a border to hover docs and signature help
-        },
+M.opts.lsp = {
+    -- Override markdown rendering so that **cmp** and other plugins use **Treesitter**
+    override = {
+        ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+        ["vim.lsp.util.stylize_markdown"] = true,
     },
+}
+
+M.opts.presets = {
+    bottom_search         = true,   -- Use a classic bottom cmdline for search
+    command_palette       = true,   -- Position the cmdline and popupmenu together
+    long_message_to_split = true,   -- Long messages will be sent to a split
+    inc_rename            = false,  -- Enables an input dialog for inc-rename.nvim
+    lsp_doc_border        = false,  -- Add a border to hover docs and signature help
 }
 
 return M

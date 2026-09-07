@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- luacheck: globals vim
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -12,7 +12,7 @@
 --
 -- Bridges mason.nvim-installed servers to Neovim's native LSP client:
 -- installs everything in ensure_installed, then calls vim.lsp.enable()
--- for them automatically. To add a server later, add its name below.
+-- for them automatically.
 -- https://github.com/mason-org/mason-lspconfig.nvim
 --
 
@@ -31,7 +31,7 @@ local M = {
 M.opts = {
     ensure_installed = {
         "lua_ls",
-        -- bashls, pyright, yamlls, taplo, ... : one line each.
+        -- bashls, pyright, yamlls, taplo,
     },
     automatic_enable = true,
 }

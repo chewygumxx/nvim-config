@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:ft=lua:
--- luacheck: globals vim
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -14,11 +14,10 @@
 -- commentstring to provide uniform comment operation via keymap
 --
 
-
 ---@module "lazy"
 ---@type LazySpec
 local M = {
-    url     = "https://github.com/numToStr/Comment.nvim",
+    "numToStr/Comment.nvim",
     enabled = true,
     lazy    = true, -- See M.keys
 }
@@ -28,26 +27,26 @@ M.opts = {
     sticky    = true,   -- Whether the cursor should remain at its position
     ignore    = nil,    -- Lines ignored
     pre_hook  = nil,    -- Function called before
-    post_hook = nil,    -- Function called after 
-    
+    post_hook = nil,    -- Function called after
+
     mappings = {        -- Enable keybindings
         basic = true,   -- Operator-pending mapping; `gcc` `gbc` `gc[count]{motion}` `gb[count]{motion}`
         extra = true,   -- Extra mapping; `gco`, `gcO`, `gcA`
-    },                     
+    },
 
     -- Toggle mappings in NORMAL
     toggler = {
         line  = 'gcc',
         block = 'gbc',
-    },                     
+    },
 
     -- Operator-pending mappings in NORMAL and VISUAL
     opleader = {
         line  = 'gc',
         block = 'gb',
-    },                     
-                           
-    extra = {           
+    },
+
+    extra = {
         above = 'gcO',  -- Add comment on the line above
         below = 'gco',  -- Add comment on the line below
         eol   = 'gcA',  -- Append comment to end of line

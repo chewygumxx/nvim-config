@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- luacheck: globals vim
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -10,10 +10,6 @@
 --
 
 --
--- Bundled default vim.lsp.Config tables (lsp/*.lua) for hundreds of
--- servers, consumed by Neovim's native vim.lsp.config()/vim.lsp.enable().
--- Server install and enable is handled by spec/mason-lspconfig.nvim.lua;
--- this spec owns the shared setup: capabilities, diagnostics, keymaps.
 -- https://github.com/neovim/nvim-lspconfig
 --
 
@@ -27,7 +23,7 @@ local M = {
 
 M.config = function()
     local lsp = _G.require_guard("util.lsp")
-    if lsp then
+    if lsp and lsp.setup then
         lsp.setup()
     end
 end

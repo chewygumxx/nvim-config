@@ -1,19 +1,22 @@
--- vim:foldlevel=1:foldmethod=expr
+#!/bin/false
+-- vim:set expandtab shiftwidth=4 filetype=lua foldlevel=1 foldmethod=expr:
+-- SPDX-License-Identifier: GPL-3.0-only
 -- luacheck: globals vim
 
 --
 --
--- ~/.config/nvim/lua/spec/neorg.lua
+-- ~chewygumxx/dotfiles.git
+-- ::: :/home/dot_config/nvim/lua/spec/neorg.lua
 --
 --
 
+---@module "lazy"
+---@type LazySpec
 local M = {
     "nvim-neorg/neorg",
-    name = "Neorg",
-    dev  = false,
     enabled = false,
     opts = {},
-} 
+}
 
 -- Neorg Modules
 M.opts.load = {
@@ -39,9 +42,9 @@ M.opts.load = {
     ["core.todo-introspector"] = {
         config = {
             highlight_group = "String",
-            
+
             ---@param completed number Total number of completed tasks
-            ---@param total  number Total number of tasks
+            ---@param total number Total number of tasks
             format = function(completed, total)
                 return string.format(
                     "[%d/%d] [%d%%]",
@@ -67,9 +70,5 @@ M.opts.load = {
     },
     ["core.summary"] = {}
 }
-
---vim.api.nvim_set_keymap("n", "<CR>", "<Plug>(neorg.esupports.hop.hop-link)",
---    { desc = "Follow Neorg-based link to referenced file" }
---)
 
 return M

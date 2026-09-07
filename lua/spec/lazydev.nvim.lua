@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- luacheck: globals vim
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -13,6 +13,8 @@
 -- https://github.com/folke/lazydev.nvim
 --
 
+---@module "lazy"
+---@type LazySpec
 local M = {
     "folke/lazydev.nvim",
     enabled = true,

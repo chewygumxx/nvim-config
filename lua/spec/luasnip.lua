@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:ft=lua:
--- luacheck: globals vim
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -14,7 +14,6 @@
 -- https://github.com/L3MON4D3/LuaSnip/blob/master/DOC.md
 --
 
-
 ---@module "lazy"
 ---@type   LazySpec
 local M = {
@@ -22,9 +21,8 @@ local M = {
     enabled = false,
     version = "v2.5.*",
     build   = "make install_jsregexp",
+
+    opts = {},
 }
-
-M.opts = { }
-
 
 return M

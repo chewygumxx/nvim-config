@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- luacheck: globals vim
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -21,8 +21,7 @@ local M = {
     "mason-org/mason.nvim",
     enabled = true,
     lazy    = false,
+    opts    = {},
 }
-
-M.opts = {}
 
 return M

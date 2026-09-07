@@ -1,10 +1,11 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4
--- luacheck: globals vim
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
--- ~/.config/nvim/lua/spec/mkdnflow.lua
+-- ~chewygumxx/dotfiles.git
+-- ::: :/home/dot_config/nvim/lua/spec/mkdnflow.lua
 --
 --
 
@@ -367,7 +368,7 @@ M.opts.bib = {
     --
     -- If `bib.default_path` also resolves to a .bib file, it will also be
     -- referenced for citation key resolution.
-    find_in_root = true, 
+    find_in_root = true,
 }
 
 return M

@@ -3,13 +3,15 @@
 -- luacheck: globals vim
 -- SPDX-License-Identifier: GPL-3.0-only
 
--- 
--- 
+--
+--
 -- ~chewygumxx/dotfiles.git
 -- ::: :/home/dot_config/nvim/lua/spec/telescope.nvim.lua
--- 
--- 
+--
+--
 
+---@module "lazy"
+---@type LazySpec
 local M = {
     "nvim-telescope/telescope.nvim",
     enabled = false,
@@ -20,6 +22,6 @@ local M = {
         -- optional but recommended
         { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     }
-} 
+}
 
 return M

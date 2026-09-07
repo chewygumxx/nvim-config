@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4
--- luacheck: globals vim
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -9,7 +9,7 @@
 --
 --
 
--- 
+--
 -- Neovim treesitter parser manager and query collection. Also includes
 -- staged features for potential future Neovim-native implementation.
 --
@@ -44,7 +44,7 @@ local ensure_installed = {
     "desktop",
     -- https://github.com/ValdezFOmar/tree-sitter-desktop
     -- For both .desktop and .directory files
-    
+
     "diff",
     -- https://github.com/tree-sitter-grammars/tree-sitter-diff
     -- Required by: gitcommit
@@ -81,7 +81,7 @@ local ensure_installed = {
     "gotmpl",
     -- https://github.com/ngalaiko/tree-sitter-go-template
     -- Golang text/template
-  
+
     --"gpg",
     -- https://github.com/tree-sitter-grammars/tree-sitter-gpg-config
     -- gpg config files
@@ -128,7 +128,7 @@ local ensure_installed = {
     --"jq",
     -- https://github.com/flurie/tree-sitter-jq
 
-    --"jsdoc",           
+    --"jsdoc",
     -- https://github.com/tree-sitter/tree-sitter-jsdoc
 
     "json",
@@ -180,7 +180,7 @@ local ensure_installed = {
 
     --"passwd",
     -- https://github.com/ath3/tree-sitter-passwd
-  
+
     --"pem",
     -- https://github.com/tree-sitter-grammars/tree-sitter-pem
 
@@ -337,7 +337,7 @@ M.config = function()
             -- Filesize Limit
             local megabyte = 1024 * 1024
             if vim.fn.getfsize(event.file) > (vim.g.large_filesize or megabyte) then
-                vim.notify("Filesize exceeded treesitter limit: (see \"Filesize Limit\" of spec/nvim-treesitter.lua)", 
+                vim.notify("Filesize exceeded treesitter limit: (see \"Filesize Limit\" of spec/nvim-treesitter.lua)",
                     vim.log.levels.INFO)
                 return
             end

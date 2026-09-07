@@ -3,13 +3,15 @@
 -- luacheck: globals vim
 -- SPDX-License-Identifier: GPL-3.0-only
 
--- 
--- 
+--
+--
 -- ~chewygumxx/dotfiles.git
 -- ::: :/home/dot_config/nvim/lua/spec/telescope-undo.lua
--- 
--- 
+--
+--
 
+---@module "lazy"
+---@type LazySpec
 local M = {
     "debugloop/telescope-undo.nvim",
     enabled = false,

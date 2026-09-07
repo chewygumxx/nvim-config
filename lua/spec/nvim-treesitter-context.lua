@@ -1,16 +1,19 @@
--- vim:
--- luacheck: globals vim
+#!/bin/false
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
--- ~/.config/nvim/lua/spec/nvim-treesitter-context.lua
+-- ~chewygumxx/dotfiles.git
+-- ::: :/home/dot_config/nvim/lua/spec/nvim-treesitter-context.lua
 --
 --
 
+---@module "lazy"
+---@type LazySpec
 local M = {
     'nvim-treesitter/nvim-treesitter-context',
     enabled = false,
-
 
     opts = {
         mode         = 'cursor',    -- Line used to resolve context. ('cursor', 'topline')
@@ -18,6 +21,7 @@ local M = {
         line_numbers = true,
         multiwindow  = false,       -- Enable multiwindow support.
         trim_scope   = 'outer',     -- Which context lines to discard if `max_lines` exceeded. ('inner', 'outer')
+
         min_window_height   = 30,   -- Minimum editor window height to enable context. 0 = no limit.
         multiline_threshold = 10,   -- Maximum number of lines to show for a single context
 

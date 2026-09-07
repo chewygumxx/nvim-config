@@ -1,9 +1,11 @@
--- vim: foldlevel=1:foldmethod=expr
--- luacheck: globals vim
+#!/bin/false
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
--- ~/.config/nvim/lua/spec/mini.nvim.lua
+-- ~chewygumxx/dotfiles.git
+-- ::: :/home/dot_config/nvim/lua/spec/mini.nvim.lua
 --
 --
 
@@ -11,8 +13,10 @@
 --  https://github.com/nvim-mini/mini.nvim
 --
 
-local M = { 
-    'nvim-mini/mini.nvim', 
+---@module "lazy"
+---@type LazySpec
+local M = {
+    'nvim-mini/mini.nvim',
     enabled = true,
     version = false,  -- 'main' branch
 }
@@ -46,7 +50,7 @@ local modules = {
                 -- In which order to show file system entries
                 sort = nil,
             },
-            
+
             -- Module mappings created only inside explorer.
             -- Use `''` (empty string) to not create one.
             mappings = {
@@ -64,7 +68,7 @@ local modules = {
                 trim_left   = '<',
                 trim_right  = '>',
             },
-            
+
             -- General options
             options = {
                 -- Whether to delete permanently or move into module-specific trash
@@ -72,7 +76,7 @@ local modules = {
                 -- Whether to use for editing directories
                 use_as_default_explorer = true,
             },
-            
+
             -- Customization of explorer windows
             windows = {
                 -- Maximum number of windows to show side by side
@@ -94,8 +98,6 @@ M.config = function()
     modules.hipatterns()
   --modules.icons()
   --modules.files()
-    
-    --for _, setup in pairs(modules) do setup() end
 end
 
 return M
