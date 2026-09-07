@@ -6,7 +6,7 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/dot_config/nvim/lua/spec/yazi.nvim.lua
+-- ::: :/home/dot_config/nvim/lua/spec/yazi.nvim.lua
 --
 --
 
