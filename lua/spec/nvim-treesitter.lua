@@ -276,7 +276,7 @@ M.config = function()
         custom_predicates.setup()
     end
 
-    vim.treesitter.language.register('ini',    'systemd' )
+    vim.treesitter.language.register('ini', 'conf')
     vim.treesitter.language.register('gotmpl', 'template')
 
     local ts = require('nvim-treesitter')

@@ -28,7 +28,6 @@ M.setup = function()
         pattern = {
             [".*gnupg/.*%.conf"] = "gpg",
             [".*/hypr/.*%.conf"] = "hyprlang",
-            [".*config/environment.d/.*%.conf"] = "systemd",
 
             [".*config/zsh/.*"]       = "zsh",
             [".*zsh/func/[^/]*"]      = "zsh",
