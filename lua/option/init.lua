@@ -17,31 +17,16 @@ local M = {}
 
 local __this_module = ...
 
-local declarative = function()
-    local sibling_modules = {
-        "general",
-        "fold",
-        "view",
-    }
-    for _, sibling in ipairs(sibling_modules) do
-        require(__this_module .. "." .. sibling).setup()
-    end
-end
-
-local aggregate = function()
-    local path = package.searchpath(__this_module, package.path)
-    local dirname = vim.fs.dirname(path)
-    for name, type in vim.fs.dir(dirname) do
-        if type == "file" and name ~= "init.lua" and name:sub(-4) == ".lua" then
-            local sibling = name:sub(1, -5)
-            require(__this_module .. "." .. sibling).setup()
-        end
-    end
-end
+local sibling_modules = {
+    "general",
+    "fold",
+    "view",
+}
 
 M.setup = function()
-    declarative()
-    --aggregate()
+    for _, sibling in ipairs(sibling_modules) do
+        _G.setup_guard(__this_module .. "." .. sibling)
+    end
 end
 
 return M

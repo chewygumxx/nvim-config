@@ -1,5 +1,5 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+-- vim:set expandtab shiftwidth=4 filetype=lua:
 -- luacheck: globals vim
 
 --
@@ -17,43 +17,41 @@ local M = {}
 local __this_module = ...
 
 
+-- Maps a detected filetype to the specialised module that handles it.
+-- Several real filetypes can share one module (e.g. the various ini-syntax
+-- filetypes Neovim assigns distinct names to all route to "dosini").
 local ft_specialised_mods = {
-    man      = true,
-    markdown = true,
-    kdl      = true,
+    man          = "man",
+    markdown     = "markdown",
+    kdl          = "kdl",
+    dosini       = "dosini",
+    confini      = "dosini",
+    gitconfig    = "dosini",
+    cfg          = "dosini",
+    editorconfig = "dosini",
 }
 local ft_specialised = function()
     vim.api.nvim_create_autocmd("FileType", {
         desc  = "If available, instantiates filetype-specialised lua module",
         group = vim.api.nvim_create_augroup("cgxx.filetype_specialised", { clear = true }),
         callback = function(opts)
-            local filetype = opts.match
-            if not ft_specialised_mods[filetype] then
+            local modname = ft_specialised_mods[opts.match]
+            if not modname then
                 return
             end
 
-            local module = _G.require_guard(__this_module .. "." .. filetype)
-            if not module then
-                return 
+            local module = _G.require_guard(__this_module .. "." .. modname)
+            if not (module and module.setup) then
+                return
             end
 
-            if module.setup then
-                module.setup(opts.file, opts.buf, opts)
-            end
+            module.setup(opts.file, opts.buf, opts)
         end
     })
 end
 
 M.setup = function()
-    local module = _G.require_guard(__this_module .. ".ftmatrix")
-    if not module then
-        return 
-    end
-
-    if module.setup then
-        module.setup()
-    end
-
+    _G.setup_guard(__this_module .. ".ftmatrix")
     ft_specialised()
 end
 

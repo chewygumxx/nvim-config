@@ -23,6 +23,21 @@ _G.require_guard = function(modpath)
     return module
 end
 
+-- Requires modpath and calls its setup(), if present. A failure in either
+-- step is reported via vim.notify rather than propagating, so one broken
+-- module can't prevent unrelated modules from loading.
+_G.setup_guard = function(modpath)
+    local module = _G.require_guard(modpath)
+    if not (module and module.setup) then
+        return
+    end
+
+    local ok, err = pcall(module.setup)
+    if not ok then
+        vim.notify("Failed to setup() module: " .. modpath .. ": " .. tostring(err), vim.log.levels.ERROR)
+    end
+end
+
 -- Initialisation Order
 local modules = {
     "option",    -- Should be overwritten by filetype, and includes essential opts
@@ -44,8 +59,5 @@ local modules = {
 }
 
 for _, modpath in ipairs(modules) do
-    local module = _G.require_guard(modpath)
-    if module then
-        module.setup()
-    end
+    _G.setup_guard(modpath)
 end

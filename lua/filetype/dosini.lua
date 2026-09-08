@@ -1,22 +1,22 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+-- vim:set expandtab shiftwidth=4 filetype=lua:
 -- luacheck: globals vim
 
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/home/dot_config/nvim/lua/filetype/man.lua
+-- ::: :/home/dot_config/nvim/lua/filetype/dosini.lua
 --
 --
 
 --
--- Filetype-specific configuration for manpages
+-- dosini filetype settings
 --
 
 local M = {}
 
 local options = {
-    number = true,
+    commentstring = "# %s"
 }
 
 M.setup = function()

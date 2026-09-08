@@ -1,5 +1,5 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+-- vim:set expandtab shiftwidth=4 filetype=lua:
 -- luacheck: globals vim
 
 --
@@ -37,31 +37,17 @@ local hlgroup_defs = {
     ["@markup.link.bracket"] = { fg = "#4408a4", underline = false },
 
     ["@punctuation.special"] = { fg = "#7408c4" },
-    ["@_label"]              = { link = "@punctuation.special.markdown" },
+    ["@label"]                = { link = "@punctuation.special.markdown" },
 }
 
-M.setup = function(file, buf) -- Argument 'file' is a placeholder for now
-    file = file or vim.fn.expand("%")
-    buf  = buf  or 0
-
-    for opt, value in pairs(options) do
-        vim.api.nvim_set_option_value(opt, value, { buf = buf })
-    end
-    for hlgroup, defmap in pairs(hlgroup_defs) do
-        vim.api.nvim_set_hl(0, hlgroup .. ".markdown",        defmap)
-        vim.api.nvim_set_hl(0, hlgroup .. ".markdown_inline", defmap)
-    end
+-- Highlight links are session-global; only need to be defined once.
+for hlgroup, defmap in pairs(hlgroup_defs) do
+    vim.api.nvim_set_hl(0, hlgroup .. ".markdown",        defmap)
+    vim.api.nvim_set_hl(0, hlgroup .. ".markdown_inline", defmap)
 end
 
-M.autocmd = function()
-    vim.api.nvim_create_autocmd("FileType", {
-        pattern = "markdown",
-        desc  = "Filetype specialised module: Markdown",
-        group = vim.api.nvim_create_augroup("cgxx.filetype_markdown", { clear = true }),
-        callback = function(opts)
-            M.setup(opts.file, opts.buf)
-        end,
-    })
+M.setup = function()
+    _G.require_guard("util.option").apply(options, { scope = "local" })
 end
 
 return M
