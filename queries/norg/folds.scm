@@ -1,3 +1,12 @@
+; vim:set expandtab shiftwidth=4 filetype=query:
+; SPDX-License-Identifier: GPL-3.0-only
+;
+;
+; ~chewygumxx/dotfiles.git
+; ::: :/home/dot_config/nvim/queries/norg/folds.scm
+;
+;
+
 (ranged_verbatim_tag
     name: (tag_name) @_name
     (#eq? @_name "document.meta")

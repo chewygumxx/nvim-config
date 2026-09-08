@@ -1,13 +1,13 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+-- vim:set expandtab shiftwidth=4 filetype=lua:
 -- luacheck: globals vim
-
--- 
--- 
--- ~/.config/nvim/lua/autocmd.lua
--- 
--- 
-
+-- SPDX-License-Identifier: GPL-3.0-only
+--
+--
+-- ~chewygumxx/dotfiles.git
+-- ::: :/home/dot_config/nvim/lua/autocmd.lua
+--
+--
 local M = {}
 
 local cursor_last_position = function()

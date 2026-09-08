@@ -1,12 +1,12 @@
--- vim: foldlevel=1:foldmethod=expr
+#!/bin/false
+-- vim:set foldlevel=1 foldmethod=expr filetype=lua:
 -- luacheck: globals vim
-
+-- SPDX-License-Identifier: GPL-3.0-only
 --
 --
--- ~/.config/nvim/lua/plugin_manager/init.lua
+-- ~chewygumxx/dotfiles.git
+-- ::: :/home/dot_config/nvim/lua/plugin_manager.lua
 --
---
-
 --
 -- https://github.com/folke/lazy.nvim
 --
