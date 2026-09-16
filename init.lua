@@ -1,6 +1,6 @@
-#!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- luacheck: globals vim
+#!/usr/bin/env lua
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -13,19 +13,24 @@
 -- Neovim initialisation root
 --
 
-
+-- Wrapper guard for require(modpath).
+-- Failure in resolving the module is reported via vim.notify rather than
+-- propagating.
+---@param modpath string Module filepath
 _G.require_guard = function(modpath)
     local ok, module = pcall(require, modpath)
     if not ok then
-        vim.notify("Failed to require() module: " .. modpath, vim.log.levels.ERROR)
+        vim.notify("Failed to require() module: " .. modpath .. "\n" .. tostring(module), vim.log.levels.ERROR)
         return
     end
     return module
 end
 
--- Requires modpath and calls its setup(), if present. A failure in either
--- step is reported via vim.notify rather than propagating, so one broken
--- module can't prevent unrelated modules from loading.
+-- Wrapper guard for require(modpath).setup().
+-- Failure in either resolving the module or calling it's setup() is reported
+-- via vim.notify rather than propagating.
+---@param modpath string Module filepath
+---@return nil
 _G.setup_guard = function(modpath)
     local module = _G.require_guard(modpath)
     if not (module and module.setup) then
@@ -34,30 +39,26 @@ _G.setup_guard = function(modpath)
 
     local ok, err = pcall(module.setup)
     if not ok then
-        vim.notify("Failed to setup() module: " .. modpath .. ": " .. tostring(err), vim.log.levels.ERROR)
+        vim.notify("Failed to setup() module: " .. modpath .. "\n" .. tostring(err), vim.log.levels.ERROR)
     end
 end
 
--- Initialisation Order
 local modules = {
-    "option",    -- Should be overwritten by filetype, and includes essential opts
-    "keymap",    -- Should be overwritten by filetype
-
-    "filetype",
-
+    "option",
+    "keymap",
+    "filetype", -- After option and keymap for overrides
     "autocmd",
     "usercmd",
 
-    -- Plugin lazy-load management
     -- After  keymap,     for lazy-load keymap triggers involving vim.g.mapleader
     -- After  filetype,   for lazy-load filetype triggers
     -- After  autocmd,    for augroup dependent plugin spec
-    -- Before highlight,  for treesitter parsing and colorscheme overwrite
     "plugin_manager",
 
-    "highlight"
+    -- After  plugin_manager,  for treesitter parsing and colorscheme overwrite
+    "highlight",
 }
 
-for _, modpath in ipairs(modules) do
-    _G.setup_guard(modpath)
+for _, module in ipairs(modules) do
+    _G.setup_guard(module)
 end

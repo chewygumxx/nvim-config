@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- luacheck: globals vim
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -28,7 +28,7 @@ end
 
 M.diagnostic = function()
     vim.diagnostic.config({
-        virtual_text  = true,
+        virtual_text = true,
         severity_sort = true,
         float = {
             border = "rounded",
@@ -45,94 +45,227 @@ end
 --
 
 M.goto_declaration = function(buf, lhs, desc)
-    local lhs  = lhs  or 'gD'
-    local desc = desc or "LSP: Goto declaration"
-    vim.keymap.set('n', lhs, vim.lsp.buf.declaration, { buffer = buf, desc = desc })
+    lhs  = lhs or "gD"
+    desc = desc or "LSP: Goto declaration"
+    vim.keymap.set("n", lhs, vim.lsp.buf.declaration, {
+        buffer = buf,
+        desc = desc,
+    })
 end
 
 M.goto_definition = function(buf, lhs, desc)
-    local lhs  = lhs  or 'gd'
-    local desc = desc or "LSP: Goto definition"
-    vim.keymap.set('n', lhs, vim.lsp.buf.definition, { buffer = buf, desc = desc })
+    lhs  = lhs or "gd"
+    desc = desc or "LSP: Goto definition"
+    vim.keymap.set("n", lhs, vim.lsp.buf.definition, {
+        buffer = buf,
+        desc   = desc,
+    })
 end
 
 M.goto_implementation = function(buf, lhs, desc)
-    local lhs  = lhs  or 'gi'
-    local desc = desc or "LSP: Goto implementation"
-    vim.keymap.set('n', lhs, vim.lsp.buf.implementation, { buffer = buf, desc = desc })
+    lhs  = lhs or "gi"
+    desc = desc or "LSP: Goto implementation"
+    vim.keymap.set("n", lhs, vim.lsp.buf.implementation, {
+        buffer = buf,
+        desc   = desc,
+    })
 end
 
 M.goto_references = function(buf, lhs, desc)
-    local lhs  = lhs  or 'gr'
-    local desc = desc or "LSP: List references"
-    vim.keymap.set('n', lhs, vim.lsp.buf.references, { buffer = buf, desc = desc })
+    lhs  = lhs or "gr"
+    desc = desc or "LSP: List references"
+    vim.keymap.set("n", lhs, vim.lsp.buf.references, {
+        buffer = buf,
+        desc   = desc,
+    })
+end
+
+M.goto_type_definition = function(buf, lhs, desc)
+    lhs  = lhs or "gy"
+    desc = desc or "LSP: Goto type definition"
+    vim.keymap.set("n", lhs, vim.lsp.buf.type_definition, {
+        buffer = buf,
+        desc   = desc,
+    })
 end
 
 M.hover = function(buf, lhs, desc)
-    local lhs  = lhs  or 'K'
-    local desc = desc or "LSP: Hover documentation"
-    vim.keymap.set('n', lhs, vim.lsp.buf.hover, { buffer = buf, desc = desc })
+    lhs  = lhs or "K"
+    desc = desc or "LSP: Hover documentation"
+    vim.keymap.set("n", lhs, vim.lsp.buf.hover, { buffer = buf, desc = desc })
 end
 
 M.rename = function(buf, lhs, desc)
-    local lhs  = lhs  or '<leader>cr'
-    local desc = desc or "LSP: Rename symbol"
-    vim.keymap.set('n', lhs, vim.lsp.buf.rename, { buffer = buf, desc = desc })
+    lhs  = lhs or "<leader>cr"
+    desc = desc or "LSP: Rename symbol"
+    vim.keymap.set("n", lhs, vim.lsp.buf.rename, { buffer = buf, desc = desc })
 end
 
 M.code_action = function(buf, lhs, desc)
-    local lhs  = lhs  or '<leader>ca'
-    local desc = desc or "LSP: Code action"
-    vim.keymap.set({ 'n', 'x' }, lhs, vim.lsp.buf.code_action, { buffer = buf, desc = desc })
+    lhs  = lhs or "<leader>ca"
+    desc = desc or "LSP: Code action"
+    vim.keymap.set({ "n", "x" }, lhs, vim.lsp.buf.code_action, {
+        buffer = buf,
+        desc = desc,
+    })
+end
+
+M.incoming_calls = function(buf, lhs, desc)
+    lhs  = lhs or "<leader>ci"
+    desc = desc or "LSP: Incoming calls"
+    vim.keymap.set("n", lhs, vim.lsp.buf.incoming_calls, {
+        buffer = buf,
+        desc   = desc,
+    })
+end
+
+M.outgoing_calls = function(buf, lhs, desc)
+    lhs  = lhs or "<leader>co"
+    desc = desc or "LSP: Outgoing calls"
+    vim.keymap.set("n", lhs, vim.lsp.buf.outgoing_calls, {
+        buffer = buf,
+        desc   = desc,
+    })
 end
 
 M.diagnostic_prev = function(buf, lhs, desc)
-    local lhs  = lhs  or '[d'
-    local desc = desc or "LSP: Previous diagnostic"
-    vim.keymap.set('n', lhs, function()
-        vim.diagnostic.jump({ count = -1, on_jump = function() vim.diagnostic.open_float() end })
-    end, { buffer = buf, desc = desc })
+    lhs  = lhs or "[d"
+    desc = desc or "LSP: Previous diagnostic"
+    vim.keymap.set("n", lhs, function()
+        vim.diagnostic.jump({
+            count = -1,
+            on_jump = function()
+                vim.diagnostic.open_float()
+            end,
+        })
+    end, { buffer = buf, desc = desc }
+    )
 end
 
 M.diagnostic_next = function(buf, lhs, desc)
-    local lhs  = lhs  or ']d'
-    local desc = desc or "LSP: Next diagnostic"
-    vim.keymap.set('n', lhs, function()
-        vim.diagnostic.jump({ count = 1, on_jump = function() vim.diagnostic.open_float() end })
-    end, { buffer = buf, desc = desc })
+    lhs  = lhs or "]d"
+    desc = desc or "LSP: Next diagnostic"
+    vim.keymap.set("n", lhs, function()
+        vim.diagnostic.jump({
+            count   = 1,
+            on_jump = function()
+                vim.diagnostic.open_float()
+            end,
+        })
+    end, { buffer = buf, desc = desc }
+    )
 end
 
 M.diagnostic_open_float = function(buf, lhs, desc)
-    local lhs  = lhs  or '<leader>e'
-    local desc = desc or "LSP: Open diagnostic float"
-    vim.keymap.set('n', lhs, vim.diagnostic.open_float, { buffer = buf, desc = desc })
+    lhs  = lhs or "<leader>e"
+    desc = desc or "LSP: Open diagnostic float"
+    vim.keymap.set("n", lhs, vim.diagnostic.open_float, {
+        buffer = buf,
+        desc   = desc,
+    })
 end
 
-M.on_attach = function(buf)
+M.diagnostics_workspace = function(buf, lhs, desc)
+    lhs  = lhs or "<leader>eq"
+    desc = desc or "LSP: Diagnostics (workspace)"
+    vim.keymap.set("n", lhs, function()
+        require("fzf-lua").diagnostics_workspace()
+    end, { buffer = buf, desc = desc }
+    )
+end
+
+M.diagnostics_document = function(buf, lhs, desc)
+    lhs  = lhs or "<leader>el"
+    desc = desc or "LSP: Diagnostics (document)"
+    vim.keymap.set("n", lhs, function()
+        require("fzf-lua").diagnostics_document()
+    end, { buffer = buf, desc = desc }
+    )
+end
+
+M.document_symbols = function(buf, lhs, desc)
+    lhs  = lhs or "<leader>ss"
+    desc = desc or "LSP: Document symbols"
+    vim.keymap.set("n", lhs, function()
+        require("fzf-lua").lsp_document_symbols()
+    end, { buffer = buf, desc = desc }
+    )
+end
+
+M.workspace_symbols = function(buf, lhs, desc)
+    lhs  = lhs or "<leader>sS"
+    desc = desc or "LSP: Workspace symbols"
+    vim.keymap.set("n", lhs, function()
+        require("fzf-lua").lsp_workspace_symbols()
+    end, { buffer = buf, desc = desc }
+    )
+end
+
+-- Popup showing the active parameter of the function being called,
+-- while typing its arguments. Only wired up for clients that actually
+-- advertise signatureHelpProvider, using their own trigger characters
+-- rather than assuming "(" and ",".
+M.signature_help_on_type = function(buf, client)
+    local triggers = vim.tbl_get(
+        client.server_capabilities,
+        "signatureHelpProvider",
+        "triggerCharacters"
+    )
+    if not triggers or #triggers == 0 then
+        return
+    end
+
+    vim.api.nvim_create_autocmd("InsertCharPre", {
+        group    = vim.api.nvim_create_augroup("UtilLspSignatureHelp:" .. buf, {
+            clear = true,
+        }),
+        buffer   = buf,
+        desc     = "LSP: Signature help while typing",
+        callback = function()
+            if vim.tbl_contains(triggers, vim.v.char) then
+                vim.schedule(vim.lsp.buf.signature_help)
+            end
+        end,
+    })
+end
+
+M.on_attach = function(buf, client)
     M.goto_declaration(buf)
     M.goto_definition(buf)
     M.goto_implementation(buf)
     M.goto_references(buf)
+    M.goto_type_definition(buf)
     M.hover(buf)
     M.rename(buf)
     M.code_action(buf)
+    M.incoming_calls(buf)
+    M.outgoing_calls(buf)
     M.diagnostic_prev(buf)
     M.diagnostic_next(buf)
     M.diagnostic_open_float(buf)
+    M.diagnostics_workspace(buf)
+    M.diagnostics_document(buf)
+    M.signature_help_on_type(buf, client)
+    M.document_symbols(buf)
+    M.workspace_symbols(buf)
 end
 
 M.setup = function()
     M.diagnostic()
 
-    vim.lsp.config('*', {
+    vim.lsp.config("*", {
         capabilities = M.capabilities(),
     })
 
-    vim.api.nvim_create_autocmd('LspAttach', {
-        group    = vim.api.nvim_create_augroup('UtilLspAttach', { clear = true }),
+    vim.api.nvim_create_autocmd("LspAttach", {
+        group    = vim.api.nvim_create_augroup(
+            "UtilLspAttach",
+            { clear = true }
+        ),
         desc     = "Configure buffer-local LSP keymaps on client attach",
         callback = function(event)
-            M.on_attach(event.buf)
+            local client = vim.lsp.get_client_by_id(event.data.client_id)
+            M.on_attach(event.buf, client)
         end,
     })
 end

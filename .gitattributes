@@ -8,4 +8,6 @@
 #
 #
 
-/.luacheckrc  -sync-header-metadata
+/.luacheckrc   -sync-header-metadata
+/.luarc.json   -sync-header-metadata
+/.luafmt.toml  -sync-header-metadata

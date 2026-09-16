@@ -5,15 +5,11 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/home/dot_config/nvim/lsp/marksman.lua
+-- ::: :/home/dot_config/nvim/lsp/vtsls.lua
 --
 --
 
 ---@type vim.lsp.Config
-local M = {
-    cmd = { "marksman", "server" },
-    filetypes = { "markdown" },
-    root_markers = { ".marksman.toml", ".git" },
-}
+local M = {}
 
 return M

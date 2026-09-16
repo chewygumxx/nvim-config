@@ -13,7 +13,7 @@
 ---@type LazySpec
 local M =  {
     "ibhagwan/fzf-lua",
-    enabled = false,
+    enabled = true,
     dependencies = {
         "nvim-tree/nvim-web-devicons",
         "nvim-treesitter/nvim-treesitter-context",

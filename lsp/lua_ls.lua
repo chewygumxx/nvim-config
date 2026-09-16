@@ -1,6 +1,6 @@
-#!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- luacheck: globals vim
+#!/usr/bin/env lua
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -9,11 +9,28 @@
 --
 --
 
+---@type vim.lsp.Config
+local M = {
+    root_markers = {
+        ".emmyrc.json",
+        ".luarc.json",
+        ".luarc.jsonc",
+        ".luacheckrc",
+        ".luafmt.toml",
+        "luafmt.toml",
+        ".stylua.toml",
+        "stylua.toml",
+        "selene.toml",
+        "selene.yml",
+    },
+}
 
 -- Rescan post-lazyloaded library inclusion
-local rescanned = {} ---@type table<integer, true>
+---@type table<integer, true>
+local rescanned = {}
 
 ---@param client vim.lsp.Client
+---@return nil
 local nudge_library_rescan = function(client)
     if not client.root_dir or rescanned[client.id] then
         return
@@ -28,18 +45,21 @@ local nudge_library_rescan = function(client)
     end, 500)
 end
 
----@type vim.lsp.Config
-local M = {
-    settings = {
-        Lua = {
-            workspace = {
-                checkThirdParty = false,
-            },
-        },
-    },
-    on_attach = function(client)
-        nudge_library_rescan(client)
-    end,
-}
+---@return nil
+local highlights = function()
+    local hlgroup_defs = {
+        ["@lsp.typemod.variable.defaultLibrary.lua"] = { link = "Special" },
+    }
+    for hlgroup, defmap in pairs(hlgroup_defs) do
+        vim.api.nvim_set_hl(0, hlgroup, defmap)
+    end
+end
+
+---@param client vim.lsp.Client
+---@return nil
+M.on_attach = function(client)
+    nudge_library_rescan(client)
+    highlights()
+end
 
 return M

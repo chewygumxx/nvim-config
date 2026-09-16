@@ -19,21 +19,22 @@
 local M = {
     url     = "https://github.com/nvim-treesitter/nvim-treesitter.git",
     enabled = true,
-    branch  = 'main',
+    branch  = "main",
     lazy    = false,
-    build   = ':TSUpdate',
+    build   = ":TSUpdate",
 }
 
 local ignore_filetypes = {
-    'checkhealth',
-    'lazy',
-    'qf',   -- QuickFix
-    'mason',
-    'snacks_dashboard',
-    'snacks_notif',
-    'snacks_win',
-    'text',
-    'man',
+    "fidget",
+    "checkhealth",
+    "lazy",
+    "man",
+    "mason",
+    "qf", -- QuickFix
+    "snacks_dashboard",
+    "snacks_notif",
+    "snacks_win",
+    "text",
 }
 
 local ensure_installed = {
@@ -50,7 +51,9 @@ local ensure_installed = {
     "css",
     -- https://github.com/tree-sitter/tree-sitter-css
 
-    "csv", "psv", "tsv",
+    "csv",
+    "psv",
+    "tsv",
     -- https://github.com/tree-sitter-grammars/tree-sitter-csv
 
     "desktop",
@@ -243,7 +246,7 @@ local ensure_installed = {
     "toml",
     -- https://github.com/tree-sitter-grammars/tree-sitter-toml
 
-    --"tsx",
+    "tsx",
     -- https://github.com/tree-sitter/tree-sitter-typescript
 
     "typescript",
@@ -273,16 +276,16 @@ local ensure_installed = {
 M.config = function()
     _G.setup_guard("util.treesitter")
 
-    vim.treesitter.language.register('ini', 'conf')
-    vim.treesitter.language.register('gotmpl', 'template')
+    vim.treesitter.language.register("ini", "conf")
+    vim.treesitter.language.register("gotmpl", "template")
 
-    local ts = require('nvim-treesitter')
+    local ts = require("nvim-treesitter")
     -- Install core parsers after lazy.nvim finishes loading all plugins
-    vim.api.nvim_create_autocmd('User', {
-        pattern  = 'LazyDone',
+    vim.api.nvim_create_autocmd("User", {
+        pattern  = "LazyDone",
         once     = true,
         callback = function()
-            ts.install(ensure_installed, { max_jobs = 8, })
+            ts.install(ensure_installed, { max_jobs = 8 })
         end,
     })
 
@@ -299,15 +302,17 @@ M.config = function()
                 vim.bo.indentexpr = "v:lua.require('nvim-treesitter').indentexpr()"
             end
             if vim.treesitter.query.get(lang, "folds") then
-                vim.wo.foldexpr   = "v:lua.vim.treesitter.foldexpr()"
-              --vim.wo.foldmethod = "expr"
+                vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+                -- vim.wo.foldmethod = "expr"
             end
         end
         return ok
     end
 
     -- Decoration provider for async parser loading
-    vim.api.nvim_set_decoration_provider(vim.api.nvim_create_namespace('treesitter.async'), {
+    vim.api.nvim_set_decoration_provider(vim.api.nvim_create_namespace(
+        "treesitter.async"
+    ), {
         on_start = vim.schedule_wrap(function()
             if #parsers_pending == 0 then
                 return false
@@ -327,15 +332,20 @@ M.config = function()
     })
 
     -- Auto-install parsers and enable highlighting on FileType
-    vim.api.nvim_create_autocmd('FileType', {
-        group = vim.api.nvim_create_augroup('TreesitterSetup', { clear = true }),
-        desc  = 'Enable treesitter functionality',
+    vim.api.nvim_create_autocmd("FileType", {
+        group    = vim.api.nvim_create_augroup(
+            "TreesitterSetup",
+            { clear = true }
+        ),
+        desc     = "Enable treesitter functionality",
         callback = function(opts)
             -- Filesize Limit
             local megabyte = 1024 * 1024
             if vim.fn.getfsize(opts.file) > (vim.g.large_filesize or megabyte) then
-                vim.notify("Filesize exceeded treesitter limit: (see \"Filesize Limit\" of spec/nvim-treesitter.lua)",
-                    vim.log.levels.INFO)
+                vim.notify(
+                    "Filesize exceeded treesitter limit: (see \"Filesize Limit\" of spec/nvim-treesitter.lua)",
+                    vim.log.levels.INFO
+                )
                 return
             end
 
@@ -344,11 +354,15 @@ M.config = function()
                 return
             end
 
-            local lang = vim.treesitter.language.get_lang(opts.match) or opts.match
+            local lang = vim.treesitter.language.get_lang(opts.match)
+                or opts.match
             local buf  = opts.buf
 
             if parsers_failed[lang] then
-                vim.notify("Treesitter parser failed for lang: " .. lang, vim.log.levels.WARN)
+                vim.notify(
+                    "Treesitter parser failed for lang: " .. lang,
+                    vim.log.levels.WARN
+                )
                 return
             end
 

@@ -20,8 +20,8 @@
 ---@type LazySpec
 local M = {
     "mason-org/mason-lspconfig.nvim",
-    enabled = vim.env.TERMUX_VERSION == nil,
-    lazy    = false,
+    enabled      = vim.env.TERMUX_VERSION == nil,
+    lazy         = false,
     dependencies = {
         "mason-org/mason.nvim",
         "neovim/nvim-lspconfig",
@@ -31,6 +31,8 @@ local M = {
 M.opts = {
     ensure_installed = {
         "lua_ls",
+        "vtsls",
+        "eslint",
         -- bashls, pyright, yamlls, taplo,
     },
     automatic_enable = true,
