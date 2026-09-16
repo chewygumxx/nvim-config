@@ -33,7 +33,10 @@ M.opts = {
         "lua_ls",
         "vtsls",
         "eslint",
-        -- bashls, pyright, yamlls, taplo,
+        "jsonls",
+        "yamlls",
+        "tombi",
+        -- bashls, pyright,
     },
     automatic_enable = true,
 }

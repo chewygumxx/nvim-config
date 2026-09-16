@@ -30,6 +30,10 @@ M.opts = {
         javascriptreact = { "prettier" },
         typescript      = { "prettier" },
         typescriptreact = { "prettier" },
+        json            = { "prettier" },
+        jsonc           = { "prettier" },
+        yaml            = { "prettier" },
+        toml            = { "tombi" },
     },
     formatters = {},
     format_on_save = {
