@@ -45,11 +45,12 @@ local nudge_library_rescan = function(client)
     end, 500)
 end
 
+local hlgroup_defs = {
+    ["@lsp.typemod.variable.defaultLibrary.lua"] = { link = "Special" },
+}
+
 ---@return nil
 local highlights = function()
-    local hlgroup_defs = {
-        ["@lsp.typemod.variable.defaultLibrary.lua"] = { link = "Special" },
-    }
     for hlgroup, defmap in pairs(hlgroup_defs) do
         vim.api.nvim_set_hl(0, hlgroup, defmap)
     end
