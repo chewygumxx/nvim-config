@@ -20,14 +20,14 @@ vim.o.timeoutlen = 1000 -- Time to complete keymap sequence
 vim.o.showcmd    = true -- Show keystrokes right of message buffer
 
 M.clear_hlsearch = function(lhs, desc)
-    local lhs  = lhs or "<leader>h"
-    local desc = desc or ":noh - Clear highlight of search match"
+    lhs  = lhs or "<leader>h"
+    desc = desc or ":noh - Clear highlight of search match"
     vim.keymap.set({ "n" }, lhs, "<cmd>noh<CR>", { desc = desc })
 end
 
 M.toggle_relativenumber = function(lhs, desc)
-    local lhs  = lhs or "<leader>rn"
-    local desc = desc or "Toggle relativenumber"
+    lhs  = lhs or "<leader>rn"
+    desc = desc or "Toggle relativenumber"
     vim.keymap.set({ "n" }, lhs, function()
         vim.o.relativenumber = not vim.o.relativenumber
     end, { desc = desc }
@@ -35,8 +35,8 @@ M.toggle_relativenumber = function(lhs, desc)
 end
 
 M.blink_relativenumber = function(lhs, desc)
-    local lhs  = lhs or "<leader>nn"
-    local desc = desc or "Blink relativenumber"
+    lhs  = lhs or "<leader>nn"
+    desc = desc or "Blink relativenumber"
     vim.keymap.set("n", lhs, function()
         local old_relativenumber = vim.o.relativenumber
         vim.o.relativenumber     = not old_relativenumber
@@ -48,8 +48,8 @@ M.blink_relativenumber = function(lhs, desc)
 end
 
 M.blink_linenumber = function(lhs, desc)
-    local lhs  = lhs or "<leader>ln"
-    local desc = desc or "Blink line number in gutter"
+    lhs  = lhs or "<leader>ln"
+    desc = desc or "Blink line number in gutter"
     vim.keymap.set({ "n" }, lhs, function()
         local old_o_number         = vim.o.number
         local old_o_relativenumber = vim.o.relativenumber
@@ -69,20 +69,20 @@ M.blink_linenumber = function(lhs, desc)
 end
 
 M.format_buffer = function(lhs, desc)
-    local lhs  = lhs or "<leader>tw"
-    local desc = desc or "Format buffer line wrapping according to textwidth"
+    lhs  = lhs or "<leader>tw"
+    desc = desc or "Format buffer line wrapping according to textwidth"
     vim.keymap.set({ "n" }, lhs, "gggqG", { desc = desc })
 end
 
 M.inspect = function(lhs, desc)
-    local lhs  = lhs or "<leader>in"
-    local desc = desc or ":Inspect highlight groups under cursor"
+    lhs  = lhs or "<leader>in"
+    desc = desc or ":Inspect highlight groups under cursor"
     vim.keymap.set({ "n" }, lhs, "<cmd>Inspect<CR>", { desc = desc })
 end
 
 M.reload_foldmethod = function(lhs, desc)
-    local lhs  = lhs or "<leader>rf"
-    local desc = desc or "Reload foldmethod"
+    lhs  = lhs or "<leader>rf"
+    desc = desc or "Reload foldmethod"
     vim.keymap.set({ "n" }, lhs, function()
         vim.o.foldmethod = vim.o.foldmethod
         vim.print("foldmethod=" .. vim.o.foldmethod)
@@ -91,23 +91,22 @@ M.reload_foldmethod = function(lhs, desc)
 end
 
 M.visual_indent_persist = function(indent, dedent, desc)
-    local indent = indent or ">"
-    local dedent = dedent or "<"
-    local desc   = desc or "Remain in visual mode after indenting"
+    indent = indent or ">"
+    dedent = dedent or "<"
+    desc   = desc or "Remain in visual mode after indenting"
     vim.keymap.set("x", indent, ">gv", { desc = desc })
     vim.keymap.set("x", dedent, "<gv", { desc = desc })
 end
 
 M.file_goto = function(lhs, desc)
-    local lhs  = lhs or "gf"
-    local desc = desc or "Open file and if provided, go to line number"
+    lhs  = lhs or "gf"
+    desc = desc or "Open file and if provided, go to line number"
     vim.keymap.set({ "n", "x" }, lhs, "gF", { desc = desc })
 end
 
 M.file_create_or_open = function(lhs, desc)
-    local lhs  = lhs or "gF"
-    local desc = desc
-        or "Create or open new file according to path under cursor"
+    lhs  = lhs or "gF"
+    desc = desc or "Create or open new file according to path under cursor"
     vim.keymap.set({ "n", "x" }, lhs, "<cmd>e <cfile><CR>", { desc = desc })
 end
 

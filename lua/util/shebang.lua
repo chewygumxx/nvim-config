@@ -46,10 +46,10 @@ local filetype_shebangs = {
 }
 
 M.get = function(file, buf, opt)
-    local file = file or vim.fn.expand("%")
-    local buf  = buf or 0
-    local opt  = opt or {}
-    local ft   = opt.ft or vim.bo[buf].filetype
+    file     = file or vim.fn.expand("%")
+    buf      = buf or 0
+    opt      = opt or {}
+    local ft = opt.ft or vim.bo[buf].filetype
 
     local path = vim.fn.fnamemodify(file, ":~:h")
     for _, dir in ipairs(source_dirs) do

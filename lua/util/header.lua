@@ -31,9 +31,9 @@ M.insert = function(file, buf, opt)
         return
     end
 
-    local file          = file or vim.fn.expand("%")
-    local buf           = buf or 0
-    local opt           = opt or {}
+    file                = file or vim.fn.expand("%")
+    buf                 = buf or 0
+    opt                 = opt or {}
     local commentstring = opt.commentstring or vim.bo[buf].commentstring
 
     if commentstring == "" then
@@ -75,8 +75,8 @@ M.insert = function(file, buf, opt)
         slug = util_git.slug(file)
     end
     if path:find("~/.config", 1, true) == 1 then
-        slug    = "chewygumxx/dotfiles"
-        path, _ = path:gsub("~/%.config", ":/dot_config")
+        slug = "chewygumxx/dotfiles"
+        path = path:gsub("~/%.config", ":/dot_config")
     end
 
     if path then

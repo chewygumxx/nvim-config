@@ -16,9 +16,9 @@
 local M = {}
 
 M.wrap_comment = function(text, width, opt)
-    local width         = width or vim.o.textwidth ~= 0 and vim.o.textwidth
+    width               = width or vim.o.textwidth ~= 0 and vim.o.textwidth
         or 80
-    local opt           = opt or {}
+    opt                 = opt or {}
     local buffer        = opt.buffer or 0
     local commentstring = opt.commentstring
         or (vim.bo[buffer].commentstring ~= "" and vim.bo[buffer].commentstring)

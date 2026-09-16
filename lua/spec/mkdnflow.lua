@@ -211,10 +211,10 @@ M.opts.to_do = {
             },
             sort = { section = 1, position = "bottom" },
             propagate = {
-                up   = function(host_list)
+                up   = function(_host_list)
                     return "in_progress"
                 end,
-                down = function(child_list)
+                down = function(_child_list)
                 end,
             },
         },
