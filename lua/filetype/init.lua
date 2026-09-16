@@ -13,9 +13,8 @@
 -- Filetype module initialisation
 --
 
-local M = {}
+local M             = {}
 local __this_module = ...
-
 
 -- Maps a detected filetype to the specialised module that handles it.
 -- Several real filetypes can share one module (e.g. the various ini-syntax
@@ -30,10 +29,12 @@ local ft_specialised_mods = {
     cfg          = "dosini",
     editorconfig = "dosini",
 }
-local ft_specialised = function()
+local ft_specialised      = function()
     vim.api.nvim_create_autocmd("FileType", {
-        desc  = "If available, instantiates filetype-specialised lua module",
-        group = vim.api.nvim_create_augroup("cgxx.filetype_specialised", { clear = true }),
+        desc     = "If available, instantiates filetype-specialised lua module",
+        group    = vim.api.nvim_create_augroup("cgxx.filetype_specialised", {
+            clear = true,
+        }),
         callback = function(opts)
             local modname = ft_specialised_mods[opts.match]
             if not modname then
@@ -46,7 +47,7 @@ local ft_specialised = function()
             end
 
             module.setup(opts.file, opts.buf, opts)
-        end
+        end,
     })
 end
 

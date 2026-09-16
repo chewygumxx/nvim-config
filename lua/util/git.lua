@@ -18,25 +18,33 @@ local M = {}
 M.slug = function(file)
     file = file or vim.fn.expand("%")
 
-    local result = vim.system(
-        { "git", "-C", vim.fn.fnamemodify(file, ":p:h"), "remote", "get-url", "origin" },
-        { text = true }
-    ):wait()
+    local result = vim.system({
+        "git",
+        "-C",
+        vim.fn.fnamemodify(file, ":p:h"),
+        "remote",
+        "get-url",
+        "origin",
+    }, { text = true }):wait()
     if result.code ~= 0 or not result.stdout or result.stdout == "" then
         return
     end
 
-    local slug = result.stdout:gsub("%s+$", ""):match("([%w_.%-]+/[%w_.%-]+)$") or ""
+    local slug = result.stdout:gsub("%s+$", ""):match("([%w_.%-]+/[%w_.%-]+)$")
+        or ""
     return (slug:gsub("%.git$", ""))
 end
 
 M.path = function(file)
     file = file or vim.fn.expand("%")
 
-    local result = vim.system(
-        { "git", "-C", vim.fn.fnamemodify(file, ":p:h"), "rev-parse", "--show-toplevel" },
-        { text = true }
-    ):wait()
+    local result = vim.system({
+        "git",
+        "-C",
+        vim.fn.fnamemodify(file, ":p:h"),
+        "rev-parse",
+        "--show-toplevel",
+    }, { text = true }):wait()
     if result.code ~= 0 or not result.stdout or result.stdout == "" then
         return vim.fn.fnamemodify(file, ":~")
     end

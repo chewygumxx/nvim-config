@@ -16,31 +16,31 @@
 ---@module "lazy"
 ---@type LazySpec
 local M = {
-    'nvim-mini/mini.nvim',
+    "nvim-mini/mini.nvim",
     enabled = true,
-    version = false,  -- 'main' branch
+    version = false, -- 'main' branch
 }
 
 local modules = {
     hipatterns = function()
-        local hipatterns = require('mini.hipatterns')
-        local opts = {
+        local hipatterns = require("mini.hipatterns")
+        local opts       = {
             highlighters = {
                 hex_color = hipatterns.gen_highlighter.hex_color({
-                    "line", --<style>
-                    200,    --<priority>
-                    function() return true end,  --<filter>
+                    "line",                     -- <style>
+                    200,                        -- <priority>
+                    function() return true end, -- <filter>
                     nil,
                 }),
-            }
+            },
         }
         hipatterns.setup(opts)
     end,
     icons = function()
-        require('mini.icons').setup()
+        require("mini.icons").setup()
     end,
     files = function()
-        require('mini.files').setup({
+        require("mini.files").setup({
             -- Customization of shown content
             content = {
                 -- Predicate for which file system entries to show
@@ -54,19 +54,19 @@ local modules = {
             -- Module mappings created only inside explorer.
             -- Use `''` (empty string) to not create one.
             mappings = {
-                close       = 'q',
-                go_in       = 'L',
-                go_in_plus  = '',
-                go_out      = 'H',
-                go_out_plus = '',
+                close       = "q",
+                go_in       = "L",
+                go_in_plus  = "",
+                go_out      = "H",
+                go_out_plus = "",
                 mark_goto   = "'",
-                mark_set    = 'm',
-                reset       = '<BS>',
-                reveal_cwd  = '@',
-                show_help   = 'g?',
-                synchronize = '=',
-                trim_left   = '<',
-                trim_right  = '>',
+                mark_set    = "m",
+                reset       = "<BS>",
+                reveal_cwd  = "@",
+                show_help   = "g?",
+                synchronize = "=",
+                trim_left   = "<",
+                trim_right  = ">",
             },
 
             -- General options
@@ -96,9 +96,8 @@ local modules = {
 
 M.config = function()
     modules.hipatterns()
-  --modules.icons()
-  --modules.files()
+    -- modules.icons()
+    -- modules.files()
 end
 
 return M
-

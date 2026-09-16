@@ -17,7 +17,7 @@ local M = {}
 
 local foldtext = function()
     -- Buffer
-    local tabstop   = vim.api.nvim_get_option_value("tabstop", {})
+    local tabstop = vim.api.nvim_get_option_value("tabstop", {})
     if tabstop   == 0 then tabstop   = 4  end
     local textwidth = vim.api.nvim_get_option_value("textwidth", {})
     if textwidth == 0 then textwidth = 80 end
@@ -28,24 +28,27 @@ local foldtext = function()
     local level = vim.v.foldlevel           -- Degree of fold nesting
 
     -- Label
-    local label  = vim.fn.getline(start):gsub("\t", string.rep(" ", tabstop))
+    local label      = vim.fn.getline(start)
+        :gsub("\t", string.rep(" ", tabstop))
     local indent_pos = label:find("%S")
-    local indent = indent_pos and (indent_pos - 1) or 0
+    local indent     = indent_pos and (indent_pos - 1) or 0
 
     if indent >= 4 then
-        label = label:gsub("^" .. string.rep(" ", indent), 
-                string.rep(" ", indent - 4) .. "~~~ ")
+        label = label:gsub(
+            "^" .. string.rep(" ", indent),
+            string.rep(" ", indent - 4) .. "~~~ "
+        )
     elseif indent == 2 then
-        label = label:gsub("^  ",  "~ ")
+        label = label:gsub("^  ", "~ ")
     elseif indent == 1 then
-        label = label:gsub("^ ",   "~")
+        label = label:gsub("^ ", "~")
     elseif indent == 3 then
         label = label:gsub("^   ", "~~ ")
     end
 
     -- Info
-    local fold_info    = string.format("[%d lines] [lvl=%i]", count, level)
-    local alignment    = string.rep(" ", textwidth - #label - #fold_info - 1)
+    local fold_info = string.format("[%d lines] [lvl=%i]", count, level)
+    local alignment = string.rep(" ", textwidth - #label - #fold_info - 1)
 
     return label .. alignment .. fold_info
 end

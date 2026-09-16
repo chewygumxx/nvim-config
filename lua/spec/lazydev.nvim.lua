@@ -19,13 +19,13 @@ local M = {
     "folke/lazydev.nvim",
     enabled = true,
 
-    ft      = "lua",
-    opts    = {},
+    ft   = "lua",
+    opts = {},
 }
 
 M.opts.library = {
-    { path = "${3rd}/luv/library", words = { "vim%.uv" }, },
-    { path = "wezterm-types",      mods  = { "wezterm" }, },  -- https://github.com/DrKJeff16/wezterm-types
+    { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+    { path = "wezterm-types", mods = { "wezterm" } }, -- https://github.com/DrKJeff16/wezterm-types
 }
 
 return M

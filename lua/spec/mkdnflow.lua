@@ -13,11 +13,11 @@
 ---@type LazySpec
 local M = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md
-    url = 'https://github.com/jakewvincent/mkdnflow.nvim',
+    url = "https://github.com/jakewvincent/mkdnflow.nvim",
     enabled = false,
 
     -- Populated by function 'filetype_triggers' (defined within file)
-    ft  = {},
+    ft = {},
 }
 
 M.opts = {
@@ -28,7 +28,6 @@ M.opts = {
     -- Limit plugin `:messages` to configuration error
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#silent
     silent = false,
-
 
     on_attach = false,
 
@@ -45,57 +44,57 @@ M.opts.modules = {
 
     -- Core
     -- Setting false only disables keybinds
-    buffers    = true,
-    cursor     = true,
-    links      = true,
-    paths      = true,
+    buffers = true,
+    cursor  = true,
+    links   = true,
+    paths   = true,
 
     -- Auxillary
-    yaml       = true,   -- Yaml headers
-    tables     = true,   -- Table management, formatting and navigation.
-    lists      = true,   -- List work and manipulation
-    to_do      = true,   -- Todo manipulation of state and collation
-    folds      = true,   -- Section folding
+    yaml   = true,   -- Yaml headers
+    tables = true, -- Table management, formatting and navigation.
+    lists  = true,  -- List work and manipulation
+    to_do  = true,  -- Todo manipulation of state and collation
+    folds  = true,  -- Section folding
 
     -- Luxury
-    maps       = true,   -- Keybinds
-    conceal    = false,  -- Link concealing (see links.conceal)
-    templates  = false,  -- New-file formatting and injection when following links
+    maps      = true,       -- Keybinds
+    conceal   = false,   -- Link concealing (see links.conceal)
+    templates = false, -- New-file formatting and injection when following links
 
     -- Cross-file primitives for scanning nb files, heading, links
     --
     -- Rationale: I want this to plugin for general markdown use. Not limited
     -- to my personal notebook repositories.
-    notebook   = false,
+    notebook = false,
 
     -- Expendable
-    bib        = false,  -- Follow citations and bib file parse
+    bib        = false,        -- Follow citations and bib file parse
     backlinks  = false,  -- Side panel showing notebook files referencing current file
-    completion = false,  -- For completion plugins such as nvim-cmp and blink.cmp
-    foldtext   = false,  -- Adorns foldtext with fold metadata infomation
+    completion = false, -- For completion plugins such as nvim-cmp and blink.cmp
+    foldtext   = false,    -- Adorns foldtext with fold metadata infomation
 }
 
 M.opts.path_resolution = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#path_resolution
 
-    root_marker = ".nex_root",  -- Filename by which notebook root directory resolvable
+    root_marker = ".nex_root", -- Filename by which notebook root directory resolvable
 
     -- Resolve paths relative to the:
     -- - 'first'   -> First file opened by current Neovim instance (default)
     -- - 'current' -> Currently viewed file
     -- - 'root'    -> Notebook root directory
-    primary     = "current",
-    fallback    = "root",
+    primary  = "current",
+    fallback = "root",
 
-    update_on_navigate = true,  -- Recalibrate path resolution heuristic upon notebook/wiki change
+    update_on_navigate = true, -- Recalibrate path resolution heuristic upon notebook/wiki change
 
     -- Synchronise curent working directory to currently viewed file.
     -- Instrumental when referencing assets relative to the current file
     -- especially synergises with path-supporting completion plugins.
-    sync_cwd    = true,
+    sync_cwd = true,
 }
 
-M.opts.filetypes = {
+M.opts.filetypes        = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#filetypes
 
     -- If this plugin is lazy-loaded per defined filetype (ie. ft = { "markdown" }),
@@ -110,7 +109,7 @@ M.opts.filetypes = {
     --txt    = "markdown", -- Resolve *.txt  as filetype 'markdown'
     --html   = false,      -- Disable *.html resolution for this plugin
 }
-local filetype_triggers = function ()
+local filetype_triggers = function()
     for filetype, value in pairs(M.opts.filetypes) do
         if (value ~= false) then -- 'value' may be boolean or string
             table.insert(M.ft, filetype)
@@ -134,9 +133,9 @@ M.opts.cursor = {
 M.opts.links = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#links
 
-    style   = 'markdown', -- 'markdown' or 'wiki' link format: []() or [[|]]
-    compact = false,      -- Wiki-link: [[source]] or [[source|name]]
-    conceal = true,       -- Conceal reference content of link
+    style   = "markdown", -- 'markdown' or 'wiki' link format: []() or [[|]]
+    compact = false,    -- Wiki-link: [[source]] or [[source|name]]
+    conceal = true,     -- Conceal reference content of link
 
     -- Show link metadata as virtual text (highlight group: 'MkdnflowRefHint').
     -- For:
@@ -160,7 +159,7 @@ M.opts.links = {
     --    return text
     --end,
 
-    transform_scope = 'path',
+    transform_scope = "path",
     auto_create = true,
     on_create_new = false,
 }
@@ -168,89 +167,89 @@ M.opts.links = {
 M.opts.new_file_template = {
     enabled      = false,
     placeholders = {},
-    template     = '# {{ title }}',
+    template     = "# {{ title }}",
 }
 
 M.opts.to_do = {
     highlight = false,
     statuses = {
         not_started = {
-            marker = ' ',
+            marker = " ",
             highlight = {
-                marker  = { link = 'Conceal' },
-                content = { link = 'Conceal' },
+                marker  = { link = "Conceal" },
+                content = { link = "Conceal" },
             },
-            sort = { section = 2, position = 'top' },
+            sort = { section = 2, position = "top" },
             propagate = {
                 up = function(host_list)
                     local no_items_started = true
                     for _, item in ipairs(host_list.items) do
-                        if item.status.name ~= 'not_started' then
+                        if item.status.name ~= "not_started" then
                             no_items_started = false
                         end
                     end
                     if no_items_started then
-                        return 'not_started'
+                        return "not_started"
                     else
-                        return 'in_progress'
+                        return "in_progress"
                     end
                 end,
                 down = function(child_list)
                     local target_statuses = {}
                     for _ = 1, #child_list.items, 1 do
-                        table.insert(target_statuses, 'not_started')
+                        table.insert(target_statuses, "not_started")
                     end
                     return target_statuses
                 end,
             },
         },
         in_progress = {
-            marker = '-',
+            marker = "-",
             highlight = {
-                marker = { link = 'WarningMsg' },
+                marker = { link = "WarningMsg" },
                 content = { bold = true },
             },
-            sort = { section = 1, position = 'bottom' },
+            sort = { section = 1, position = "bottom" },
             propagate = {
                 up   = function(host_list)
-                    return 'in_progress'
+                    return "in_progress"
                 end,
                 down = function(child_list)
                 end,
             },
         },
         complete = {
-            marker = { 'X', 'x' },
+            marker = { "X", "x" },
             highlight = {
-                marker = { link = 'String' },
-                content = { link = 'Conceal' },
+                marker = { link = "String" },
+                content = { link = "Conceal" },
             },
-            sort = { section = 3, position = 'top' },
+            sort = { section = 3, position = "top" },
             propagate = {
                 up = function(host_list)
                     local all_items_complete = true
                     for _, item in ipairs(host_list.items) do
-                        if item.status.name ~= 'complete' then
+                        if item.status.name ~= "complete" then
                             all_items_complete = false
                         end
                     end
                     if all_items_complete then
-                        return 'complete'
+                        return "complete"
                     else
-                        return 'in_progress'
+                        return "in_progress"
                     end
                 end,
                 down = function(child_list)
                     local target_statuses = {}
                     for _ = 1, #child_list.items, 1 do
-                        table.insert(target_statuses, 'complete')
+                        table.insert(target_statuses, "complete")
                     end
                     return target_statuses
                 end,
             },
         },
     },
-    status_order = { 'not_started', 'in_progress', 'complete' },
+    status_order = { "not_started", "in_progress", "complete" },
     status_propagation = {
         up = true,
         down = true,
@@ -258,17 +257,17 @@ M.opts.to_do = {
     sort = {
         on_status_change = false,
         recursive = false,
-        cursor_behavior = { track = true, },
+        cursor_behavior = { track = true },
     },
 }
 
 M.opts.tables = {
-    type = 'pipe',
+    type             = "pipe",
     trim_whitespace  = true,
     format_on_move   = true,
     auto_extend_rows = false,
     auto_extend_cols = false,
-    style = {
+    style            = {
         cell_padding      = 1,
         separator_padding = 1,
         outer_pipes       = true,
@@ -276,84 +275,88 @@ M.opts.tables = {
     },
 }
 
-M.opts.yaml = { bib = { override = false }, }
+M.opts.yaml = { bib = { override = false } }
 
 M.opts.mappings = {
-    MkdnEnter      = { { 'n', 'v' }, '<CR>' },
-    MkdnGoBack     = { 'n', '<BS>' },
-    MkdnGoForward  = { 'n', '<Del>' },
-    MkdnMoveSource = { 'n', '<F2>' },
-    MkdnNextLink = { 'n', '<Tab>' },
-    MkdnPrevLink = { 'n', '<S-Tab>' },
-    MkdnFollowLink = false,
-    MkdnDestroyLink = { 'n', '<M-CR>' },
-    MkdnTagSpan = { 'v', '<M-CR>' },
-    MkdnYankAnchorLink = { 'n', 'yaa' },
-    MkdnYankFileAnchorLink = { 'n', 'yfa' },
-    MkdnNextHeading = { 'n', ']]' },
-    MkdnPrevHeading = { 'n', '[[' },
-    MkdnNextHeadingSame = { 'n', '][' },
-    MkdnPrevHeadingSame = { 'n', '[]' },
+    MkdnEnter              = { { "n", "v" }, "<CR>" },
+    MkdnGoBack             = { "n", "<BS>" },
+    MkdnGoForward          = { "n", "<Del>" },
+    MkdnMoveSource         = { "n", "<F2>" },
+    MkdnNextLink           = { "n", "<Tab>" },
+    MkdnPrevLink           = { "n", "<S-Tab>" },
+    MkdnFollowLink         = false,
+    MkdnDestroyLink        = { "n", "<M-CR>" },
+    MkdnTagSpan            = { "v", "<M-CR>" },
+    MkdnYankAnchorLink     = { "n", "yaa" },
+    MkdnYankFileAnchorLink = { "n", "yfa" },
+    MkdnNextHeading        = { "n", "]]" },
+    MkdnPrevHeading        = { "n", "[[" },
+    MkdnNextHeadingSame    = { "n", "][" },
+    MkdnPrevHeadingSame    = { "n", "[]" },
 
-    MkdnIncreaseHeading = { { 'n', 'v' }, '+' },
-    MkdnDecreaseHeading = { { 'n', 'v' }, '-' },
-    MkdnIncreaseHeadingOp = { { 'n', 'v' }, 'g+' },
-    MkdnDecreaseHeadingOp = { { 'n', 'v' }, 'g-' },
-    MkdnToggleToDo = { { 'n', 'v' }, '<C-Space>' },
+    MkdnIncreaseHeading = { { "n", "v" }, "+" },
+    MkdnDecreaseHeading = { { "n", "v" }, "-" },
+    MkdnIncreaseHeadingOp = { { "n", "v" }, "g+" },
+    MkdnDecreaseHeadingOp = { { "n", "v" }, "g-" },
+    MkdnToggleToDo = { { "n", "v" }, "<C-Space>" },
     MkdnNewListItem = false,
-    MkdnNewListItemBelowInsert = { 'n', 'o' },
-    MkdnNewListItemAboveInsert = { 'n', 'O' },
+    MkdnNewListItemBelowInsert = { "n", "o" },
+    MkdnNewListItemAboveInsert = { "n", "O" },
     MkdnExtendList = false,
-    MkdnUpdateNumbering = { 'n', '<leader>nn' },
+    MkdnUpdateNumbering = { "n", "<leader>nn" },
 
-    MkdnTableNextCell = { 'i', '<Tab>' },
-    MkdnTablePrevCell = { 'i', '<S-Tab>' },
+    MkdnTableNextCell = { "i", "<Tab>" },
+    MkdnTablePrevCell = { "i", "<S-Tab>" },
     MkdnTableNextRow = false,
-    MkdnTablePrevRow = { 'i', '<M-CR>' },
-    MkdnTableNewRowBelow = { 'n', '<leader>ir' },
-    MkdnTableNewRowAbove = { 'n', '<leader>iR' },
-    MkdnTableNewColAfter = { 'n', '<leader>ic' },
-    MkdnTableNewColBefore = { 'n', '<leader>iC' },
-    MkdnTableDeleteRow = { 'n', '<leader>dr' },
-    MkdnTableDeleteCol = { 'n', '<leader>dc' },
+    MkdnTablePrevRow = { "i", "<M-CR>" },
+    MkdnTableNewRowBelow = { "n", "<leader>ir" },
+    MkdnTableNewRowAbove = { "n", "<leader>iR" },
+    MkdnTableNewColAfter = { "n", "<leader>ic" },
+    MkdnTableNewColBefore = { "n", "<leader>iC" },
+    MkdnTableDeleteRow = { "n", "<leader>dr" },
+    MkdnTableDeleteCol = { "n", "<leader>dc" },
 
-    MkdnFoldSection =      { 'n', '<leader>f' },
-    MkdnUnfoldSection = { 'n', '<leader>F' },
+    MkdnFoldSection = { "n", "<leader>f" },
+    MkdnUnfoldSection = { "n", "<leader>F" },
 
     MkdnTab = false,
     MkdnSTab = false,
-    MkdnIndentListItem = { 'i', '<C-t>' },
-    MkdnDedentListItem = { 'i', '<C-d>' },
+    MkdnIndentListItem = { "i", "<C-t>" },
+    MkdnDedentListItem = { "i", "<C-d>" },
     MkdnCreateLink = false,
-    MkdnCreateLinkFromClipboard = { { 'n', 'v' }, '<leader>p' },
+    MkdnCreateLinkFromClipboard = { { "n", "v" }, "<leader>p" },
 }
 
 -- Disabled
 M.opts.foldtext = {
     object_count = true,
-    object_count_icon_set = 'emoji',
+    object_count_icon_set = "emoji",
     object_count_opts = function()
-        return require('mkdnflow').foldtext.default_count_opts()
+        return require("mkdnflow")
+            .foldtext
+            .default_count_opts()
     end,
 
     line_count = true,
     line_percentage = true,
     word_count = false,
     title_transformer = function()
-        return require('mkdnflow').foldtext.default_title_transformer
+        return require("mkdnflow")
+            .foldtext
+            .default_title_transformer
     end,
 
     fill_chars = {
-        left_edge = '⢾⣿⣿',
-        right_edge = '⣿⣿⡷',
-        item_separator = ' · ',
-        section_separator = ' ⣹⣿⣏ ',
-        left_inside = ' ⣹',
-        right_inside = '⣏ ',
-        middle = '⣿',
+        left_edge = "⢾⣿⣿",
+        right_edge = "⣿⣿⡷",
+        item_separator = " · ",
+        section_separator = " ⣹⣿⣏ ",
+        left_inside = " ⣹",
+        right_inside = "⣏ ",
+        middle = "⣿",
     },
 }
-M.opts.bib = {
+M.opts.bib      = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#bib
 
     -- Filepath of default .bib for citation key resolution.

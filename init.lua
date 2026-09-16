@@ -20,7 +20,11 @@
 _G.require_guard = function(modpath)
     local ok, module = pcall(require, modpath)
     if not ok then
-        vim.notify("Failed to require() module: " .. modpath .. "\n" .. tostring(module), vim.log.levels.ERROR)
+        vim.notify(
+            "Failed to require() module: " .. modpath
+                .. "\n" .. tostring(module),
+            vim.log.levels.ERROR
+        )
         return
     end
     return module
@@ -39,7 +43,10 @@ _G.setup_guard = function(modpath)
 
     local ok, err = pcall(module.setup)
     if not ok then
-        vim.notify("Failed to setup() module: " .. modpath .. "\n" .. tostring(err), vim.log.levels.ERROR)
+        vim.notify(
+            "Failed to setup() module: " .. modpath .. "\n" .. tostring(err),
+            vim.log.levels.ERROR
+        )
     end
 end
 

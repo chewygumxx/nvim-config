@@ -9,12 +9,11 @@
 --
 --
 
-
 ---@module "lazy"
 ---@type LazySpec
 local M = {
     "imsnif/kdl.vim",
-    ft = { 'kdl' }
+    ft = { "kdl" },
 }
 
 return M

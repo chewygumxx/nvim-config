@@ -15,13 +15,12 @@
 
 local M = {}
 
-local options = {
-}
+local options = {}
 
 local hlgroup_defs = {
     ["@type"]                  = { link = "@property" },
-    ["@punctuation.bracket"]   = { link = "PreProc"   },
-    ["@punctuation.delimiter"] = { link = "Macro"     },
+    ["@punctuation.bracket"]   = { link = "PreProc" },
+    ["@punctuation.delimiter"] = { link = "Macro" },
 }
 
 -- Highlight links are session-global; only need to be defined once.

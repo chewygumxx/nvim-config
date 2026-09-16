@@ -24,10 +24,12 @@ local visual_traversal = function()
         return
     end
     local vt = mod.command
-    def_usercmd("XXVisTrav",        vt("toggle"),  { desc = "Toggle: "  .. desc })
-    def_usercmd("XXVisTravToggle",  vt("toggle"),  { desc = "Toggle: "  .. desc })
-    def_usercmd("XXVisTravEnable",  vt("enable"),  { desc = "Enable: "  .. desc })
-    def_usercmd("XXVisTravDisable", vt("disable"), { desc = "Disable: " .. desc })
+    def_usercmd("XXVisTrav", vt("toggle"), { desc = "Toggle: " .. desc })
+    def_usercmd("XXVisTravToggle", vt("toggle"), { desc = "Toggle: " .. desc })
+    def_usercmd("XXVisTravEnable", vt("enable"), { desc = "Enable: " .. desc })
+    def_usercmd("XXVisTravDisable", vt("disable"), {
+        desc = "Disable: " .. desc,
+    })
 end
 
 local interpret_escape = function()
@@ -36,7 +38,7 @@ local interpret_escape = function()
     if not ie then
         return
     end
-    def_usercmd("XXInterpretEscape", ie.command, { desc = desc, bang = true, })
+    def_usercmd("XXInterpretEscape", ie.command, { desc = desc, bang = true })
 end
 
 local redirect_awkward_pager = function()
@@ -52,12 +54,14 @@ local redirect_awkward_pager = function()
         def_usercmd("XXRedir" .. capitalvcmd, rap(vimcmd), {
             desc  = desc .. vimcmd,
             nargs = "*",
-            bang  = true
+            bang  = true,
         })
         -- Only abbreviate when vimcmd is in the command position and is
         -- invoked as the command itself
-        vim.cmd(("cnoreabbrev <expr> %s (getcmdtype() == ':' && getcmdline() == '%s') ? 'XXRedir%s' : '%s'")
-            :format(vimcmd, vimcmd, capitalvcmd, vimcmd))   
+        vim.cmd(
+            ("cnoreabbrev <expr> %s (getcmdtype() == ':' && getcmdline() == '%s') ? 'XXRedir%s' : '%s'")
+                :format(vimcmd, vimcmd, capitalvcmd, vimcmd)
+        )
     end
 end
 
@@ -67,7 +71,9 @@ local insert_header = function()
     if not ih then
         return
     end
-    vim.api.nvim_create_user_command("XXInsertHeader", ih.command, { desc = desc })
+    vim.api.nvim_create_user_command("XXInsertHeader", ih.command, {
+        desc = desc,
+    })
 end
 
 M.setup = function()

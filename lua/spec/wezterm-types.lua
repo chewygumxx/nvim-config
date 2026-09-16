@@ -16,7 +16,7 @@
 ---@module "lazy"
 ---@type LazySpec
 local M = {
-    'DrKJeff16/wezterm-types',
+    "DrKJeff16/wezterm-types",
     version = false,
 }
 

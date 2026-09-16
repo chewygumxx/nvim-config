@@ -14,12 +14,11 @@
 --
 
 local M = {
-    extension = {
-    },
+    extension = {},
     filename  = {
         ["ignore"]         = "gitignore",
         [".chezmoiignore"] = "gitignore",
-        [".assetsignore"]  = "gitignore",  -- CloudFlare Worker wrangler config
+        [".assetsignore"]  = "gitignore", -- CloudFlare Worker wrangler config
     },
     pattern   = {
         [".*gnupg/.*%.conf"] = "gpg",
@@ -36,11 +35,21 @@ local define_dosini = function()
         "conf",
 
         -- Systemd
-        "automount", "device", "mount", "path", "scope", "service",
-        "slice", "snapshot", "socket", "swap", "target", "timer",
+        "automount",
+        "device",
+        "mount",
+        "path",
+        "scope",
+        "service",
+        "slice",
+        "snapshot",
+        "socket",
+        "swap",
+        "target",
+        "timer",
     }
 
-    for _,ext in ipairs(exts) do
+    for _, ext in ipairs(exts) do
         M.extension[ext] = "dosini"
     end
 end

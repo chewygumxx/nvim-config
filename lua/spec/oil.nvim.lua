@@ -12,14 +12,14 @@
 ---@module "lazy"
 ---@type LazySpec
 local M = {
-    'stevearc/oil.nvim',
+    "stevearc/oil.nvim",
     enabled = false,
 
     -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
     lazy = false,
     -- Optional dependencies
     dependencies = {
-        { "nvim-mini/mini.icons", opts = {}  },
+        { "nvim-mini/mini.icons", opts = {} },
         { "nvim-tree/nvim-web-devicons", opts = {} },
     },
 }

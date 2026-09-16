@@ -16,12 +16,12 @@
 ---@module "lazy"
 ---@type LazySpec
 local M = {
-    'nvim-orgmode/orgmode',
+    "nvim-orgmode/orgmode",
 
-    ft = { 'org' },
+    ft = { "org" },
     opts = {
-        org_agenda_files = '~/nexus/orgmode/**/*',
-        org_default_notes_file = '~/nexus/orgmode/refile.org',
+        org_agenda_files = "~/nexus/orgmode/**/*",
+        org_default_notes_file = "~/nexus/orgmode/refile.org",
     },
 }
 

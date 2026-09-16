@@ -215,10 +215,11 @@ M.signature_help_on_type = function(buf, client)
         return
     end
 
+    local group = vim.api.nvim_create_augroup("UtilLspSignatureHelp:" .. buf, {
+        clear = true,
+    })
     vim.api.nvim_create_autocmd("InsertCharPre", {
-        group    = vim.api.nvim_create_augroup("UtilLspSignatureHelp:" .. buf, {
-            clear = true,
-        }),
+        group    = group,
         buffer   = buf,
         desc     = "LSP: Signature help while typing",
         callback = function()

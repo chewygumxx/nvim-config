@@ -32,11 +32,11 @@ M.opts.load = {
                     indent = 4,
                     modifiers = {
                         "under-headings",
-                        "under-nestable-detached-modifiers"
-                    }
-                }
-            }
-        }
+                        "under-nestable-detached-modifiers",
+                    },
+                },
+            },
+        },
     },
     ["core.esupports.hop"] = {},
     ["core.todo-introspector"] = {
@@ -44,7 +44,7 @@ M.opts.load = {
             highlight_group = "String",
 
             ---@param completed number Total number of completed tasks
-            ---@param total number Total number of tasks
+            ---@param total     number Total number of tasks
             format = function(completed, total)
                 return string.format(
                     "[%d/%d] [%d%%]",
@@ -52,23 +52,23 @@ M.opts.load = {
                     total,
                     (total ~= 0 and math.floor((completed / total) * 100) or 0)
                 )
-            end
-        }
+            end,
+        },
     },
     ["core.dirman"] = {
         config = {
             default_workspace = "neorg",
             open_last_workspace = "default",
             workspaces = { neorg = "~/note/neorg" },
-        }
+        },
     },
     ["core.concealer"] = {
         config = {
             folds = true,
-            icon_preset = "diamond"
-        }
+            icon_preset = "diamond",
+        },
     },
-    ["core.summary"] = {}
+    ["core.summary"] = {},
 }
 
 return M

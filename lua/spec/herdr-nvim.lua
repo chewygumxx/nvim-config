@@ -22,14 +22,30 @@ local M = {
     lazy  = vim.env.HERDR_NVIM_DAEMON ~= "1",
     build = "sh scripts/build.sh",
 
-    opts  = {},
+    opts = {},
 }
 
-M.cmd  = { "HerdrAsk", "HerdrReply", "HerdrAskTarget", "HerdrAnnotate",
-    "HerdrAnnotations", "HerdrSend", "HerdrPaste", "HerdrPreview",
-    "HerdrPickFile", "HerdrAgents" }
+M.cmd = {
+    "HerdrAsk",
+    "HerdrReply",
+    "HerdrAskTarget",
+    "HerdrAnnotate",
+    "HerdrAnnotations",
+    "HerdrSend",
+    "HerdrPaste",
+    "HerdrPreview",
+    "HerdrPickFile",
+    "HerdrAgents",
+}
 
-M.keys = { "<leader>ac", "<leader>ar", "<leader>aa", "<leader>al",
-    "<leader>as", "<leader>aS", "<leader>af" }
+M.keys = {
+    "<leader>ac",
+    "<leader>ar",
+    "<leader>aa",
+    "<leader>al",
+    "<leader>as",
+    "<leader>aS",
+    "<leader>af",
+}
 
 return M

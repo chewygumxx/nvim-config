@@ -20,10 +20,13 @@ local cached_source, cached_lines
 
 local function range_text(source, row, start_col, end_col)
     if type(source) == "number" then
-        return vim.api.nvim_buf_get_text(source, row, start_col, row, end_col, {})[1] or ""
+        return vim.api.nvim_buf_get_text(source, row, start_col, row, end_col, {})[1]
+            or ""
     end
     if cached_source ~= source then
-        cached_source, cached_lines = source, vim.split(source, "\n", { plain = true })
+        cached_source, cached_lines = source, vim.split(source, "\n", {
+                plain = true,
+            })
     end
     local line = cached_lines[row + 1] or ""
     return line:sub(start_col + 1, end_col)
@@ -33,7 +36,7 @@ end
 -- nothing at all: true byte adjacency), on the same line.
 local function whitespace_only_gap(source, a, b)
     local _, _, a_end_row, a_end_col = a:range()
-    local b_row, b_col = b:range()
+    local b_row, b_col               = b:range()
     if a_end_row ~= b_row then
         return false
     end
@@ -69,7 +72,7 @@ end
 
 -- #last-matching? @a "pattern"
 M.last_matching = function(match, _, source, predicate)
-    local nodes = match[predicate[2]]
+    local nodes   = match[predicate[2]]
     local pattern = predicate[3]
     if not nodes then
         return true
@@ -111,8 +114,8 @@ local function maximal_adjacent_run(node, source)
 end
 
 local HEADER_LINE_PATTERNS = {
-    { shape = "repo", pattern = "%s*~[%w_-]+/[%w_-]+%.git$" },  -- ~owner/name.git
-    { shape = "path", pattern = "%s*:::%s*:/[%w_/.-]+$"     },  -- ::: :/path/to/file
+    { shape = "repo", pattern = "%s*~[%w_-]+/[%w_-]+%.git$" }, -- ~owner/name.git
+    { shape = "path", pattern = "%s*:::%s*:/[%w_/.-]+$" },     -- ::: :/path/to/file
 }
 
 -- #header-line? @capture ["repo"|"path"]
@@ -131,7 +134,8 @@ M.header_line = function(match, _, source, predicate)
 
         local matched = false
         for _, entry in ipairs(HEADER_LINE_PATTERNS) do
-            if (not want_shape or entry.shape == want_shape) and line:match(entry.pattern) then
+            if (not want_shape or entry.shape == want_shape)
+                and line:match(entry.pattern) then
                 matched = true
                 break
             end
@@ -145,9 +149,15 @@ M.header_line = function(match, _, source, predicate)
 end
 
 M.setup = function()
-    vim.treesitter.query.add_predicate("adjacent?",      M.adjacent,      { force = true })
-    vim.treesitter.query.add_predicate("last-matching?", M.last_matching, { force = true })
-    vim.treesitter.query.add_predicate("header-line?",   M.header_line,   { force = true })
+    vim.treesitter.query.add_predicate("adjacent?", M.adjacent, {
+        force = true,
+    })
+    vim.treesitter.query.add_predicate("last-matching?", M.last_matching, {
+        force = true,
+    })
+    vim.treesitter.query.add_predicate("header-line?", M.header_line, {
+        force = true,
+    })
 end
 
 return M

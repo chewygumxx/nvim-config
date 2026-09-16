@@ -17,14 +17,14 @@
 ---@module "lazy"
 ---@type LazySpec
 local M = {
-    'ray-x/starry.nvim',
+    "ray-x/starry.nvim",
 
-    priority = 1001,  -- Load this first and foremost
+    priority = 1001, -- Load this first and foremost
     lazy     = false,
 
     config = function(_, opts)
-        require('starry').setup(opts)
-        vim.cmd( [[ colorscheme starry ]] )
+        require("starry").setup(opts)
+        vim.cmd([[ colorscheme starry ]])
     end,
 }
 
@@ -35,15 +35,15 @@ M.opts = {
     --   - starry/util.lua:61
     --   - starry/util.lua:105
 
-    border   = true,  -- Split window borders
-    hide_eob = true,  -- Hide end of buffer
+    border   = true,   -- Split window borders
+    hide_eob = true, -- Hide end of buffer
 
     -- * Syntax Font Styling: Italics
     italics = {
         comments  = false,  -- Italic comments
-        strings   = false,  -- Italic strings
+        strings   = false,   -- Italic strings
         keywords  = false,  -- Italic keywords
-        functions = false,  -- Italic functions
+        functions = false, -- Italic functions
         variables = false,  -- Italic variables
     },
 
@@ -63,14 +63,14 @@ M.opts = {
     -- Whether to apply higher contrasting text
     -- Set in accordance with theme variant (_lighter or standard)
     text_contrast = {
-        lighter = false,  -- For lighter variant
-        darker = true     -- For standard variant
+        lighter = false, -- For lighter variant
+        darker = true,   -- For standard variant
     },
 
     disable = {
         background = true,   -- If true > transparent background
         term_colors = false, -- Disable defining the terminal colors
-        eob_lines = false    -- Make end-of-buffer lines invisible
+        eob_lines = false,   -- Make end-of-buffer lines invisible
     },
 
     -- * Theme Name
@@ -105,7 +105,7 @@ M.opts = {
         -- > defaults to 'monokai'     [starry/util.lua:118]
         -- String values accepted:
         -- > see :64
-        name = 'middlenight_blue',
+        name = "middlenight_blue",
 
         -- * Forbidden Font Styles
         -- e.g. {'bold', 'underline'}.

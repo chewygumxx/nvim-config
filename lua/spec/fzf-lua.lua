@@ -11,7 +11,7 @@
 
 ---@module "lazy"
 ---@type LazySpec
-local M =  {
+local M = {
     "ibhagwan/fzf-lua",
     enabled = true,
     dependencies = {

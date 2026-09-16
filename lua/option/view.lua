@@ -23,7 +23,7 @@ local opts = {
     number         = true,
     relativenumber = true,
     scrolloff      = 5,
-    
+
     -- Window Splitting
     splitright = true,
 
@@ -38,4 +38,3 @@ M.setup = function()
 end
 
 return M
-

@@ -49,11 +49,11 @@ M.get = function(file, buf, opt)
     local file = file or vim.fn.expand("%")
     local buf  = buf or 0
     local opt  = opt or {}
-    local ft   = opt.ft  or vim.bo[buf].filetype
+    local ft   = opt.ft or vim.bo[buf].filetype
 
     local path = vim.fn.fnamemodify(file, ":~:h")
-    for _,dir in ipairs(source_dirs) do
-        if path:find(dir .. '/', 1, true) == 1 then
+    for _, dir in ipairs(source_dirs) do
+        if path:find(dir .. "/", 1, true) == 1 then
             return "#!/bin/false"
         end
     end
@@ -62,4 +62,3 @@ M.get = function(file, buf, opt)
 end
 
 return M
-

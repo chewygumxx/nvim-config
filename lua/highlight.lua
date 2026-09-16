@@ -19,18 +19,18 @@ local M = {}
 -- Highlight Table
 local hlgroup_defs = {
     -- Background Transparency and Anti-Eye Strain
-    ["Normal"]     = { ctermbg   = "none",    fg = "#cad6ff", bg = "none",   },
-    ["Search"]     = { bold      = true,      fg = "#e0e8ff", bg = "#52408f" },
-    ["Title"]      = { bold      = true,      fg = "#cad6ff" },
-    ["NonText"]    = { ctermbg   = "none",    bg = "none"    },
+    ["Normal"]     = { ctermbg = "none", fg = "#cad6ff", bg = "none" },
+    ["Search"]     = { bold = true, fg = "#e0e8ff", bg = "#52408f" },
+    ["Title"]      = { bold = true, fg = "#cad6ff" },
+    ["NonText"]    = { ctermbg = "none", bg = "none" },
     ["Underlined"] = { underline = true },
 
     -- Paired-Boundary Character
     ["MatchParen"] = { standout = true },
 
     -- Define @markup Underline, Bold and Strikethrough
-    ["@markup.strong"]        = { bold          = true },
-    ["@markup.underline"]     = { underline     = true },
+    ["@markup.strong"]        = { bold = true },
+    ["@markup.underline"]     = { underline = true },
     ["@markup.strikethrough"] = { strikethrough = true },
 }
 

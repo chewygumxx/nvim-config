@@ -16,7 +16,7 @@
 local M = {}
 
 local options = {
-    commentstring = "# %s"
+    commentstring = "# %s",
 }
 
 M.setup = function()
