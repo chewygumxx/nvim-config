@@ -20,8 +20,20 @@ local M = {
     url     = "https://github.com/nvim-treesitter/nvim-treesitter.git",
     enabled = true,
     branch  = 'main',
-    build   = ':TSUpdate',
     lazy    = false,
+    build   = ':TSUpdate',
+}
+
+local ignore_filetypes = {
+    'checkhealth',
+    'lazy',
+    'qf',   -- QuickFix
+    'mason',
+    'snacks_dashboard',
+    'snacks_notif',
+    'snacks_win',
+    'text',
+    'man',
 }
 
 local ensure_installed = {
@@ -256,25 +268,10 @@ local ensure_installed = {
     -- https://github.com/georgeharker/tree-sitter-zsh
 }
 
-local ignore_filetypes = {
-    'checkhealth',
-    'lazy',
-    'qf',   -- QuickFix
-    'mason',
-    'snacks_dashboard',
-    'snacks_notif',
-    'snacks_win',
-    'text',
-    'man',
-}
-
 -- Ripped from:
 -- https://www.reddit.com/r/neovim/comments/1pndf9e/my_new_nvimtreesitter_configuration_for_the_main/
 M.config = function()
-    local custom_predicates = _G.require_guard("util.treesitter")
-    if custom_predicates then
-        custom_predicates.setup()
-    end
+    _G.setup_guard("util.treesitter")
 
     vim.treesitter.language.register('ini', 'conf')
     vim.treesitter.language.register('gotmpl', 'template')
@@ -283,8 +280,10 @@ M.config = function()
     -- Install core parsers after lazy.nvim finishes loading all plugins
     vim.api.nvim_create_autocmd('User', {
         pattern  = 'LazyDone',
-        callback = function() ts.install(ensure_installed, { max_jobs = 8,})  end,
         once     = true,
+        callback = function()
+            ts.install(ensure_installed, { max_jobs = 8, })
+        end,
     })
 
     -- State tracking for async parser loading
@@ -331,24 +330,22 @@ M.config = function()
     vim.api.nvim_create_autocmd('FileType', {
         group = vim.api.nvim_create_augroup('TreesitterSetup', { clear = true }),
         desc  = 'Enable treesitter functionality',
-        callback = function(event)
-          --vim.notify(require('inspect')(event), vim.log.levels.INFO)
-
+        callback = function(opts)
             -- Filesize Limit
             local megabyte = 1024 * 1024
-            if vim.fn.getfsize(event.file) > (vim.g.large_filesize or megabyte) then
+            if vim.fn.getfsize(opts.file) > (vim.g.large_filesize or megabyte) then
                 vim.notify("Filesize exceeded treesitter limit: (see \"Filesize Limit\" of spec/nvim-treesitter.lua)",
                     vim.log.levels.INFO)
                 return
             end
 
             -- Filetype Ignore
-            if vim.tbl_contains(ignore_filetypes, event.match) then
+            if vim.tbl_contains(ignore_filetypes, opts.match) then
                 return
             end
 
-            local lang = vim.treesitter.language.get_lang(event.match) or event.match
-            local buf  = event.buf
+            local lang = vim.treesitter.language.get_lang(opts.match) or opts.match
+            local buf  = opts.buf
 
             if parsers_failed[lang] then
                 vim.notify("Treesitter parser failed for lang: " .. lang, vim.log.levels.WARN)
