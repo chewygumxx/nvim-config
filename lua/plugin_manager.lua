@@ -2,218 +2,221 @@
 -- vim:set foldlevel=1 foldmethod=expr filetype=lua:
 -- luacheck: globals vim
 -- SPDX-License-Identifier: GPL-3.0-only
+
 --
 --
 -- ~chewygumxx/dotfiles.git
 -- ::: :/home/dot_config/nvim/lua/plugin_manager.lua
 --
+
 --
--- https://github.com/folke/lazy.nvim
+-- https://lazy.folke.io/configuration
 --
 
-local lazy = {}
+local M = {}
 
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-local spec  = {{ import = "spec" }}
+local data     = vim.fn.stdpath("data") .. "/lazy"
+local state    = vim.fn.stdpath("state") .. "/lazy"
+local lazypath = data .. "/lazy.nvim"
 
+---@type LazyConfig
 local opts = {
-    -- Plugin Installation Directory
-    root     = vim.fn.stdpath("data") .. "/lazy",
-    -- Post-Update Lockfile
-    lockfile = vim.fn.stdpath("state") .. "/lazy/lock.json", 
-    -- State Infomation file
-    state    = vim.fn.stdpath("state") .. "/lazy/state.json",
-    
-    -- Default Plugin Spec
-    defaults = {
-        lazy    = false, -- should plugins be lazy-loaded?
-        version = "*",   -- Always use the latest version lmao
-        cond    = nil,   ---@type boolean|fun(self:LazyPlugin):boolean|nil
+    root     = data, -- Plugin Installation Directory
+    lockfile = state .. "/lock.json", -- Post-Update Lockfile
+    state    = state .. "/state.json", -- State Infomation file
+
+    -- Plugin Specs
+    ---@type LazySpec
+    spec = {
+        { import = "spec" },
     },
-    dev = { path = vim.fn.expand('~') .. "/dev", },
+
+    -- Plugin Spec Defaults
+    ---@type LazySpec
+    defaults = {
+        lazy = false,
+    },
+
+    -- Locally Available Plugins
+    dev = {
+        path     = vim.fn.expand("~") .. "/dev",
+        patterns = { "chewygumxx" },
+        fallback = true, -- Use git if not found
+    },
+
+    -- TODO(@chewygum): [LOW] Investigate
     pkg = {
         enabled  = true,
-        cache    = vim.fn.stdpath("state") .. "/lazy/pkg_cache.lua",
-        versions = true, -- Honor versions in pkg sources
-        
-        -- The first package source that is found for a plugin will be used.
-        sources = {
+        cache    = state .. "/pkg_cache.lua",
+        versions = true, -- Honour versions in pkg sources
+        sources  = {
             "lazy",
             "rockspec",
             "packspec",
         },
     },
+
+    -- TODO(@chewygum): [LOW] Investigate
     rocks = {
-        root   = vim.fn.stdpath("data") .. "/lazy/rocks",
-        server = "https://nvim-neorocks.github.io/rocks-binaries/",
+        enabled   = true,
+        root      = data .. "/rocks",
+        server    = "https://lumen-oss.github.io/rocks-binaries/",
+        hererocks = nil,
     },
+
     install = {
         -- Install missing plugins on startup
         missing = true,
-        
-        -- Attempt to load colorscheme during installation 
+        -- Prioritised colorscheme list to attempt to load during installation
         colorscheme = { "middlenight_blue" },
     },
-    ui = {
-        size = { width = 0.8, height = 0.8 },
-        -- Line Wrapping
-        wrap = true, 
-        -- UI Floating Window Border
-        border = "none",
-        -- The backdrop opacity. 0 is fully opaque, 100 is fully transparent.
-        backdrop = 40,
-        
-        -- Title,
-        -- - If border not "none"
-        title = nil, 
-        title_pos = "center", ---@type "center" | "left" | "right"
-        
-        -- :Lazy Window Header Icons
-        pills = true, ---@type boolean
-        icons = {
-            cmd = " ",
-            config = "",
-            event = " ",
-            favorite = " ",
-            ft = " ",
-            init = " ",
-            import = " ",
-            keys = " ",
-            lazy = "󰒲 ",
-            loaded = "●",
-            not_loaded = "○",
-            plugin = " ",
-            runtime = " ",
-            require = "󰢱 ",
-            source = " ",
-            start = " ",
-            task = "✔ ",
-            list = {
-                "●",
-                "➜",
-                "★",
-                "‒",
-            },
-        },
-        browser = "/usr/bin/firefox",
-        throttle = 20,
-        
-        -- Keymapping
-        -- - Shown in :Lazy help
-        custom_keys = {
-            ["<localleader>l"] = {
-                function(plugin)
-                    require("lazy.util").float_term({ "lazygit", "log" }, {
-                        cwd = plugin.dir
-                    })
-                end,
-                desc = "Open lazygit log",
-            },
-            ["<localleader>t"] = {
-                function(plugin)
-                    require("lazy.util").float_term(nil, {
-                        cwd = plugin.dir
-                    })
-                end,
-                desc = "Open terminal in plugin.dir"
-            },
-        },
-        
-    },
-    diff = {
-        -- diff command <d> can be one of:
-        -- * browser: opens the github compare view. Note that this is always
-		--     mapped to <K> as well, so you can have a different command for
-		--     diff <d>
-        -- * git: will run git diff and open a buffer with filetype git
-        -- * terminal_git: will open a pseudo terminal with git diff
-        -- * diffview.nvim: will open Diffview to show the diff
-        cmd = "git",
-    },
+
+    diff = { cmd = "git" },
+
+    -- Auto-Update Check
+    -- This may be why I occasionally experience lag in Herdr panes
+    -- TODO(@chewygumxx): Investigate
     checker = {
-        -- [Disabled] Auto-Update Check 
-        enabled = true,
-        
-        -- Concurrent/Parallel Check Limit
-        concurrency = nil, ---@type number?
-        notify = false,
-        
-        -- Check Frequency (seconds)
-        frequency = 3600,
-        
-        -- Check Version Pinned Packages (requires manual plugin spec edit)
-        check_pinned = false, 
+        enabled      = vim.env.HERDR_ENV == nil
+            and vim.env.TERMUX_VERSION == nil,
+        concurrency  = nil, -- Concurrent/Parallel Check Limit
+        notify       = false,
+        frequency    = 3600, -- Check Frequency (seconds)
+        check_pinned = false, -- Check Version Pinned Packages (requires manual plugin spec edit)
     },
-    change_detection = {
-        -- Configuration File Modification
-        enabled = true,
-        notify  = false,
-    },
+
     performance = {
-        cache = { enabled = true, },
+        cache          = { enabled = true },
         reset_packpath = true, -- reset the package path to improve startup time
-        rtp = {
-            reset = true, -- reset the runtime path to $VIMRUNTIME and your config ctory
-            ---@type string[]
-            paths = {}, -- add any custom paths here that you want to includes in the rtp
-            ---@type string[] list any plugins you want to disable here
-            disabled_plugins = {
-                -- "gzip",
-                -- "matchit",
-                -- "matchparen",
-                -- "netrwPlugin",
-                -- "tarPlugin",
-                -- "tohtml",
-                -- "tutor",
-                -- "zipPlugin",
-            },
+        rtp            = {
+            reset            = true, -- reset the runtime path to $VIMRUNTIME and your config ctory
+            paths            = {}, -- Custom runtime paths
+            disabled_plugins = {},
         },
     },
+
+    -- Generate `:help` documentation from README
     readme = {
-        -- lazy can generate helptags from the headings in markdown readme files,
-        -- so :help works even for plugins that don't have vim docs.
-        -- when the readme opens with :help it will be correctly displayed as markdown
-        enabled = true,
-        root    = vim.fn.stdpath("data") .. "/lazy/readme",
-        files   = { "README.md", "lua/**/README.md" },
-        -- only generate markdown helptags for plugins that dont have docs
+        enabled            = true,
+        root               = data .. "/readme",
+        files              = { "README.md", "lua/**/README.md" },
         skip_if_doc_exists = true,
     },
+
+    -- Additional stats provided on 'Debug' tab
     profiling = {
-        -- Enables extra stats on the debug tab related to the loader cache.
-        -- Additionally gathers stats about all package.loaders
-        loader = true,
-        -- Track each new require in the Lazy profiling tab
-        require = false,
+        loader  = vim.g.lazy_profile ~= nil, -- Assess all package.loaders
+        require = vim.g.lazy_profile ~= nil, -- Track each new require
     },
 }
 
-local install = function ()
-    if not (vim.uv or vim.loop).fs_stat(lazypath) then
-        local out = vim.fn.system({ 
-            "git", 
-            "clone", 
-            "--filter=blob:none", 
-            "--branch=stable", 
-            "https://github.com/folke/lazy.nvim.git", 
-            lazypath 
-        })
-        if vim.v.shell_error ~= 0 then
-            vim.api.nvim_echo({
-                { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-                { out, "WarningMsg" },
-                { "\nPress any key to exit..." },
-            }, true, {})
-            vim.fn.getchar()
-            os.exit(1)
-        end
+-- Watch configuration file and reload UI on change
+opts.change_detection = {
+    enabled = vim.g.lazy_watch_config ~= nil,
+    notify  = true,
+}
+
+opts.ui = {
+    size        = { width = 0.8, height = 0.8 },
+    wrap        = true, -- Line Wrapping
+    pills       = true, -- Header Icons
+    backdrop    = 40, -- Backdrop opacity
+    border      = "none", -- `nvim_open_win()` config.border
+    title       = nil,
+    title_pos   = "center",
+    browser     = vim.env.BROWSER,
+    throttle    = 20, -- Redraw frequency
+    icons       = {
+        cmd        = " ",
+        config     = "",
+        event      = " ",
+        favorite   = " ",
+        ft         = " ",
+        init       = " ",
+        import     = " ",
+        keys       = " ",
+        lazy       = "󰒲 ",
+        loaded     = "●",
+        not_loaded = "○",
+        plugin     = " ",
+        runtime    = " ",
+        require    = "󰢱 ",
+        source     = " ",
+        start      = " ",
+        task       = "✔ ",
+        list       = { "●", "➜", "★", "‒" },
+    },
+    custom_keys = { -- - Shown in :Lazy help
+        ["<localleader>l"] = {
+            function(plugin)
+                require("lazy.util").float_term({ "lazygit", "log" }, {
+                    cwd = plugin.dir,
+                })
+            end,
+            desc = "Open lazygit log",
+        },
+        ["<localleader>t"] = {
+            function(plugin)
+                require("lazy.util").float_term(nil, {
+                    cwd = plugin.dir,
+                })
+            end,
+            desc = "Open terminal in plugin.dir",
+        },
+    },
+}
+
+local git_clone = {
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "--branch=stable",
+    "https://github.com/folke/lazy.nvim.git",
+    lazypath,
+}
+
+local install_legacy = function()
+    local out = vim.fn.system(git_clone)
+    if vim.v.shell_error ~= 0 then
+        vim.api.nvim_echo({
+            { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+            { out, "WarningMsg" },
+            { "\nPress any key to exit..." },
+        }, true, {})
+        vim.fn.getchar()
+        os.exit(1)
     end
 end
 
-lazy.setup = function ()
-    install()
-    vim.opt.rtp:append(lazypath)
-    require("lazy").setup(spec, opts)
+local install = function()
+    local syscall = vim.system(git_clone, { text = true }):wait()
+    if syscall.code ~= 0 then
+        vim.notify(
+            table.concat({
+                "Failed to clone lazy.nvim",
+                "Exited with code: " .. tostring(syscall.code),
+                syscall.stderr,
+                "Press any key to exit",
+            }, "\n"),
+            vim.log.levels.ERROR
+        )
+        vim.fn.getchar()
+        os.exit(1)
+    end
 end
 
-return lazy
+M.setup = function()
+    if not (vim.uv or vim.loop).fs_stat(lazypath) then
+        vim.notify("Installing lazy.nvim package manager", vim.log.levels.INFO)
+        if vim.version.ge(vim.version(), { 0, 10, 0 }) then
+            install()
+        else
+            install_legacy()
+        end
+    end
+
+    vim.opt.rtp:append(lazypath)
+    require("lazy").setup(opts)
+end
+
+return M
