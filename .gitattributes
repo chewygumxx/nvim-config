@@ -8,7 +8,7 @@
 #
 #
 
-* text=auto eof=lf
+* text=auto eol=lf
 
 
 # ---------------------
