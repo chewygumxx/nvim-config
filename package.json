@@ -39,5 +39,15 @@
             "remark-preset-lint-recommended",
             "remark-preset-lint-consistent"
         ]
+    },
+    "prettier": {
+        "overrides": [
+            {
+                "files": "*.jsonc",
+                "options": {
+                    "trailingComma": "none"
+                }
+            }
+        ]
     }
 }
