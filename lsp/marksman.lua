@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lsp/marksman.lua
+-- ::: :/lsp/marksman.lua
 --
 --
 

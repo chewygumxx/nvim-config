@@ -6,7 +6,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/spec/nvim-dbee.lua
+-- ::: :/lua/spec/nvim-dbee.lua
 --
 --
 

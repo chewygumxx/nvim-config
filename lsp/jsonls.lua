@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lsp/jsonls.lua
+-- ::: :/lsp/jsonls.lua
 --
 --
 

@@ -6,7 +6,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/plugin_manager.lua
+-- ::: :/lua/plugin_manager.lua
 --
 
 --

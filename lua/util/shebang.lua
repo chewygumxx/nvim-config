@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/util/shebang.lua
+-- ::: :/lua/util/shebang.lua
 --
 --
 

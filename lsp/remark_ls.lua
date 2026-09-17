@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lsp/remark_ls.lua
+-- ::: :/lsp/remark_ls.lua
 --
 --
 

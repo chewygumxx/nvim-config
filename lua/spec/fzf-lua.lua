@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/spec/fzf-lua.lua
+-- ::: :/lua/spec/fzf-lua.lua
 --
 --
 

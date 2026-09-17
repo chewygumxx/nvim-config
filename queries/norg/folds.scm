@@ -3,7 +3,7 @@
 ;
 ;
 ; ~chewygumxx/nvim-config.git
-; ::: :/home/dot_config/nvim/queries/norg/folds.scm
+; ::: :/queries/norg/folds.scm
 ;
 ;
 

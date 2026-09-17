@@ -3,7 +3,7 @@
 ;
 ;
 ; ~chewygumxx/nvim-config.git
-; ::: :/home/dot_config/nvim/queries/markdown_inline/highlights.scm
+; ::: :/queries/markdown_inline/highlights.scm
 ;
 ;
 

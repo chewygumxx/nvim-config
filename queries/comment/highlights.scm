@@ -4,7 +4,7 @@
 ;
 ;
 ; ~chewygumxx/nvim-config.git
-; ::: :/home/dot_config/nvim/queries/comment/highlights.scm
+; ::: :/queries/comment/highlights.scm
 ;
 ;
 

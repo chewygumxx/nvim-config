@@ -6,7 +6,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/snippet/header/markdown.lua
+-- ::: :/lua/snippet/header/markdown.lua
 --
 --
 

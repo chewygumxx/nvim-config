@@ -4,7 +4,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/dot_luacheckrc
+-- ::: :/.luacheckrc
 --
 --
 

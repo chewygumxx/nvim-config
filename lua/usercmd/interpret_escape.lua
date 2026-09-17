@@ -6,7 +6,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/usercmd/interpret_escape.lua
+-- ::: :/lua/usercmd/interpret_escape.lua
 --
 --
 
