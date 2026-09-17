@@ -5,21 +5,35 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/home/dot_config/nvim/lsp/marksman.lua
+-- ::: :/home/dot_config/nvim/lsp/markdown_oxide.lua
 --
 --
 
 local cgxx = _G.require_guard("cgxx").lsp or {}
-if cgxx.markdown ~= "marksman" then
+if cgxx.markdown == "marksman" then
     return {}
 end
 
 ---@type vim.lsp.Config
 local M = {
-    cmd = { "marksman", "server" },
+    cmd = { "markdown_oxide" },
+
     filetypes = { "markdown" },
-    root_markers = { ".marksman.toml", ".git" },
+    root_markers = { ".moxide.toml", ".git", "README", "index.md" },
 }
+
+---@type lsp.ClientCapabilities
+M.capabilities = vim.tbl_deep_extend(
+    "force",
+    _G.require_guard("util.lsp").capabilities(),
+    {
+        workspace = {
+            didChangeWatchedFiles = {
+                dynamicRegistration = true,
+            },
+        },
+    }
+)
 
 -- Placeholder for the inevitable overwrites later
 local hlgroup_defs = {
@@ -33,6 +47,7 @@ local highlights = function()
     end
 end
 
+---@return nil
 M.on_attach = function()
     highlights()
 end
