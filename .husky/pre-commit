@@ -1,0 +1,75 @@
+#!/usr/bin/env sh
+# vim:set expandtab shiftwidth=4 filetype=sh:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/.husky/pre-commit
+#
+#
+
+set -e
+
+status=0
+
+# --------
+# Lua
+# --------
+
+if command -v luafmt >/dev/null 2>&1 && command -v luacheck >/dev/null 2>&1; then
+    lua_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.lua' ':!**/symlink_*')
+    if [ -n "$lua_files" ]; then
+        echo "$lua_files" | xargs luafmt --write
+        echo "$lua_files" | xargs git add --
+
+        for f in $lua_files; do
+            dir=$(dirname "$f")
+            while [ "$dir" != "." ] && [ ! -f "$dir/.luacheckrc" ]; do
+                dir=$(dirname "$dir")
+            done
+            if [ -f "$dir/.luacheckrc" ]; then
+                luacheck --config "$dir/.luacheckrc" "$f" || status=1
+            else
+                luacheck "$f" || status=1
+            fi
+        done
+    fi
+else
+    echo "pre-commit: luafmt/luacheck not on PATH, skipping Lua checks" >&2
+fi
+
+# --------
+# TOML
+# --------
+
+if command -v tombi >/dev/null 2>&1; then
+    toml_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.toml' ':!**/symlink_*')
+    if [ -n "$toml_files" ]; then
+        echo "$toml_files" | xargs tombi format --offline
+        echo "$toml_files" | xargs git add --
+        echo "$toml_files" | xargs tombi lint --error-on-warnings --offline || status=1
+    fi
+else
+    echo "pre-commit: tombi not on PATH, skipping TOML checks" >&2
+fi
+
+# --------
+# JSON/YAML
+# --------
+
+if command -v npx >/dev/null 2>&1; then
+    json_yaml_files=$(
+        git diff --cached --name-only --diff-filter=ACMR \
+            -- '*.json' '*.jsonc' '*.yaml' '*.yml' ':!**/symlink_*' |
+            while IFS= read -r f; do [ -L "$f" ] || printf '%s\n' "$f"; done
+    )
+    if [ -n "$json_yaml_files" ]; then
+        echo "$json_yaml_files" | xargs npx --no -- prettier --write
+        echo "$json_yaml_files" | xargs git add --
+    fi
+else
+    echo "pre-commit: npx not on PATH, skipping JSON/YAML checks" >&2
+fi
+
+exit $status

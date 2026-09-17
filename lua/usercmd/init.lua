@@ -4,7 +4,7 @@
 
 --
 --
--- ~chewygumxx/dotfiles.git
+-- ~chewygumxx/nvim-config.git
 -- ::: :/home/dot_config/nvim/lua/usercmd/init.lua
 --
 --

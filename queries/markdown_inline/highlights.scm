@@ -1,15 +1,15 @@
 ; vim: expandtab:shiftwidth=4:filetype=query:
 
-; 
-; 
-; ~chewygumxx/dotfiles.git
+;
+;
+; ~chewygumxx/nvim-config.git
 ; ::: :/home/dot_config/nvim/queries/markdown_inline/highlights.scm
-; 
-; 
+;
+;
 
-; 
+;
 ; Treesitter query, our favourite x-x
-; 
+;
 
 (full_reference_link      [ "[" "]" "(" ")" ] @markup.link.bracket)
 (collapsed_reference_link [ "[" "]" "(" ")" ] @markup.link.bracket)
@@ -85,7 +85,7 @@
     "("
     (link_destination)
     ")"
-  ] 
+  ]
   (#set! conceal ""))
 
 ; Conceal full reference links

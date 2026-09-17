@@ -1,0 +1,108 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/.github/workflows/lint-config.yaml
+#
+#
+
+name: Lint Config
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+    workflow_dispatch: {}
+
+permissions:
+    contents: read
+
+jobs:
+    lua:
+        name: Lua
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            - name: Install luacheck
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y lua5.4 liblua5.4-dev luarocks
+                  luarocks --lua-version 5.4 --local install luacheck
+                  luarocks --local path --lr-bin | tr ':' '\n' >> "$GITHUB_PATH"
+
+            - name: Install luafmt
+              run: |
+                  version=$(curl -s https://api.github.com/repos/EmmyLuaLs/emmylua-analyzer-rust/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
+                  mkdir -p "$RUNNER_TEMP/luafmt"
+                  curl -sL "https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases/download/${version}/luafmt-linux-x64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/luafmt"
+                  chmod +x "$RUNNER_TEMP/luafmt/luafmt"
+                  echo "$RUNNER_TEMP/luafmt" >> "$GITHUB_PATH"
+
+            - name: Check formatting
+              run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs luafmt --check --verify
+
+            - name: Lint
+              run: |
+                  status=0
+                  for f in $(git ls-files -- '*.lua' ':!**/symlink_*'); do
+                      dir=$(dirname "$f")
+                      while [ "$dir" != "." ] && [ ! -f "$dir/.luacheckrc" ]; do
+                          dir=$(dirname "$dir")
+                      done
+                      if [ -f "$dir/.luacheckrc" ]; then
+                          luacheck --config "$dir/.luacheckrc" "$f" || status=1
+                      else
+                          luacheck "$f" || status=1
+                      fi
+                  done
+                  exit $status
+
+    toml:
+        name: TOML
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            - name: Install tombi
+              run: |
+                  version=$(curl -s https://api.github.com/repos/tombi-toml/tombi/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
+                  mkdir -p "$RUNNER_TEMP/tombi"
+                  curl -sL "https://github.com/tombi-toml/tombi/releases/download/${version}/tombi-cli-${version#v}-x86_64-unknown-linux-musl.tar.gz" | tar xzf - -C "$RUNNER_TEMP/tombi" --strip-components=1
+                  chmod +x "$RUNNER_TEMP/tombi/tombi"
+                  echo "$RUNNER_TEMP/tombi" >> "$GITHUB_PATH"
+
+            - name: Check Formatting
+              run: git ls-files -- '*.toml' ':!**/symlink_*' | xargs tombi format --check --offline
+
+            - name: Lint
+              run: git ls-files -- '*.toml' ':!**/symlink_*' | xargs tombi lint --error-on-warnings --offline
+
+    json-yaml:
+        name: JSON & YAML
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            - name: Setup Node
+              uses: actions/setup-node@v5
+              with:
+                  node-version: 22
+
+            - name: NPM Clean Install
+              run: npm ci
+
+            - name: Check Formatting
+              run: |
+                  git ls-files -- '*.json' '*.jsonc' '*.yaml' '*.yml' ':!**/symlink_*' |
+                      while IFS= read -r f; do [ -L "$f" ] || printf '%s\n' "$f"; done |
+                      xargs npx --no -- prettier --check

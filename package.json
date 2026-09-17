@@ -1,0 +1,43 @@
+{
+    "name": "nvim-config",
+    "description": "My Neovim dotfiles",
+    "private": true,
+    "keywords": [
+        "dotfiles",
+        "neovim-config",
+        "config"
+    ],
+    "license": "GPL-3.0-only",
+    "homepage": "https://github.com/chewygumxx/nvim-config",
+    "repository": "github:chewygumxx/nvim-config",
+    "devDependencies": {
+        "@commitlint/cli": "^21.2.2",
+        "@commitlint/config-conventional": "^21.2.2",
+        "@commitlint/cz-commitlint": "^21.2.2",
+        "commitizen": "^4.3.2",
+        "husky": "^9.1.7",
+        "prettier": "^3.9.7",
+        "remark-preset-lint-consistent": "^6.0.1",
+        "remark-preset-lint-recommended": "^7.0.1",
+        "typescript": "^7.0.2"
+    },
+    "scripts": {
+        "commit": "cz",
+        "prepare": "test -d node_modules/husky && husky || true",
+        "typecheck": "tsc"
+    },
+    "config": {
+        "commitizen": {
+            "path": "@commitlint/cz-commitlint"
+        }
+    },
+    "patchedDependencies": {
+        "@commitlint/cz-commitlint@21.2.2": "patches/@commitlint/cz-commitlint@21.2.2.patch"
+    },
+    "remarkConfig": {
+        "plugins": [
+            "remark-preset-lint-recommended",
+            "remark-preset-lint-consistent"
+        ]
+    }
+}

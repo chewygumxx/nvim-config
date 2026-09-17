@@ -1,12 +1,12 @@
 ; vim:set expandtab shiftwidth=4 filetype=query:
 ; SPDX-License-Identifier: GPL-3.0-only
 
-; 
-; 
-; ~chewygumxx/dotfiles.git
+;
+;
+; ~chewygumxx/nvim-config.git
 ; ::: :/home/dot_config/nvim/queries/comment/highlights.scm
-; 
-; 
+;
+;
 
 ;
 ; Tree-sitter query for https://github.com/stsewd/tree-sitter-comment
@@ -14,7 +14,7 @@
 
 ; Header
 
-; ~chewygumxx/dotfiles.git
+; ~chewygumxx/nvim-config.git
 (
     "text" @comment.header.repo.owner
     "text" @comment.header.repo.solidus
@@ -29,7 +29,7 @@
     (#adjacent?  @comment.header.repo.owner
                  @comment.header.repo.solidus
                  @comment.header.repo.name
-                 @comment.header.repo.dot 
+                 @comment.header.repo.dot
                  @comment.header.repo.ext)
  )
 

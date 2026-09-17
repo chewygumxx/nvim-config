@@ -2,7 +2,7 @@
 ; SPDX-License-Identifier: GPL-3.0-only
 ;
 ;
-; ~chewygumxx/dotfiles.git
+; ~chewygumxx/nvim-config.git
 ; ::: :/home/dot_config/nvim/queries/norg/highlights.scm
 ;
 ;
