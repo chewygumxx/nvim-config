@@ -9,8 +9,10 @@
 #
 #
 
-set -e
-
+# No `set -e`: each section below accumulates failures into `status` and
+# keeps running the remaining sections, so one failing check doesn't hide
+# problems in the others. A stray non-zero from any unguarded command must
+# not abort the script early.
 status=0
 
 # --------
