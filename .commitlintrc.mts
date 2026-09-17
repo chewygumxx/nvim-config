@@ -85,13 +85,61 @@ const types: { enum: Enumerable[] } = {
     ],
 };
 
-// Intentionally empty: this repo doesn't curate a scope list (unlike the
-// dotfiles repo this config structure is adapted from). scope-enum still
-// resolves to "any scope allowed" against an empty enum, so this is inert,
-// not a placeholder waiting to be filled in.
 const scopes: { delimiters: string[]; enum: Enumerable[] } = {
     delimiters: ["/"],
-    enum: [],
+    enum: [
+        {
+            name: "hl",
+            fullName: "Highlight",
+            description: "Highlight and colourscheme configuration",
+        },
+        {
+            name: "opt",
+            fullName: "Option",
+            description: "Neovim option configuration",
+        },
+        {
+            name: "ft",
+            fullName: "Filetype",
+            description: "Neovim filetype handling",
+        },
+        {
+            name: "key",
+            fullName: "Keymap",
+            description: "Neovim keymap setup",
+        },
+        {
+            name: "ucmd",
+            fullName: "Usercmd",
+            description: "Neovim user command definition",
+        },
+        {
+            name: "acmd",
+            fullName: "Autocmd",
+            description: "Neovim auto command specification",
+        },
+        {
+            name: "lsp",
+            fullName: "LSP",
+            description: "Language Server Protocol",
+        },
+        {
+            name: "spec",
+            fullName: "Spec",
+            description: "Plugin load, specification, and integration",
+        },
+        {
+            name: "util",
+            fullName: "Utility",
+            description: "Composition of utilities beyond plugin specification",
+        },
+        {
+            name: "asset",
+            fullName: "Asset",
+            description:
+                "Inclusion of assets ie. templates, snippets, spell, etc.",
+        },
+    ],
 };
 
 const lvl = {
