@@ -22,20 +22,9 @@ status=0
 if command -v luafmt >/dev/null 2>&1 && command -v luacheck >/dev/null 2>&1; then
     lua_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.lua' ':!**/symlink_*')
     if [ -n "$lua_files" ]; then
-        echo "$lua_files" | xargs luafmt --write
-        echo "$lua_files" | xargs git add --
-
-        for f in $lua_files; do
-            dir=$(dirname "$f")
-            while [ "$dir" != "." ] && [ ! -f "$dir/.luacheckrc" ]; do
-                dir=$(dirname "$dir")
-            done
-            if [ -f "$dir/.luacheckrc" ]; then
-                luacheck --config "$dir/.luacheckrc" "$f" || status=1
-            else
-                luacheck "$f" || status=1
-            fi
-        done
+        echo "$lua_files" | xargs -d '\n' luafmt --write
+        echo "$lua_files" | xargs -d '\n' git add --
+        echo "$lua_files" | xargs -d '\n' luacheck || status=1
     fi
 else
     echo "pre-commit: luafmt/luacheck not on PATH, skipping Lua checks" >&2
@@ -48,9 +37,9 @@ fi
 if command -v tombi >/dev/null 2>&1; then
     toml_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.toml' ':!**/symlink_*')
     if [ -n "$toml_files" ]; then
-        echo "$toml_files" | xargs tombi format --offline
-        echo "$toml_files" | xargs git add --
-        echo "$toml_files" | xargs tombi lint --error-on-warnings --offline || status=1
+        echo "$toml_files" | xargs -d '\n' tombi format --offline
+        echo "$toml_files" | xargs -d '\n' git add --
+        echo "$toml_files" | xargs -d '\n' tombi lint --error-on-warnings --offline || status=1
     fi
 else
     echo "pre-commit: tombi not on PATH, skipping TOML checks" >&2
@@ -67,8 +56,8 @@ if command -v npx >/dev/null 2>&1; then
             while IFS= read -r f; do [ -L "$f" ] || printf '%s\n' "$f"; done
     )
     if [ -n "$json_yaml_files" ]; then
-        echo "$json_yaml_files" | xargs npx --no -- prettier --write
-        echo "$json_yaml_files" | xargs git add --
+        echo "$json_yaml_files" | xargs -d '\n' npx --no -- prettier --write
+        echo "$json_yaml_files" | xargs -d '\n' git add --
     fi
 else
     echo "pre-commit: npx not on PATH, skipping JSON/YAML checks" >&2

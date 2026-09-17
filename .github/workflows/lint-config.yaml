@@ -60,23 +60,13 @@ jobs:
               run: echo "$RUNNER_TEMP/luafmt" >> "$GITHUB_PATH"
 
             - name: Check formatting
-              run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs luafmt --check --verify
+              run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs -d '\n' luafmt --check --verify
 
+            # luacheck resolves .luacheckrc from the invocation cwd (repo
+            # root) on its own; this assumes a single repo-root .luacheckrc.
+            # If a nested one is ever added, this needs --config again.
             - name: Lint
-              run: |
-                  status=0
-                  for f in $(git ls-files -- '*.lua' ':!**/symlink_*'); do
-                      dir=$(dirname "$f")
-                      while [ "$dir" != "." ] && [ ! -f "$dir/.luacheckrc" ]; do
-                          dir=$(dirname "$dir")
-                      done
-                      if [ -f "$dir/.luacheckrc" ]; then
-                          luacheck --config "$dir/.luacheckrc" "$f" || status=1
-                      else
-                          luacheck "$f" || status=1
-                      fi
-                  done
-                  exit $status
+              run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs -d '\n' luacheck
 
     toml:
         name: TOML
@@ -110,10 +100,10 @@ jobs:
               run: echo "$RUNNER_TEMP/tombi" >> "$GITHUB_PATH"
 
             - name: Check Formatting
-              run: git ls-files -- '*.toml' ':!**/symlink_*' | xargs tombi format --check --offline
+              run: git ls-files -- '*.toml' ':!**/symlink_*' | xargs -d '\n' tombi format --check --offline
 
             - name: Lint
-              run: git ls-files -- '*.toml' ':!**/symlink_*' | xargs tombi lint --error-on-warnings --offline
+              run: git ls-files -- '*.toml' ':!**/symlink_*' | xargs -d '\n' tombi lint --error-on-warnings --offline
 
     json-yaml:
         name: JSON & YAML
@@ -135,4 +125,4 @@ jobs:
               run: |
                   git ls-files -- '*.json' '*.jsonc' '*.yaml' '*.yml' ':!**/symlink_*' |
                       while IFS= read -r f; do [ -L "$f" ] || printf '%s\n' "$f"; done |
-                      xargs npx --no -- prettier --check
+                      xargs -d '\n' npx --no -- prettier --check
