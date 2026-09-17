@@ -23,17 +23,19 @@ local M = {
     root_markers = { ".moxide.toml", ".git", "README", "index.md" },
 }
 
+local extra_capabilities = {
+    workspace = {
+        didChangeWatchedFiles = {
+            dynamicRegistration = true,
+        },
+    },
+}
+
 ---@type lsp.ClientCapabilities
 M.capabilities = vim.tbl_deep_extend(
     "force",
     _G.require_guard("util.lsp").capabilities(),
-    {
-        workspace = {
-            didChangeWatchedFiles = {
-                dynamicRegistration = true,
-            },
-        },
-    }
+    extra_capabilities
 )
 
 -- Placeholder for the inevitable overwrites later
