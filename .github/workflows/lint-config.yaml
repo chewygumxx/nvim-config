@@ -25,6 +25,12 @@ jobs:
         name: Lua
         runs-on: ubuntu-latest
 
+        # Pinned manually to avoid an unauthenticated releases-API lookup on
+        # every run; bump by hand when a newer luafmt release is needed.
+        # https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases
+        env:
+            LUAFMT_VERSION: "0.25.1"
+
         steps:
             - name: Checkout
               uses: actions/checkout@v7
@@ -36,13 +42,22 @@ jobs:
                   luarocks --lua-version 5.4 --local install luacheck
                   luarocks --local path --lr-bin | tr ':' '\n' >> "$GITHUB_PATH"
 
+            - name: Cache luafmt
+              id: cache-luafmt
+              uses: actions/cache@v4
+              with:
+                  path: ${{ runner.temp }}/luafmt
+                  key: luafmt-${{ env.LUAFMT_VERSION }}
+
             - name: Install luafmt
+              if: steps.cache-luafmt.outputs.cache-hit != 'true'
               run: |
-                  version=$(curl -s https://api.github.com/repos/EmmyLuaLs/emmylua-analyzer-rust/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
                   mkdir -p "$RUNNER_TEMP/luafmt"
-                  curl -sL "https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases/download/${version}/luafmt-linux-x64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/luafmt"
+                  curl -sL "https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases/download/${LUAFMT_VERSION}/luafmt-linux-x64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/luafmt"
                   chmod +x "$RUNNER_TEMP/luafmt/luafmt"
-                  echo "$RUNNER_TEMP/luafmt" >> "$GITHUB_PATH"
+
+            - name: Add luafmt to PATH
+              run: echo "$RUNNER_TEMP/luafmt" >> "$GITHUB_PATH"
 
             - name: Check formatting
               run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs luafmt --check --verify
@@ -67,17 +82,32 @@ jobs:
         name: TOML
         runs-on: ubuntu-latest
 
+        # Pinned manually to avoid an unauthenticated releases-API lookup on
+        # every run; bump by hand when a newer tombi release is needed.
+        # https://github.com/tombi-toml/tombi/releases
+        env:
+            TOMBI_VERSION: "v1.5.5"
+
         steps:
             - name: Checkout
               uses: actions/checkout@v7
 
+            - name: Cache tombi
+              id: cache-tombi
+              uses: actions/cache@v4
+              with:
+                  path: ${{ runner.temp }}/tombi
+                  key: tombi-${{ env.TOMBI_VERSION }}
+
             - name: Install tombi
+              if: steps.cache-tombi.outputs.cache-hit != 'true'
               run: |
-                  version=$(curl -s https://api.github.com/repos/tombi-toml/tombi/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+')
                   mkdir -p "$RUNNER_TEMP/tombi"
-                  curl -sL "https://github.com/tombi-toml/tombi/releases/download/${version}/tombi-cli-${version#v}-x86_64-unknown-linux-musl.tar.gz" | tar xzf - -C "$RUNNER_TEMP/tombi" --strip-components=1
+                  curl -sL "https://github.com/tombi-toml/tombi/releases/download/${TOMBI_VERSION}/tombi-cli-${TOMBI_VERSION#v}-x86_64-unknown-linux-musl.tar.gz" | tar xzf - -C "$RUNNER_TEMP/tombi" --strip-components=1
                   chmod +x "$RUNNER_TEMP/tombi/tombi"
-                  echo "$RUNNER_TEMP/tombi" >> "$GITHUB_PATH"
+
+            - name: Add tombi to PATH
+              run: echo "$RUNNER_TEMP/tombi" >> "$GITHUB_PATH"
 
             - name: Check Formatting
               run: git ls-files -- '*.toml' ':!**/symlink_*' | xargs tombi format --check --offline
