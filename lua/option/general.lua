@@ -39,6 +39,9 @@ local opts = {
     ignorecase = true,
     smartcase  = true,
 
+    -- Spelling: language only, per-filetype modules toggle `spell` itself
+    spelllang = "en",
+
     -- Consign security to oblivion
   --modelineexpr = true,
 }

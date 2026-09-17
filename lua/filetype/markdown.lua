@@ -17,6 +17,7 @@ local M = {}
 
 local options = {
     shiftwidth = 2,
+    spell      = true,
 }
 
 local hlgroup_defs = {

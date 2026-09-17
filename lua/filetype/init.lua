@@ -28,6 +28,8 @@ local ft_specialised_mods = {
     gitconfig    = "dosini",
     cfg          = "dosini",
     editorconfig = "dosini",
+    gitcommit    = "prose",
+    text         = "prose",
 }
 local ft_specialised      = function()
     vim.api.nvim_create_autocmd("FileType", {

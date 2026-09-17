@@ -9,3 +9,11 @@
 #
 
 node_modules/
+
+# Raw wordlist used to (re)generate spell/en.utf-8.spl via :mkspell;
+# third-party-derived and large, not worth tracking. Only the compiled
+# .spl is tracked. Personal `zg` additions are local state too.
+/words.txt
+/words_alpha.txt
+/spell/*.add
+/spell/*.add.spl

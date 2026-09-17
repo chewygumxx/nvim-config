@@ -17,3 +17,9 @@
 
 /LICENSE    -sync-header-metadata
 *.json      -sync-header-metadata
+
+# ---------------------
+# Binary
+# ---------------------
+
+spell/*.spl binary -diff -sync-header-metadata
