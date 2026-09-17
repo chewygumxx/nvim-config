@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/dotfiles.git
--- ::: :/home/dot_config/nvim/lua/util/cgxx_default.lua
+-- ::: :/home/dot_config/nvim/lua/cgxx/config.lua
 --
 --
 
