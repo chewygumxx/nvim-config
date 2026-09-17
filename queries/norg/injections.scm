@@ -3,7 +3,7 @@
 ;
 ;
 ; ~chewygumxx/nvim-config.git
-; ::: :/home/dot_config/nvim/queries/norg/injections.scm
+; ::: :/queries/norg/injections.scm
 ;
 ;
 

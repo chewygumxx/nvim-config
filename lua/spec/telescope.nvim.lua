@@ -6,7 +6,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/spec/telescope.nvim.lua
+-- ::: :/lua/spec/telescope.nvim.lua
 --
 --
 

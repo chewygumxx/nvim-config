@@ -6,7 +6,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/util/visual_traversal.lua
+-- ::: :/lua/util/visual_traversal.lua
 --
 --
 

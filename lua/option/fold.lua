@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/option/fold.lua
+-- ::: :/lua/option/fold.lua
 --
 --
 

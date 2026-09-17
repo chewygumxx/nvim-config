@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/filetype/dosini.lua
+-- ::: :/lua/filetype/dosini.lua
 --
 --
 

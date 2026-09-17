@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/spec/comment.nvim.lua
+-- ::: :/lua/spec/comment.nvim.lua
 --
 --
 

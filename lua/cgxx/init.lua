@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/cgxx/init.lua
+-- ::: :/lua/cgxx/init.lua
 --
 --
 

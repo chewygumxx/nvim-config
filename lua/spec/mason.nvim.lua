@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lua/spec/mason.nvim.lua
+-- ::: :/lua/spec/mason.nvim.lua
 --
 --
 

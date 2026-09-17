@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/home/dot_config/nvim/lsp/markdown_oxide.lua
+-- ::: :/lsp/markdown_oxide.lua
 --
 --
 

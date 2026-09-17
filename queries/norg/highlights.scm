@@ -3,7 +3,7 @@
 ;
 ;
 ; ~chewygumxx/nvim-config.git
-; ::: :/home/dot_config/nvim/queries/norg/highlights.scm
+; ::: :/queries/norg/highlights.scm
 ;
 ;
 
