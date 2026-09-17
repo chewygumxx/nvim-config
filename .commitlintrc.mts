@@ -85,6 +85,10 @@ const types: { enum: Enumerable[] } = {
     ],
 };
 
+// Intentionally empty: this repo doesn't curate a scope list (unlike the
+// dotfiles repo this config structure is adapted from). scope-enum still
+// resolves to "any scope allowed" against an empty enum, so this is inert,
+// not a placeholder waiting to be filled in.
 const scopes: { delimiters: string[]; enum: Enumerable[] } = {
     delimiters: ["/"],
     enum: [],
