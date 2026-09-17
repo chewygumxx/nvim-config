@@ -14,6 +14,7 @@
 local M = {
     "ibhagwan/fzf-lua",
     enabled = true,
+    cond = (_G.require_guard("cgxx") or {}).fuzzy ~= "telescope.nvim",
     dependencies = {
         "nvim-tree/nvim-web-devicons",
         "nvim-treesitter/nvim-treesitter-context",

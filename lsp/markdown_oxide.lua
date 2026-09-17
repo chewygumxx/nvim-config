@@ -9,8 +9,9 @@
 --
 --
 
-local cgxx = _G.require_guard("cgxx").lsp or {}
-if cgxx.markdown == "marksman" then
+local cgxx_mod = _G.require_guard("cgxx") or {}
+local cgxx     = cgxx_mod.lsp or {}
+if cgxx.markdown ~= "markdown_oxide" then
     return {}
 end
 

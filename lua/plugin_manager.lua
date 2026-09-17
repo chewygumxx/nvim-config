@@ -19,6 +19,9 @@ local data     = vim.fn.stdpath("data") .. "/lazy"
 local state    = vim.fn.stdpath("state") .. "/lazy"
 local lazypath = data .. "/lazy.nvim"
 
+local cgxx_mod = _G.require_guard("cgxx") or {}
+local cgxx     = cgxx_mod.lazy or {}
+
 ---@type LazyConfig
 local opts = {
     root     = data, -- Plugin Installation Directory
@@ -33,13 +36,14 @@ local opts = {
 
     -- Plugin Spec Defaults
     ---@type LazySpec
-    defaults = {
-        lazy = false,
-    },
+    defaults = cgxx.default_spec
+        or {
+            lazy = false,
+        },
 
     -- Locally Available Plugins
     dev = {
-        path     = vim.fn.expand("~") .. "/dev",
+        path     = cgxx.devpath or vim.fn.expand("~") .. "/dev",
         patterns = { "chewygumxx" },
         fallback = true, -- Use git if not found
     },
@@ -67,8 +71,13 @@ local opts = {
     install = {
         -- Install missing plugins on startup
         missing = true,
+
         -- Prioritised colorscheme list to attempt to load during installation
-        colorscheme = { "middlenight_blue" },
+        -- Handled by (with remarkable brilliance):
+        -- - LazyCoreLoader.install_missing()
+        -- - LazyCoreLoader.colorscheme(color)
+        ---@type string[]
+        colorscheme = cgxx_mod.colorscheme or { "middlenight_blue" },
     },
 
     diff = { cmd = "git" },
@@ -77,8 +86,7 @@ local opts = {
     -- This may be why I occasionally experience lag in Herdr panes
     -- TODO(@chewygumxx): Investigate
     checker = {
-        enabled      = vim.env.HERDR_ENV == nil
-            and vim.env.TERMUX_VERSION == nil,
+        enabled      = cgxx.checker == true,
         concurrency  = nil, -- Concurrent/Parallel Check Limit
         notify       = false,
         frequency    = 3600, -- Check Frequency (seconds)
@@ -97,7 +105,7 @@ local opts = {
 
     -- Generate `:help` documentation from README
     readme = {
-        enabled            = true,
+        enabled            = cgxx.readme ~= false,
         root               = data .. "/readme",
         files              = { "README.md", "lua/**/README.md" },
         skip_if_doc_exists = true,
@@ -105,14 +113,14 @@ local opts = {
 
     -- Additional stats provided on 'Debug' tab
     profiling = {
-        loader  = vim.g.lazy_profile ~= nil, -- Assess all package.loaders
-        require = vim.g.lazy_profile ~= nil, -- Track each new require
+        loader  = cgxx.profile == true, -- Assess all package.loaders
+        require = cgxx.profile == true, -- Track each new require
     },
 }
 
 -- Watch configuration file and reload UI on change
 opts.change_detection = {
-    enabled = vim.g.lazy_watch_config ~= nil,
+    enabled = cgxx.watch_config == true,
     notify  = true,
 }
 

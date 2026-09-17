@@ -9,6 +9,12 @@
 --
 --
 
+local cgxx_mod = _G.require_guard("cgxx") or {}
+local cgxx     = cgxx_mod.lsp or {}
+if cgxx.markdown ~= "remark_ls" then
+    return {}
+end
+
 ---@type vim.lsp.Config
 local M = {
     root_markers = {

@@ -30,12 +30,22 @@ local M = {
 
 M.opts = {
     ensure_installed = {
-        "lua_ls",
+        "lua_ls", -- Lua
+
+        -- TSX/JSX
         "vtsls",
         "eslint",
+
+        -- Structured Data
         "jsonls",
         "yamlls",
         "tombi",
+
+        -- Markdown
+        "remark_ls",
+        "marksman",
+        "markdown_oxide",
+
         -- bashls, pyright,
     },
     automatic_enable = true,
