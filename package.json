@@ -1,6 +1,6 @@
 {
     "name": "nvim-config",
-    "description": "My Neovim dotfiles",
+    "description": "My Neovim configuration dotfiles",
     "private": true,
     "keywords": [
         "dotfiles",
