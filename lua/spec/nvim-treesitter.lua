@@ -35,6 +35,7 @@ local ignore_filetypes = {
     "snacks_notif",
     "snacks_win",
     "text",
+    "blink-cmp-menu",
 }
 
 local ensure_installed = {
