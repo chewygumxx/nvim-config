@@ -24,18 +24,50 @@ local M = {
     build   = ":TSUpdate",
 }
 
+-- Chrome/UI buffers from installed plugins that were never meant to have a
+-- parser: cross-referenced against `require("nvim-treesitter.parsers")`'s
+-- actual registry (not guessed), so this only lists names confirmed absent
+-- from it.
 local ignore_filetypes = {
     "fidget",
     "checkhealth",
     "lazy",
+    "lazy_backdrop",
     "man",
     "mason",
-    "qf", -- QuickFix
+    "mason_backdrop",
+    "qf",  -- QuickFix
+    "git", -- fzf-lua's/lazy.nvim's diff previewers, not tree-sitter-diff
+
     "snacks_dashboard",
+    "snacks_input",
+    "snacks_layout_box",
     "snacks_notif",
+    "snacks_notif_history",
+    "snacks_picker_input",
+    "snacks_picker_list",
+    "snacks_picker_preview",
+    "snacks_terminal",
     "snacks_win",
-    "text",
+    "snacks_win_backdrop",
+    "snacks_win_help",
+
+    "TelescopePrompt",
+    "TelescopeResults",
+
+    "blink-cmp-documentation",
+    "blink-cmp-dot-repeat",
     "blink-cmp-menu",
+    "blink-cmp-signature",
+
+    "conform-info",
+    "fzf",
+    "fzflua_backdrop",
+    "minifiles",
+    "minifiles-help",
+    "yazi",
+
+    "text",
 }
 
 local ensure_installed = {
