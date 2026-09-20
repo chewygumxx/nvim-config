@@ -276,6 +276,15 @@ local ensure_installed = {
 M.config = function()
     _G.setup_guard("util.treesitter")
 
+    -- Termux ships its compiler under `$PREFIX/bin`, not a system path.
+    -- Without an explicit CC/CXX, `tree-sitter build`'s underlying Rust `cc`
+    -- crate misdetects the host toolchain as a cross-compiler and looks for
+    -- a nonexistent `aarch64-linux-android-gcc` instead.
+    if vim.env.TERMUX_VERSION then
+        vim.env.CC  = vim.env.CC or vim.env.PREFIX .. "/bin/clang"
+        vim.env.CXX = vim.env.CXX or vim.env.PREFIX .. "/bin/clang++"
+    end
+
     vim.treesitter.language.register("ini", "conf")
     vim.treesitter.language.register("gotmpl", "template")
 
