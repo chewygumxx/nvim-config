@@ -9,12 +9,6 @@
 --
 --
 
-local cgxx_mod = _G.require_guard("cgxx") or {}
-local cgxx     = cgxx_mod.lsp or {}
-if cgxx.markdown ~= "markdown_oxide" then
-    return {}
-end
-
 ---@type vim.lsp.Config
 local M = {
     cmd = { "markdown_oxide" },
