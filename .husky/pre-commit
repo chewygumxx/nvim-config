@@ -19,15 +19,15 @@ status=0
 # Lua
 # --------
 
-if command -v luafmt >/dev/null 2>&1 && command -v luacheck >/dev/null 2>&1; then
+if command -v luafmt >/dev/null 2>&1 && command -v selene >/dev/null 2>&1; then
     lua_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.lua' ':!**/symlink_*')
     if [ -n "$lua_files" ]; then
         echo "$lua_files" | xargs -d '\n' luafmt --write
         echo "$lua_files" | xargs -d '\n' git add --
-        echo "$lua_files" | xargs -d '\n' luacheck || status=1
+        echo "$lua_files" | xargs -d '\n' selene || status=1
     fi
 else
-    echo "pre-commit: luafmt/luacheck not on PATH, skipping Lua checks" >&2
+    echo "pre-commit: luafmt/selene not on PATH, skipping Lua checks" >&2
 fi
 
 # --------

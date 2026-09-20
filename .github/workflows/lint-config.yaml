@@ -26,21 +26,14 @@ jobs:
         runs-on: ubuntu-latest
 
         # Pinned manually to avoid an unauthenticated releases-API lookup on
-        # every run; bump by hand when a newer luafmt release is needed.
-        # https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases
+        # every run; bump by hand when a newer release is needed.
         env:
-            LUAFMT_VERSION: "0.25.1"
+            LUAFMT_VERSION: "0.25.1" # https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases
+            SELENE_VERSION: "0.31.0" # https://github.com/Kampfkarren/selene/releases
 
         steps:
             - name: Checkout
               uses: actions/checkout@v7
-
-            - name: Install luacheck
-              run: |
-                  sudo apt-get update
-                  sudo apt-get install -y lua5.4 liblua5.4-dev luarocks
-                  luarocks --lua-version 5.4 --local install luacheck
-                  luarocks --local path --lr-bin | tr ':' '\n' >> "$GITHUB_PATH"
 
             - name: Cache luafmt
               id: cache-luafmt
@@ -59,14 +52,34 @@ jobs:
             - name: Add luafmt to PATH
               run: echo "$RUNNER_TEMP/luafmt" >> "$GITHUB_PATH"
 
+            - name: Cache selene
+              id: cache-selene
+              uses: actions/cache@v6
+              with:
+                  path: ${{ runner.temp }}/selene
+                  key: selene-${{ env.SELENE_VERSION }}
+
+            # "light" build: no Roblox standard library, unneeded here.
+            - name: Install selene
+              if: steps.cache-selene.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p "$RUNNER_TEMP/selene"
+                  curl -sL "https://github.com/Kampfkarren/selene/releases/download/${SELENE_VERSION}/selene-light-${SELENE_VERSION}-linux.zip" -o "$RUNNER_TEMP/selene/selene.zip"
+                  unzip -oq "$RUNNER_TEMP/selene/selene.zip" -d "$RUNNER_TEMP/selene"
+                  chmod +x "$RUNNER_TEMP/selene/selene"
+
+            - name: Add selene to PATH
+              run: echo "$RUNNER_TEMP/selene" >> "$GITHUB_PATH"
+
             - name: Check formatting
               run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs -d '\n' luafmt --check --verify
 
-            # luacheck resolves .luacheckrc from the invocation cwd (repo
-            # root) on its own; this assumes a single repo-root .luacheckrc.
-            # If a nested one is ever added, this needs --config again.
+            # selene resolves selene.toml (and the std files it references)
+            # from the invocation cwd (repo root) on its own; this assumes a
+            # single repo-root selene.toml. If a nested one is ever added,
+            # this needs --config again.
             - name: Lint
-              run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs -d '\n' luacheck
+              run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs -d '\n' selene
 
     toml:
         name: TOML
