@@ -22,14 +22,7 @@ local M = {
 
 local opts = {
     hipatterns = {
-        highlighters = {
-            hex_color = require("mini.hipatterns").gen_highlighter.hex_color({
-                "line",                     -- <style>
-                200,                        -- <priority>
-                function() return true end, -- <filter>
-                nil,
-            }),
-        },
+        highlighters = {},
     },
     icons = {},
     files = {
@@ -125,7 +118,15 @@ local opts = {
 }
 
 M.config = function()
-    require("mini.hipatterns").setup(opts.hipatterns or {})
+    local hipatterns                       = require("mini.hipatterns")
+    opts.hipatterns.highlighters.hex_color = hipatterns.gen_highlighter
+        .hex_color({
+            "line",                     -- <style>
+            200,                        -- <priority>
+            function() return true end, -- <filter>
+            nil,
+        })
+    hipatterns.setup(opts.hipatterns)
     require("mini.icons").setup(opts.icons or {})
     require("mini.files").setup(opts.files or {})
     require("mini.test").setup(opts.test or {})
