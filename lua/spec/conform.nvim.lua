@@ -33,7 +33,11 @@ M.opts = {
         json            = { "prettier" },
         jsonc           = { "prettier" },
         yaml            = { "prettier" },
-        toml            = { "tombi" },
+        -- Explicit, so format_on_save never falls back to remark_ls: its
+        -- formatter forces "*" bullets and mangles YAML frontmatter it
+        -- doesn't recognize.
+        markdown = { "prettier" },
+        toml     = { "tombi" },
     },
     formatters = {},
     format_on_save = {
