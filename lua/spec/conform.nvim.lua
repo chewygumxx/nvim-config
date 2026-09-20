@@ -31,7 +31,7 @@ M.opts = {
         typescript      = { "prettier" },
         typescriptreact = { "prettier" },
         json            = { "prettier" },
-        jsonc           = { "prettier" },
+        jsonc           = { "prettier_jsonc" },
         yaml            = { "prettier" },
         -- Explicit, so format_on_save never falls back to remark_ls: its
         -- formatter forces "*" bullets and mangles YAML frontmatter it
@@ -55,6 +55,17 @@ M.opts.formatters_by_ft.lua = function(bufnr)
     end
     return { "luafmt" }
 end
+
+-- Unlike prettier's "json" parser, "jsonc" honors `trailingComma` and
+-- defaults to "all". A repo-local `.prettierrc`/`package.json` override can
+-- disable that, but only within that repo's own tree, e.g. this repo's own
+-- `.repo-metadata.jsonc`; a jsonc file edited outside such a repo would still
+-- get trailing commas, which not every consumer of "JSON with comments"
+-- tolerates. Force "none" here so it holds regardless of project.
+M.opts.formatters.prettier_jsonc = {
+    inherit = "prettier",
+    append_args = { "--trailing-comma", "none" },
+}
 
 -- Not bundled with conform.nvim
 M.opts.formatters.luafmt = {
