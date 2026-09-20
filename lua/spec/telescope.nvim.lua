@@ -13,14 +13,12 @@
 -- TODO(@chewygumxx): [LOW] Incomplete as a fzf-lua contingency: restore a
 -- version pin (was `version = "*"`), call
 -- require("telescope").load_extension("fzf") for telescope-fzf-native
--- below to have any effect, and align enabled/cond semantics with
--- spec/fzf-lua.lua so toggling cgxx.fuzzy doesn't leave one of the two
--- permanently installed.
+-- below to have any effect.
 ---@module "lazy"
 ---@type LazySpec
 local M = {
     "nvim-telescope/telescope.nvim",
-    enabled = (_G.require_guard("cgxx") or {}).fuzzy == "telescope.nvim",
+    enabled = false,
     opts    = {},
 
     dependencies = {
