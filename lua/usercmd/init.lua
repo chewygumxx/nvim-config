@@ -38,22 +38,27 @@ end
 --- whichever plugin repo is currently open, not just this config.
 ---@return nil
 local mini_test = function()
-    local mt = _G.require_guard("mini.test")
-    if not mt then
-        return
+    -- `usercmd` runs before `util.lazy` in init.lua's load order, so
+    -- `mini.test` isn't on the runtimepath yet at registration time; the
+    -- require has to happen inside each callback instead, once lazy.nvim
+    -- has actually loaded the plugin.
+    ---@param method string
+    local function run(method)
+        return function()
+            local mt = _G.require_guard("mini.test")
+            if mt then
+                mt[method]()
+            end
+        end
     end
-    usercmd("XXTestRun", function() mt.run() end, {
-        desc = "MiniTest: Run all cases",
-    })
-    usercmd("XXTestRunFile", function() mt.run_file() end, {
+    usercmd("XXTestRun", run("run"), { desc = "MiniTest: Run all cases" })
+    usercmd("XXTestRunFile", run("run_file"), {
         desc = "MiniTest: Run current file",
     })
-    usercmd("XXTestRunAtCursor", function() mt.run_at_location() end, {
+    usercmd("XXTestRunAtCursor", run("run_at_location"), {
         desc = "MiniTest: Run case at cursor",
     })
-    usercmd("XXTestStop", function() mt.stop() end, {
-        desc = "MiniTest: Stop execution",
-    })
+    usercmd("XXTestStop", run("stop"), { desc = "MiniTest: Stop execution" })
 end
 
 --- Registers the `XXInterpretEscape` user command.
