@@ -1,0 +1,24 @@
+# vim:set expandtab shiftwidth=4 filetype=toml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/selene.toml
+#
+#
+
+std = "lua51+vim+luajit+busted"
+
+[lints]
+# LazySpec tables mix an array-part plugin name with dict-part opts
+# (`{ "author/repo", opts = ... }`), this repo's plugin spec convention.
+mixed_table = "allow"
+
+# `_G.require_guard`/`_G.setup_guard`, this repo's own safe-require
+# convention (see CLAUDE.md), used throughout instead of a bare `require`.
+global_usage = "allow"
+
+# One-line `function() ... end` callbacks are this repo's own formatting
+# convention (luafmt collapses short callback bodies onto one line).
+multiple_statements = "allow"
