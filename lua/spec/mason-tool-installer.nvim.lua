@@ -33,6 +33,7 @@ M.opts.ensure_installed = {
     "luafmt",
     "prettier",
     "tombi",
+    "selene",
 }
 
 return M
