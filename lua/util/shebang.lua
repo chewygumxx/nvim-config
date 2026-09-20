@@ -45,6 +45,12 @@ local filetype_shebangs = {
     zsh    = "#!/usr/bin/env zsh",
 }
 
+--- Resolves the shebang line for a buffer's filetype, or "#!/bin/false"
+--- for paths under one of `source_dirs` (sourced files, never executed).
+---@param file? string          Path-check source (default: current buf)
+---@param buf?  integer         Filetype fallback source (default: 0)
+---@param opt?  { ft?: string } Filetype override
+---@return string? shebang nil if ft has no configured shebang
 M.get = function(file, buf, opt)
     file     = file or vim.fn.expand("%")
     buf      = buf or 0

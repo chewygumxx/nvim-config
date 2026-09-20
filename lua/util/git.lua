@@ -15,6 +15,9 @@
 
 local M = {}
 
+--- Resolves the "owner/repo" slug of file's git remote "origin".
+---@param file? string File to resolve from (default: current buffer)
+---@return string? slug "owner/repo", or nil if file has no "origin" remote
 M.slug = function(file)
     file = file or vim.fn.expand("%")
 
@@ -35,6 +38,10 @@ M.slug = function(file)
     return (slug:gsub("%.git$", ""))
 end
 
+--- Resolves file's path relative to its git repository root.
+---@param file? string File to resolve from (default: current buffer)
+---@return string path ":"-prefixed root-relative path, or a "~"-relative
+---  path if file isn't inside a git repository
 M.path = function(file)
     file = file or vim.fn.expand("%")
 

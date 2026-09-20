@@ -15,12 +15,31 @@
 
 local M = {}
 
--- Explicit nil-check
+--- Explicit nil-check: returns explicit unless it is nil.
+---@generic T
+---@param explicit T?
+---@param fallback T
+---@return T
 local function n(explicit, fallback)
     if explicit ~= nil then return explicit end
     return fallback
 end
 
+---@class util.ModelineOpt
+---@field buf?           integer Fallback source buffer (default: 0)
+---@field et?            boolean
+---@field expandtab?     boolean Alias for `et`
+---@field sw?            integer
+---@field shiftwidth?    integer Alias for `sw` (default: buf's own, or 4)
+---@field ft?            string
+---@field filetype?      string  Alias for `ft` (default: buf's own filetype)
+---@field append?        string  Extra `:set` clause(s), appended verbatim
+---@field commentstring? string  printf-style wrapper (default: buf's own)
+
+--- Builds a `vim:set ...:` modeline comment from opt, falling back to
+--- buf's own option values for anything left unset.
+---@param opt? util.ModelineOpt
+---@return string modeline
 M.base = function(opt)
     opt       = opt or {}
     local buf = opt.buf or 0

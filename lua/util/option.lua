@@ -15,6 +15,10 @@
 
 local M = {}
 
+--- Applies a table of option name/value pairs with a shared scope.
+---@param options     table<string, any>    Map of option name to value
+---@param scope_opts? vim.api.keyset.option Passed to `nvim_set_option_value`
+---@return nil
 M.apply = function(options, scope_opts)
     for opt, value in pairs(options) do
         vim.api.nvim_set_option_value(opt, value, scope_opts or {})

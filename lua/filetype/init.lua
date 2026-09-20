@@ -31,7 +31,10 @@ local ft_specialised_mods = {
     gitcommit    = "prose",
     text         = "prose",
 }
-local ft_specialised      = function()
+--- Registers the FileType autocmd that dispatches to a specialised
+--- filetype module, if one is mapped for the triggering filetype.
+---@return nil
+local ft_specialised = function()
     vim.api.nvim_create_autocmd("FileType", {
         desc     = "If available, instantiates filetype-specialised lua module",
         group    = vim.api.nvim_create_augroup("cgxx.filetype_specialised", {
@@ -53,6 +56,8 @@ local ft_specialised      = function()
     })
 end
 
+--- Sets up custom filetype detection and specialised filetype dispatch.
+---@return nil
 M.setup = function()
     _G.setup_guard(__this_module .. ".ftmatrix")
     ft_specialised()

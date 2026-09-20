@@ -19,6 +19,9 @@ local util_modeline = _G.require_guard("util.modeline")
 local util_shebang  = _G.require_guard("util.shebang")
 local util_git      = _G.require_guard("util.git")
 
+--- Strips trailing whitespace from every line, in place.
+---@param lines string[]
+---@return string[] lines Same table, mutated in place
 local trim_lines = function(lines)
     for i = 1, #lines, 1 do
         lines[i] = lines[i]:gsub("[ \t]+$", "")
@@ -26,6 +29,15 @@ local trim_lines = function(lines)
     return lines
 end
 
+---@class util.HeaderInsertOpt
+---@field commentstring? string Commentstring override
+
+--- Prepends buf with a templated header (modeline, SPDX line, repo slug
+--- and path), then Markdown frontmatter if buf's filetype is "markdown".
+---@param file? string               Slug/path source (default: current buf)
+---@param buf?  integer              Buffer to insert into (default: buf 0)
+---@param opt?  util.HeaderInsertOpt
+---@return nil
 M.insert = function(file, buf, opt)
     if not (util_modeline and util_shebang and util_git) then
         return
@@ -112,10 +124,15 @@ M.insert = function(file, buf, opt)
     vim.api.nvim_buf_set_lines(buf, 0, 0, false, trim_lines(lines))
 end
 
+--- `XXInsertHeader` callback: inserts a header into the current buffer.
+---@return nil
 M.command = function()
     M.insert(vim.fn.expand("%"), vim.api.nvim_get_current_buf())
 end
 
+--- Registers the BufNewFile/FileType autocmd pair that defers header
+--- insertion on a new file buffer until its filetype is known.
+---@return nil
 M.autocmd = function()
     vim.api.nvim_create_autocmd("BufNewFile", {
         group    = vim.api.nvim_create_augroup("cgxx.header_mark_pending", {
@@ -141,6 +158,8 @@ M.autocmd = function()
     })
 end
 
+--- Registers the `XXInsertHeader` user command and its supporting autocmds.
+---@return nil
 M.setup = function()
     vim.api.nvim_create_user_command("XXInsertHeader", M.command, {
         desc = "Prepend buffer with a header, templated according to filepath and extension.",

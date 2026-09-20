@@ -16,7 +16,13 @@
 
 local M = {}
 
--- Redirects output of a given command to a new temporary buffer
+--- Redirects the output of vimcmd to a new temporary buffer, unless args
+--- were supplied or vimcmd wasn't invoked with a bang (then run normally).
+---@param vimcmd string  Vim command to execute (no leading ":")
+---@param args   string  Command arguments, as passed through by the wrapping
+---  user command
+---@param bang   boolean Whether the wrapping user command had a bang
+---@return nil
 local redirect = function(vimcmd, args, bang)
     -- If any arguments were supplied or command NOT executed with "!"
     -- execute command normally
@@ -45,12 +51,18 @@ end
 -- vimcmds that print to Neovim's awkward pager
 local vimcmds = { "map", "highlight", "autocmd", "command" }
 
+--- Builds an `XXRedir*` user command callback bound to vimcmd.
+---@param vimcmd string Vim command to redirect (no leading ":")
+---@return fun(opts: vim.api.keyset.create_user_command.command_args) callback
 M.command = function(vimcmd)
     return function(opts)
         redirect(vimcmd, opts.args, opts.bang)
     end
 end
 
+--- Registers an `XXRedir*` user command, and its bang-only cnoreabbrev,
+--- for every entry in vimcmds.
+---@return nil
 M.setup = function()
     for _, vimcmd in ipairs(vimcmds) do
         local capitalvcmd, _ = vimcmd:gsub("^%l", string.upper)

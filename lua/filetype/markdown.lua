@@ -46,6 +46,7 @@ for hlgroup, defmap in pairs(hlgroup_defs) do
     vim.api.nvim_set_hl(0, hlgroup .. ".markdown_inline", defmap)
 end
 
+---@return nil
 M.setup = function()
     _G.require_guard("util.option").apply(options, { scope = "local" })
 end

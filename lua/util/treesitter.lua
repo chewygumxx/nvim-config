@@ -18,6 +18,11 @@ local M = {}
 -- #adjacent? @a @b ...
 local cached_source, cached_lines
 
+---@param source    integer | string Buffer number, or raw source text
+---@param row       integer          0-indexed row
+---@param start_col integer          0-indexed start column
+---@param end_col   integer          0-indexed end column (exclusive)
+---@return string text
 local function range_text(source, row, start_col, end_col)
     if type(source) == "number" then
         return vim.api.nvim_buf_get_text(source, row, start_col, row, end_col, {})[1]
@@ -32,8 +37,12 @@ local function range_text(source, row, start_col, end_col)
     return line:sub(start_col + 1, end_col)
 end
 
--- True if two nodes are separated by nothing but whitespace (usually
--- nothing at all: true byte adjacency), on the same line.
+--- True if two nodes are separated by nothing but whitespace (usually
+--- nothing at all: true byte adjacency), on the same line.
+---@param source integer | string
+---@param a      TSNode
+---@param b      TSNode
+---@return boolean
 local function whitespace_only_gap(source, a, b)
     local _, _, a_end_row, a_end_col = a:range()
     local b_row, b_col               = b:range()
@@ -43,6 +52,13 @@ local function whitespace_only_gap(source, a, b)
     return not range_text(source, a_end_row, a_end_col, b_col):match("%S")
 end
 
+--- Treesitter query predicate: `#adjacent? @a @b ...`
+--- True if every captured node is separated only by whitespace, in order.
+---@param match     table<integer, TSNode[]> Capture id -> matched nodes
+---@param _         integer                  Pattern id (unused)
+---@param source    integer | string
+---@param predicate string[]                 `{ "adjacent?", "@a", "@b", ... }`
+---@return boolean
 M.adjacent = function(match, _, source, predicate)
     local nodes = {}
     for i = 2, #predicate do
@@ -70,7 +86,13 @@ M.adjacent = function(match, _, source, predicate)
     return true
 end
 
--- #last-matching? @a "pattern"
+--- Treesitter query predicate: `#last-matching? @a "pattern"`
+--- True unless some node's next sibling's text matches pattern.
+---@param match     table<integer, TSNode[]> Capture id -> matched nodes
+---@param _         integer                  Pattern id (unused)
+---@param source    integer | string
+---@param predicate string[]                 `{ "last-matching?", "@a", pat }`
+---@return boolean
 M.last_matching = function(match, _, source, predicate)
     local nodes   = match[predicate[2]]
     local pattern = predicate[3]
@@ -91,7 +113,11 @@ M.last_matching = function(match, _, source, predicate)
     return true
 end
 
--- #header-line? @capture
+--- Expands node to the widest run of same-line, whitespace-adjacent
+--- siblings around it, and returns that run's source text.
+---@param node   TSNode
+---@param source integer | string
+---@return string? text nil if the run spans more than one line
 local function maximal_adjacent_run(node, source)
     local first, last = node, node
 
@@ -118,7 +144,14 @@ local HEADER_LINE_PATTERNS = {
     { shape = "path", pattern = "%s*:::%s*:/[%w_/.-]+$" },     -- ::: :/path/to/file
 }
 
--- #header-line? @capture ["repo"|"path"]
+--- Treesitter query predicate: `#header-line? @capture ["repo"|"path"]`
+--- True if every captured node's expanded line matches one of
+--- `HEADER_LINE_PATTERNS` (optionally restricted to a given shape).
+---@param match     table<integer, TSNode[]> Capture id -> matched nodes
+---@param _         integer                  Pattern id (unused)
+---@param source    integer | string
+---@param predicate string[]                 `{ "header-line?", "@a", shape }`
+---@return boolean
 M.header_line = function(match, _, source, predicate)
     local nodes = match[predicate[2]]
     if not nodes then
@@ -148,6 +181,8 @@ M.header_line = function(match, _, source, predicate)
     return true
 end
 
+--- Registers this module's custom treesitter query predicates.
+---@return nil
 M.setup = function()
     vim.treesitter.query.add_predicate("adjacent?", M.adjacent, {
         force = true,

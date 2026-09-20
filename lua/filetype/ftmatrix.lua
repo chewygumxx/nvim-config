@@ -30,6 +30,8 @@ local M = {
     },
 }
 
+--- Populates M.extension with this repo's dosini-mapped extensions.
+---@return nil
 local define_dosini = function()
     local exts = {
         "conf",
@@ -54,6 +56,8 @@ local define_dosini = function()
     end
 end
 
+--- Registers this module's extension/filename/pattern filetype mappings.
+---@return nil
 M.setup = function()
     define_dosini()
     vim.filetype.add({
