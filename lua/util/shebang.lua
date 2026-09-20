@@ -59,7 +59,7 @@ M.get = function(file, buf, opt)
 
     local path = vim.fn.fnamemodify(file, ":~:h")
     for _, dir in ipairs(source_dirs) do
-        if path:find(dir .. "/", 1, true) == 1 then
+        if path == dir or path:find(dir .. "/", 1, true) == 1 then
             return "#!/bin/false"
         end
     end
