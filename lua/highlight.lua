@@ -24,6 +24,12 @@ local hlgroup_defs = {
     ["NonText"]    = { ctermbg = "none", bg = "none" },
     ["Underlined"] = { underline = true },
 
+    -- Match `Normal`'s transparency in floating windows (Telescope, Lazy,
+    -- LSP hover/diagnostics, etc.), which otherwise keep starry's solid
+    -- `NormalFloat`/`FloatBorder` background and stand out as boxes.
+    ["NormalFloat"] = { ctermbg = "none", bg = "none" },
+    ["FloatBorder"] = { ctermbg = "none", bg = "none" },
+
     -- Paired-Boundary Character
     ["MatchParen"] = { standout = true },
 
