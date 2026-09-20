@@ -46,6 +46,8 @@ local opts = {
   --modelineexpr = true,
 }
 
+--- Applies this module's global option values.
+---@return nil
 M.setup = function()
     for opt, value in pairs(opts) do
         vim.api.nvim_set_option_value(opt, value, {})

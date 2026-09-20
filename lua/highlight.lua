@@ -34,6 +34,8 @@ local hlgroup_defs = {
     ["@markup.strikethrough"] = { strikethrough = true },
 }
 
+--- Applies this module's highlight group overrides.
+---@return nil
 M.setup = function()
     for hlgroup, defmap in pairs(hlgroup_defs) do
         vim.api.nvim_set_hl(0, hlgroup, defmap)

@@ -23,6 +23,8 @@ local sibling_modules = {
     "view",
 }
 
+--- Sets up each sibling option module.
+---@return nil
 M.setup = function()
     for _, sibling in ipairs(sibling_modules) do
         _G.setup_guard(__this_module .. "." .. sibling)

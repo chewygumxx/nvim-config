@@ -10,6 +10,10 @@
 --
 local M = {}
 
+--- Registers the `BufReadPost` autocmd that restores the cursor to its
+--- last position in the file (skipped if something already moved it,
+--- e.g. `gF`, a line-number arg).
+---@return nil
 local cursor_last_position = function()
     vim.api.nvim_create_autocmd("BufReadPost", {
         desc     = "Move cursor to last position within file",
@@ -27,6 +31,9 @@ local cursor_last_position = function()
     })
 end
 
+--- Registers the `BufReadPost` autocmd that maps "q" to quit, buffer-local,
+--- for buffers opened readonly or otherwise unmodifiable.
+---@return nil
 local unmodifiable_q_quit = function()
     vim.api.nvim_create_autocmd("BufReadPost", {
         desc     = "For unmodifiable buffers: Keymap (nv) q->quit ",
@@ -44,7 +51,11 @@ local unmodifiable_q_quit = function()
     })
 end
 
+--- Creates the shared "cgxx.file_entry" augroup and registers this
+--- module's autocmds.
+---@return nil
 M.setup = function()
+    ---@type integer
     M.augroup_file_entry = vim.api.nvim_create_augroup("cgxx.file_entry", {
         clear = true,
     })

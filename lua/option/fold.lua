@@ -15,6 +15,10 @@
 
 local M = {}
 
+--- `foldtext` callback (`v:lua.cgxx_foldtext()`): renders the folded
+--- line's own text, indent-collapsed into "~", followed by a right-aligned
+--- "[N lines] [lvl=N]" summary. Reads fold state from `vim.v.fold*`.
+---@return string text
 local foldtext = function()
     -- Buffer
     local tabstop = vim.api.nvim_get_option_value("tabstop", {})
@@ -53,6 +57,9 @@ local foldtext = function()
     return label .. alignment .. fold_info
 end
 
+--- Registers `foldtext` as a global and applies this module's fold
+--- option values.
+---@return nil
 M.setup = function()
     _G.cgxx_foldtext = foldtext
     vim.opt.foldtext = "v:lua.cgxx_foldtext()"
