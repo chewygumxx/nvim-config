@@ -31,6 +31,26 @@ else
 fi
 
 # --------
+# mini.test
+# --------
+
+if command -v nvim >/dev/null 2>&1; then
+    test_files=$(git diff --cached --name-only --diff-filter=ACMR -- 'lua/*' 'tests/*' ':!**/symlink_*')
+    if [ -n "$test_files" ]; then
+        data_dir=$(nvim --headless --clean \
+            -c 'lua io.stdout:write(vim.fn.stdpath("data"))' -c 'qa!' 2>/dev/null)
+        if [ -d "$data_dir/lazy/mini.nvim" ]; then
+            nvim --headless -u scripts/minimal_init.lua \
+                -l scripts/minitest.lua || status=1
+        else
+            echo "pre-commit: mini.nvim not installed, skipping tests" >&2
+        fi
+    fi
+else
+    echo "pre-commit: nvim not on PATH, skipping tests" >&2
+fi
+
+# --------
 # TOML
 # --------
 
