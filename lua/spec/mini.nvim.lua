@@ -117,12 +117,9 @@ local opts = {
     },
 }
 
---- Registers the `XXTest*` user commands, backed by `mini.test`. cwd-
---- relative, like `mini.test`'s own config, so they work unmodified in
---- whichever plugin repo is currently open, not just this config. `setup()`
---- is deferred to first invocation rather than paid on every startup: not
---- every session that wants `mini.hipatterns` is also running this repo's
---- test suite.
+--- Registers the `XXTest*` user commands. `setup()` is deferred to first
+--- invocation rather than paid on every startup: not every session that
+--- wants `mini.hipatterns` is also running this repo's test suite.
 ---@return nil
 local mini_test_usercmds = function()
     local done = false
