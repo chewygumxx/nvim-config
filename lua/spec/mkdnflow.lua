@@ -111,7 +111,7 @@ M.opts.filetypes        = {
 }
 local filetype_triggers = function()
     for filetype, value in pairs(M.opts.filetypes) do
-        if (value ~= false) then -- 'value' may be boolean or string
+        if value ~= false then -- 'value' may be boolean or string
             table.insert(M.ft, filetype)
         end
     end
