@@ -65,16 +65,20 @@ local modules = {
     "filetype", -- After option and keymap for overrides
     "autocmd",
     "usercmd",
-
-    -- After  keymap,   for lazy-load keymap triggers involving vim.g.mapleader
-    -- After  filetype, for lazy-load filetype triggers
-    -- After  autocmd,  for augroup dependent plugin spec
-    "util.lazy",
-
-    -- After  util.lazy,  for treesitter parsing and colorscheme overwrite
-    "highlight",
 }
 
 for _, module in ipairs(modules) do
     _G.setup_guard(module)
 end
+
+-- After  keymap,   for lazy-load keymap triggers involving vim.g.mapleader
+-- After  filetype, for lazy-load filetype triggers
+-- After  autocmd,  for augroup dependent plugin spec
+_G.setup_guard("util.lazy", {
+    git = {
+        url_format = "git@github.com:%s.git",
+    },
+})
+
+-- After  util.lazy,  for treesitter parsing and colorscheme overwrite
+_G.setup_guard("highlight")
