@@ -117,6 +117,37 @@ local opts = {
     },
 }
 
+--- Registers the `XXTest*` user commands, backed by `mini.test`. cwd-
+--- relative, like `mini.test`'s own config, so they work unmodified in
+--- whichever plugin repo is currently open, not just this config. `setup()`
+--- is deferred to first invocation rather than paid on every startup: not
+--- every session that wants `mini.hipatterns` is also running this repo's
+--- test suite.
+---@return nil
+local mini_test_usercmds = function()
+    local done = false
+    ---@param method string
+    local function run(method)
+        return function()
+            local mt = require("mini.test")
+            if not done then
+                mt.setup(opts.test)
+                done = true
+            end
+            mt[method]()
+        end
+    end
+    local usercmd = vim.api.nvim_create_user_command
+    usercmd("XXTestRun", run("run"), { desc = "MiniTest: Run all cases" })
+    usercmd("XXTestRunFile", run("run_file"), {
+        desc = "MiniTest: Run current file",
+    })
+    usercmd("XXTestRunAtCursor", run("run_at_location"), {
+        desc = "MiniTest: Run case at cursor",
+    })
+    usercmd("XXTestStop", run("stop"), { desc = "MiniTest: Stop execution" })
+end
+
 M.config = function()
     local hipatterns                       = require("mini.hipatterns")
     opts.hipatterns.highlighters.hex_color = hipatterns.gen_highlighter
@@ -129,7 +160,7 @@ M.config = function()
     hipatterns.setup(opts.hipatterns)
     require("mini.icons").setup(opts.icons or {})
     require("mini.files").setup(opts.files or {})
-    require("mini.test").setup(opts.test or {})
+    mini_test_usercmds()
 end
 
 return M

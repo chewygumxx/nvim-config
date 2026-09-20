@@ -33,34 +33,6 @@ local visual_traversal = function()
     usercmd("XXVisTravDisable", vt("disable"), { desc = "Disable: " .. desc })
 end
 
---- Registers the `XXTest*` user commands, backed by `mini.test`. cwd-
---- relative, like `mini.test`'s own config, so they work unmodified in
---- whichever plugin repo is currently open, not just this config.
----@return nil
-local mini_test = function()
-    -- `usercmd` runs before `util.lazy` in init.lua's load order, so
-    -- `mini.test` isn't on the runtimepath yet at registration time; the
-    -- require has to happen inside each callback instead, once lazy.nvim
-    -- has actually loaded the plugin.
-    ---@param method string
-    local function run(method)
-        return function()
-            local mt = _G.require_guard("mini.test")
-            if mt then
-                mt[method]()
-            end
-        end
-    end
-    usercmd("XXTestRun", run("run"), { desc = "MiniTest: Run all cases" })
-    usercmd("XXTestRunFile", run("run_file"), {
-        desc = "MiniTest: Run current file",
-    })
-    usercmd("XXTestRunAtCursor", run("run_at_location"), {
-        desc = "MiniTest: Run case at cursor",
-    })
-    usercmd("XXTestStop", run("stop"), { desc = "MiniTest: Stop execution" })
-end
-
 --- Registers the `XXInterpretEscape` user command.
 ---@return nil
 local interpret_escape = function()
@@ -115,7 +87,6 @@ end
 ---@return nil
 M.setup = function()
     visual_traversal()
-    mini_test()
     interpret_escape()
     redirect_awkward_pager()
     insert_header()
