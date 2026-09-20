@@ -32,6 +32,7 @@ M.opts.ensure_installed = {
     "stylua",
     "luafmt",
     "prettier",
+    "tombi",
 }
 
 return M
