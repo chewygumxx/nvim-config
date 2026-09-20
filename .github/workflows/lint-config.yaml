@@ -44,7 +44,7 @@ jobs:
 
             - name: Cache luafmt
               id: cache-luafmt
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: ${{ runner.temp }}/luafmt
                   key: luafmt-${{ env.LUAFMT_VERSION }}
@@ -84,7 +84,7 @@ jobs:
 
             - name: Cache tombi
               id: cache-tombi
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: ${{ runner.temp }}/tombi
                   key: tombi-${{ env.TOMBI_VERSION }}

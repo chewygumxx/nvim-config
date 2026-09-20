@@ -37,7 +37,7 @@ jobs:
 
             - name: Cache Neovim
               id: cache-nvim
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: ${{ runner.temp }}/nvim
                   key: nvim-${{ env.NVIM_VERSION }}
