@@ -1,6 +1,5 @@
 #!/bin/false
 -- vim:set expandtab shiftwidth=4 filetype=lua foldlevel=3 foldmethod=expr:
--- luacheck: globals vim
 
 --
 --

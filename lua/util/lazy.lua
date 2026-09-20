@@ -1,7 +1,6 @@
 #!/bin/false
 -- vim:set expandtab shiftwidth=4 foldlevel=1 filetype=lua:
 -- SPDX-License-Identifier: GPL-3.0-only
--- luacheck: globals vim
 
 --
 --

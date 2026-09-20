@@ -91,7 +91,7 @@ local opts = {
 
             -- Predicate function indicating if test case should be executed.
             -- Upstream default is `function(case) return true end`; case is
-            -- referenced here only to satisfy luacheck's unused-arg check.
+            -- referenced here only to satisfy selene's unused-arg check.
             filter_cases = function(case) return not not case end,
         },
 
