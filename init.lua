@@ -13,6 +13,10 @@
 -- Neovim initialisation root
 --
 
+--- ****************
+--- Essential Guard
+--- ****************
+
 -- Wrapper guard for require(modpath).
 -- Failure in resolving the module is reported via vim.notify rather than
 -- propagating.
@@ -51,14 +55,9 @@ _G.setup_guard = function(modpath, opts)
     end
 end
 
-_G.setup_guard("cgxx", {
-    lsp = {},
-    fuzzy = "fzf-lua",
-    colorscheme = { "middlenight_blue" },
-    lazy = {
-        checker = vim.env.HERDR_ENV == nil and vim.env.TERMUX_VERSION == nil,
-    },
-})
+--- **********************
+--- Module Initialisation
+--- **********************
 
 local modules = {
     "option",
@@ -67,12 +66,12 @@ local modules = {
     "autocmd",
     "usercmd",
 
-    -- After  keymap,     for lazy-load keymap triggers involving vim.g.mapleader
-    -- After  filetype,   for lazy-load filetype triggers
-    -- After  autocmd,    for augroup dependent plugin spec
-    "plugin_manager",
+    -- After  keymap,   for lazy-load keymap triggers involving vim.g.mapleader
+    -- After  filetype, for lazy-load filetype triggers
+    -- After  autocmd,  for augroup dependent plugin spec
+    "util.lazy",
 
-    -- After  plugin_manager,  for treesitter parsing and colorscheme overwrite
+    -- After  util.lazy,  for treesitter parsing and colorscheme overwrite
     "highlight",
 }
 
