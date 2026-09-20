@@ -29,8 +29,10 @@ M.wrap_comment = function(text, width, opt)
     for word in text:gmatch("%S+") do
         local candidate = current == "" and word or current .. " " .. word
         if #candidate > (width - (#commentstring - 2)) then
-            lines[#lines + 1] = string.format(commentstring, current)
-            current           = word
+            if current ~= "" then
+                lines[#lines + 1] = string.format(commentstring, current)
+            end
+            current = word
         else
             current = candidate
         end
