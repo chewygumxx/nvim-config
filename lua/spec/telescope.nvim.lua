@@ -18,8 +18,8 @@
 ---@type LazySpec
 local M = {
     "nvim-telescope/telescope.nvim",
-    enabled = false,
-    opts    = {},
+
+    opts = {},
 
     dependencies = {
         "nvim-lua/plenary.nvim",
