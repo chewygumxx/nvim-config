@@ -167,13 +167,22 @@ M.opts.dashboard = {
         end,
         footer = { "%s", align = "center" },
         header = { "%s", align = "center" },
+        ---@param item snacks.dashboard.Item
+        ---@param ctx  snacks.dashboard.Format.ctx
         file = function(item, ctx)
+            -- `snacks.dashboard.Item` has a `[string]: any` catch-all
+            -- alongside its own `file?: string` field, so `item.file`
+            -- itself resolves loosely; narrow it here rather than at
+            -- every `fnamemodify()` call below.
+            ---@type string
             local fname = vim.fn.fnamemodify(item.file, ":~")
             fname       = ctx.width and #fname > ctx.width
                 and vim.fn.pathshorten(fname) or fname
             if #fname > ctx.width then
-                local dir  = vim.fn.fnamemodify(fname, ":h")
-                local file = vim.fn.fnamemodify(fname, ":t")
+                -- `fname`'s reassignment above doesn't keep the cast on
+                -- its first declaration; cast these results instead.
+                local dir  = vim.fn.fnamemodify(fname, ":h") --[[@as string]]
+                local file = vim.fn.fnamemodify(fname, ":t") --[[@as string]]
                 if dir and file then
                     file  = file:sub(-(ctx.width - #dir - 2))
                     fname = dir .. "/…" .. file

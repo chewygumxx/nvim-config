@@ -33,6 +33,7 @@ M.config = function()
     -- Neovim's process cwd, so `selene.toml` (and the std files it
     -- references) only resolve when Neovim happens to have been started
     -- from the repo root; resolve it per-buffer instead.
+    ---@type integer
     local augroup = vim.api.nvim_create_augroup("XXLint", { clear = true })
     vim.api.nvim_create_autocmd("BufWritePost", {
         group = augroup,
