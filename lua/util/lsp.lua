@@ -308,6 +308,7 @@ M.signature_help_on_type = function(buf, client)
         return
     end
 
+    ---@type integer
     local group = vim.api.nvim_create_augroup("UtilLspSignatureHelp:" .. buf, {
         clear = true,
     })

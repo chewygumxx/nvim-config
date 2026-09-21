@@ -56,7 +56,11 @@ M.get = function(file, buf, opt)
     opt      = opt or {}
     local ft = opt.ft or vim.bo[buf].filetype
 
-    local path = vim.fn.fnamemodify(file, ":~:h")
+    -- `vim.fn.expand()` is declared `string|string[]` (the `list` arg
+    -- form), even though this single-arg call always returns `string`;
+    -- casting the *parameter* at its reassignment above doesn't narrow
+    -- it the way a fresh `local` would, so cast the result here instead.
+    local path = vim.fn.fnamemodify(file, ":~:h") --[[@as string]]
     for _, dir in ipairs(source_dirs) do
         if path == dir or path:find(dir .. "/", 1, true) == 1 then
             return "#!/bin/false"
