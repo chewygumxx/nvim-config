@@ -92,6 +92,7 @@ _G.setup_guard("util.lazy", {
                     { cond = false, "MunifTanjim/nvim-nio" },
                     { cond = false, "OXY2DEV/markview.nvim" },
                     { cond = false, "folke/which-key.nvim" },
+                    { cond = false, "nvim-neorg/neorg" },
                 }
             end,
         },
