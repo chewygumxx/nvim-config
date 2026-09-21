@@ -26,6 +26,7 @@ local M = {
     },
 }
 
+---@diagnostic disable-next-line: undefined-doc-name -- oil.nvim disabled, type stub unavailable
 ---@type oil.SetupOpts
 M.opts = {}
 

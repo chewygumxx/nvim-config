@@ -13,11 +13,13 @@
 -- LuaSnip snippet for markdown header
 --
 
-local ls  = require("luasnip")
-local s   = ls.snippet
-local t   = ls.text_node
-local i   = ls.insert_node
-local f   = ls.function_node
+local ls = require("luasnip")
+---@diagnostic disable: undefined-field -- luasnip.lua is disabled, type stub unavailable
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+local f = ls.function_node
+---@diagnostic enable: undefined-field
 local rep = require("luasnip.extras").rep
 
 local git  = require("util.git")
