@@ -20,9 +20,8 @@
 ---@type LazyPluginSpec
 local M = {
     "mason-org/mason.nvim",
-    enabled = true,
-    lazy    = false,
-    opts    = {},
+    lazy = false,
+    opts = {},
 }
 
 return M

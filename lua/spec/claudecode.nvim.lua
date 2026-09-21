@@ -11,7 +11,7 @@
 
 local M = {
     "coder/claudecode.nvim",
-    enabled = false, -- Depends on snacks.nvim, currently disabled
+    cond = false, -- Depends on snacks.nvim, currently disabled
     lazy = true,
     dependencies = { "folke/snacks.nvim" },
 

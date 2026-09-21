@@ -15,7 +15,7 @@
 local M = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md
     url = "https://github.com/jakewvincent/mkdnflow.nvim",
-    enabled = false,
+    cond = false,
 
     -- Populated by function 'filetype_triggers' (defined within file)
     ft = {},

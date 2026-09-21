@@ -14,7 +14,7 @@
 ---@type LazyPluginSpec
 local M = {
     "debugloop/telescope-undo.nvim",
-    enabled = false,
+    cond = false,
 
     dependencies = { -- note how they're inverted to above example
         {

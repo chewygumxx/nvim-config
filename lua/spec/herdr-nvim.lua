@@ -15,7 +15,7 @@
 ---@type LazyPluginSpec
 local M = {
     "jtnovellis/herdr-nvim",
-    enabled = false,
+    cond = false,
 
     -- The sidebar daemon needs it at startup for the reload watcher and the
     -- quit guard; everywhere else it can wait.
