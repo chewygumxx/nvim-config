@@ -16,11 +16,14 @@
 --
 
 ---@module "lazy"
+---@module "mason"
 
 ---@type LazyPluginSpec
 local M = {
     "mason-org/mason.nvim",
     lazy = false,
+
+    ---@type MasonSettings
     opts = {},
 }
 

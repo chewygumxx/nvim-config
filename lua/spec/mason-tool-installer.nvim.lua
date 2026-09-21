@@ -17,6 +17,7 @@
 --
 
 ---@module "lazy"
+---@module "mason-tool-installer"
 
 ---@type LazyPluginSpec
 local M = {
@@ -26,15 +27,17 @@ local M = {
     dependencies = {
         "mason-org/mason.nvim",
     },
-    opts         = {},
-}
 
-M.opts.ensure_installed = {
-    "stylua",
-    "luafmt",
-    "prettier",
-    "tombi",
-    "selene",
+    ---@type MasonToolInstallerSettings
+    opts = {
+        ensure_installed = {
+            "stylua",
+            "luafmt",
+            "prettier",
+            "tombi",
+            "selene",
+        },
+    },
 }
 
 return M

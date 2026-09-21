@@ -17,6 +17,7 @@
 --
 
 ---@module "lazy"
+---@module "mason-lspconfig"
 
 ---@type LazyPluginSpec
 local M = {
@@ -29,6 +30,7 @@ local M = {
     },
 }
 
+---@type MasonLspconfigSettings
 M.opts = {
     ensure_installed = {
         "lua_ls", -- Lua
