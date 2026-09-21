@@ -9,6 +9,9 @@
 --
 --
 
+---@module "lazy"
+
+---@type LazyPluginSpec
 local M = {
     "samjwill/nvim-unception",
     lazy = false,

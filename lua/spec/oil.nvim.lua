@@ -10,6 +10,8 @@
 --
 
 ---@module "lazy"
+---@module 'oil'
+
 ---@type LazyPluginSpec
 local M = {
     "stevearc/oil.nvim",
@@ -24,7 +26,6 @@ local M = {
     },
 }
 
----@module 'oil'
 ---@type oil.SetupOpts
 M.opts = {}
 

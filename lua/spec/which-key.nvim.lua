@@ -10,7 +10,7 @@
 --
 
 ---@module "lazy"
----@module "which-key"
+---@module "wk"
 
 ---@type LazyPluginSpec
 local M = {

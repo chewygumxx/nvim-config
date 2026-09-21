@@ -11,7 +11,7 @@
 
 ---@module "lazy"
 
----@type LazyConfig
+---@type LazyPluginSpec
 local M = {
     "OXY2DEV/markview.nvim",
 
