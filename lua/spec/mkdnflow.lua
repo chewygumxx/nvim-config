@@ -108,11 +108,13 @@ M.opts.filetypes        = {
     --html   = false,      -- Disable *.html resolution for this plugin
 }
 local filetype_triggers = function()
+    local ft = {}
     for filetype, value in pairs(M.opts.filetypes) do
         if value ~= false then -- 'value' may be boolean or string
-            table.insert(M.ft, filetype)
+            table.insert(ft, filetype)
         end
     end
+    M.ft = ft
 end
 filetype_triggers()
 M.opts.cursor            = {
