@@ -22,7 +22,9 @@ local M = {}
 local save_preinterpreted_copy = function(lines)
     -- Save Directory
     local log_dir = vim.fn.stdpath("cache") .. "/log-ansi/"
-    if not vim.fn.isdirectory(log_dir) then vim.fn.mkdir(log_dir, "p") end
+    if not vim.fn.isdirectory(log_dir) then
+        vim.fn.mkdir(log_dir, "p")
+    end
 
     -- If filename has a tail, remove it.
     -- Irrespective of whether filename had tail or not, append '.ansi'.
