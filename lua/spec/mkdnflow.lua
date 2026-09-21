@@ -10,6 +10,7 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md
@@ -20,7 +21,7 @@ local M = {
     ft = {},
 }
 
-M.opts = {
+M.opts                  = {
     -- Wrap to file beginning/end when traversing links/headings,
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#wrap
     wrap = false,
@@ -38,8 +39,7 @@ M.opts = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#create_dirs
     create_dirs = true,
 }
-
-M.opts.modules = {
+M.opts.modules          = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#modules
 
     -- Core
@@ -73,8 +73,7 @@ M.opts.modules = {
     completion = false, -- For completion plugins such as nvim-cmp and blink.cmp
     foldtext   = false,    -- Adorns foldtext with fold metadata infomation
 }
-
-M.opts.path_resolution = {
+M.opts.path_resolution  = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#path_resolution
 
     root_marker = ".nex_root", -- Filename by which notebook root directory resolvable
@@ -93,7 +92,6 @@ M.opts.path_resolution = {
     -- especially synergises with path-supporting completion plugins.
     sync_cwd = true,
 }
-
 M.opts.filetypes        = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#filetypes
 
@@ -117,8 +115,7 @@ local filetype_triggers = function()
     end
 end
 filetype_triggers()
-
-M.opts.cursor = {
+M.opts.cursor            = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#cursor
 
     -- Table of Lua regex patterns as jump destinations in addition to
@@ -129,8 +126,7 @@ M.opts.cursor = {
     -- Yank anchor links to this register
     yank_register = "a",
 }
-
-M.opts.links = {
+M.opts.links             = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#links
 
     style   = "markdown", -- 'markdown' or 'wiki' link format: []() or [[|]]
@@ -163,14 +159,12 @@ M.opts.links = {
     auto_create = true,
     on_create_new = false,
 }
-
 M.opts.new_file_template = {
     enabled      = false,
     placeholders = {},
     template     = "# {{ title }}",
 }
-
-M.opts.to_do = {
+M.opts.to_do             = {
     highlight = false,
     statuses = {
         not_started = {
@@ -260,8 +254,7 @@ M.opts.to_do = {
         cursor_behavior = { track = true },
     },
 }
-
-M.opts.tables = {
+M.opts.tables            = {
     type             = "pipe",
     trim_whitespace  = true,
     format_on_move   = true,
@@ -274,10 +267,8 @@ M.opts.tables = {
         apply_alignment   = true,
     },
 }
-
-M.opts.yaml = { bib = { override = false } }
-
-M.opts.mappings = {
+M.opts.yaml              = { bib = { override = false } }
+M.opts.mappings          = {
     MkdnEnter              = { { "n", "v" }, "<CR>" },
     MkdnGoBack             = { "n", "<BS>" },
     MkdnGoForward          = { "n", "<Del>" },
@@ -326,7 +317,6 @@ M.opts.mappings = {
     MkdnCreateLink = false,
     MkdnCreateLinkFromClipboard = { { "n", "v" }, "<leader>p" },
 }
-
 -- Disabled
 M.opts.foldtext = {
     object_count = true,
