@@ -10,10 +10,12 @@
 --
 
 ---@module "lazy"
+---@module "yazi"
+
 ---@type LazyPluginSpec
 local M = {
     "mikavilpas/yazi.nvim",
-    enabled = true,
+    cond = false,
 
     version = "*",
     event = "VeryLazy",
@@ -41,7 +43,7 @@ M.keys = {
     },
 }
 
----@type YaziConfig | { }
+---@type YaziConfig
 M.opts = {
     -- if true, `M.init = function() vim.g.loadednetrwPlugin = 1 end`
     open_for_directories = true,
