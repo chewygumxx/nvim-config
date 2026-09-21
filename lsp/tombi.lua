@@ -17,12 +17,14 @@ local hlgroup_defs = {
     ["@lsp.type.table.toml"] = { link = "@property" },
 }
 
+---@return nil
 local highlight = function()
     for hlgroup, defmap in pairs(hlgroup_defs) do
         vim.api.nvim_set_hl(0, hlgroup, defmap)
     end
 end
 
+---@return nil
 M.on_attach = function()
     highlight()
 end
