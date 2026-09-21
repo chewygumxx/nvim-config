@@ -11,8 +11,10 @@
 
 local M = {
     "coder/claudecode.nvim",
+    enabled = false, -- Depends on snacks.nvim, currently disabled
+    lazy = true,
     dependencies = { "folke/snacks.nvim" },
-    config = true,
+
     cmd = {
         "ClaudeCode",
         "ClaudeCodeFocus",
@@ -29,6 +31,7 @@ local M = {
         "ClaudeCodeDiffDeny",
         "ClaudeCodeCloseAllDiffs",
     },
+
     keys = {
         { "<leader>a", nil, desc = "AI/Claude Code" },
         { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
@@ -72,6 +75,8 @@ local M = {
         { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
         { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
     },
+
+    opts = {},
 }
 
 return M

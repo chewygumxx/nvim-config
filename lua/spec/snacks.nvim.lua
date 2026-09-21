@@ -20,6 +20,7 @@
 ---@type LazyPluginSpec
 local M = {
     "folke/snacks.nvim",
+    enabled = false,
     lazy = false,
     priority = 1000, -- Referenced by other plugins and specs
 }
