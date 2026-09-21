@@ -11,6 +11,13 @@
 
 local M = {}
 
+--- Widens the current help window and moves it to the far right, unless
+--- it is the last window left (where `:wincmd L` would no-op) or the
+--- buffer was merely `:edit`ed rather than opened via `:help`.
+---@param _file string
+---@param buf   integer
+---@param _opts vim.api.keyset.create_autocmd.callback_args
+---@return nil
 M.setup = function(_file, buf, _opts)
     -- Exclusively help windows, skip `:edit`ed doc files,
     if vim.bo[buf].buftype ~= "help" then
