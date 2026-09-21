@@ -10,10 +10,15 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "nvim-treesitter/nvim-treesitter-context",
     enabled = false,
+
+    dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+    },
 
     opts = {
         mode         = "cursor", -- Line used to resolve context. ('cursor', 'topline')
