@@ -76,8 +76,18 @@ end
 -- After  filetype, for lazy-load filetype triggers
 -- After  autocmd,  for augroup dependent plugin spec
 _G.setup_guard("util.lazy", {
-    git = {
-        url_format = "git@github.com:%s.git",
+    git  = { url_format = "git@github.com:%s.git" },
+    spec = {
+        { import = "spec" },
+        { "folke/noice.nvim", cond = false },
+        { "folke/snacks.nvim", cond = false },
+        { "L3M0NAD3/LuaSnip", cond = false },
+        { "mikavilpas/yazi.nvim", cond = false },
+        { "stevearc/oil.nvim", cond = false },
+        { "kndndrj/nvim-dbee", cond = false },
+        { "MunifTanjim/nvim-nio", cond = false },
+        { "OXY2DEV/markview.nvim", cond = false },
+        { "folke/which-key.nvim", cond = false },
     },
 })
 
