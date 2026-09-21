@@ -15,11 +15,11 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "numToStr/Comment.nvim",
-    enabled = true,
-    lazy    = true, -- See M.keys
+    lazy = true, -- See M.keys
 }
 
 M.opts = {

@@ -10,12 +10,12 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "gennaro-tedesco/nvim-jqx",
 
     ft = { "json", "yaml" },
-    --event = { "BufReadPost" },
 }
 
 return M
