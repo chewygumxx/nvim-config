@@ -9,11 +9,8 @@
 --
 --
 
--- TODO(@chewygumxx): [LOW] Incomplete as a fzf-lua contingency: restore a
--- version pin (was `version = "*"`), call
--- require("telescope").load_extension("fzf") for telescope-fzf-native
--- below to have any effect.
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "nvim-telescope/telescope.nvim",
@@ -31,7 +28,9 @@ local M = {
     },
 }
 
-M.config = function(_, opts)
+M.config = function()
+    local opts = M.opts
+    ---@cast opts table
     require("telescope").setup(opts)
 
     -- Route quickfix/location-list windows through Telescope's own picker
