@@ -74,7 +74,7 @@ local act_func = {
 }
 
 --- Resolves act to a `nvim_create_user_command` callback.
----@param act "toggle" | "enable" | "disable"
+---@param act string
 ---@return fun(opts: table)? callback nil if act isn't a known action
 M.command = function(act)
     return act_func[act]

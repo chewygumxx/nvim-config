@@ -25,15 +25,15 @@ local function n(explicit, fallback)
 end
 
 ---@class util.ModelineOpt
----@field buf?           integer Fallback source buffer (default: 0)
+---@field buf?           integer           Fallback source buffer (default: 0)
 ---@field et?            boolean
----@field expandtab?     boolean Alias for `et`
----@field sw?            integer
----@field shiftwidth?    integer Alias for `sw` (default: buf's own, or 4)
----@field ft?            string
----@field filetype?      string  Alias for `ft` (default: buf's own filetype)
----@field append?        string  Extra `:set` clause(s), appended verbatim
----@field commentstring? string  printf-style wrapper (default: buf's own)
+---@field expandtab?     boolean           Alias for `et`
+---@field sw?            integer | boolean
+---@field shiftwidth?    integer | boolean Alias for `sw` (default: buf's own, or 4)
+---@field ft?            string | boolean
+---@field filetype?      string | boolean  Alias for `ft` (default: buf's own filetype)
+---@field append?        string            Extra `:set` clause(s), appended verbatim
+---@field commentstring? string            printf-style wrapper (default: buf's own)
 
 --- Builds a `vim:set ...:` modeline comment from opt, falling back to
 --- buf's own option values for anything left unset.
