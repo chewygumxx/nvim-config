@@ -59,4 +59,27 @@ M.path = function(file)
     return ":" .. vim.fn.fnamemodify(file, ":p"):sub(#root + 1)
 end
 
+---@class cgxx.git.gh.opts
+---@field fmt cgxx.git.gh.opts.fmt
+
+---@enum (key) cgxx.git.gh.opts.fmt
+local gh_url_fmt = {
+    ssh   = "git@github.com:%s.git",
+    https = "https://github.com/%s.git",
+}
+
+--- Returns the repository GitHub URL of the provided slug
+---@param slug string           owner/repo
+---@param opts cgxx.git.gh.opts Additional options ie. fmt = "ssh"|"https"
+---@return string url Repository GitHub URL
+M.gh = function(slug, opts)
+    local fmt = vim.tbl_get(opts, "fmt") or "ssh"
+
+    if not gh_url_fmt[fmt] then
+        return string.format("Bad format: %s", fmt)
+    end
+
+    return string.format(gh_url_fmt[fmt], slug)
+end
+
 return M
