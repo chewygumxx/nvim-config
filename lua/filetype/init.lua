@@ -29,7 +29,9 @@ local ft_specialised_mods = {
     editorconfig = "dosini",
     gitcommit    = "prose",
     text         = "prose",
+    help         = "help",
 }
+
 --- Registers the FileType autocmd that dispatches to a specialised
 --- filetype module, if one is mapped for the triggering filetype.
 ---@return nil
@@ -46,7 +48,7 @@ local ft_specialised = function()
             end
 
             local module = _G.require_guard(__this_module .. "." .. modname)
-            if not (module and module.setup) then
+            if not module or not module.setup then
                 return
             end
 
