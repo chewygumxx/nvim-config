@@ -14,6 +14,16 @@
 
 local M = {}
 
+---@class util.WrapCommentOpt
+---@field buffer?        integer Source of the fallback `commentstring` (default: 0)
+---@field commentstring? string  printf-style wrapper (default: buffer's own)
+
+--- Wraps text into a list of comment lines no wider than width, each
+--- formatted through commentstring.
+---@param text   string
+---@param width? integer             Default: 'textwidth', or 80 if unset
+---@param opt?   util.WrapCommentOpt
+---@return string[] lines
 M.wrap_comment = function(text, width, opt)
     width               = width or vim.o.textwidth ~= 0 and vim.o.textwidth
         or 80
