@@ -22,8 +22,5 @@
 -- root is on the runtime path; harmless to prepend again if already there.
 vim.opt.rtp:prepend(vim.fn.getcwd())
 
-local minitest = require("mini.test")
-if _G.MiniTest == nil then
-    minitest.setup()
-end
-minitest.run()
+require("mini.test").setup()
+require("mini.test").run()

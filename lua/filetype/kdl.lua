@@ -30,7 +30,7 @@ end
 
 ---@return nil
 M.setup = function()
-    _G.require_guard("util.option").apply(options, { scope = "local" })
+    require("util.option").apply(options, { scope = "local" })
 end
 
 return M

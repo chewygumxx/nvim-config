@@ -14,9 +14,9 @@
 
 local M = {}
 
-local util_modeline = _G.require_guard("util.modeline")
-local util_shebang  = _G.require_guard("util.shebang")
-local util_git      = _G.require_guard("util.git")
+local util_modeline = require("util.modeline")
+local util_shebang  = require("util.shebang")
+local util_git      = require("util.git")
 
 --- Strips trailing whitespace from every line, in place.
 ---@param lines string[]

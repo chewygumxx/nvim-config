@@ -60,7 +60,7 @@ M.setup = function()
     })
     cursor_last_position()
     unmodifiable_q_quit()
-    local header = _G.require_guard("util.header")
+    local header = require("util.header")
     if header then
         header.autocmd()
     end

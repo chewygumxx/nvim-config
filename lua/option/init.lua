@@ -26,7 +26,7 @@ local sibling_modules = {
 ---@return nil
 M.setup = function()
     for _, sibling in ipairs(sibling_modules) do
-        _G.setup_guard(__this_module .. "." .. sibling)
+        require(__this_module .. "." .. sibling).setup()
     end
 end
 

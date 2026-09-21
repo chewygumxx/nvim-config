@@ -45,6 +45,7 @@ local nudge_library_rescan = function(client)
     end, 500)
 end
 
+---@type { [string]: vim.api.keyset.highlight }
 local hlgroup_defs = {
     ["@lsp.typemod.variable.defaultLibrary.lua"] = { link = "Special" },
 }

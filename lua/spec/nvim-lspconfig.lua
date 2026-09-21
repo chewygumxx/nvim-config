@@ -22,7 +22,7 @@ local M = {
 }
 
 M.config = function()
-    _G.setup_guard("util.lsp")
+    require("util.lsp").setup()
 end
 
 return M

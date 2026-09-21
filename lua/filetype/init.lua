@@ -47,7 +47,7 @@ local ft_specialised = function()
                 return
             end
 
-            local module = _G.require_guard(__this_module .. "." .. modname)
+            local module = require(__this_module .. "." .. modname)
             if not module or not module.setup then
                 return
             end
@@ -60,7 +60,7 @@ end
 --- Sets up custom filetype detection and specialised filetype dispatch.
 ---@return nil
 M.setup = function()
-    _G.setup_guard(__this_module .. ".ftmatrix")
+    require(__this_module .. ".ftmatrix").setup()
     ft_specialised()
 end
 

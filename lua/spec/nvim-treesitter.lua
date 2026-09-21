@@ -309,7 +309,7 @@ local ensure_installed = {
 -- Ripped from:
 -- https://www.reddit.com/r/neovim/comments/1pndf9e/my_new_nvimtreesitter_configuration_for_the_main/
 M.config = function()
-    _G.setup_guard("util.treesitter")
+    require("util.treesitter").setup()
 
     -- Termux ships its compiler under `$PREFIX/bin`, not a system path.
     -- Without an explicit CC/CXX, `tree-sitter build`'s underlying Rust `cc`

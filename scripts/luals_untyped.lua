@@ -24,11 +24,6 @@
 -- Usage: `nvim --headless -u scripts/minimal_init.lua
 --         -l scripts/luals_untyped.lua`
 --
--- False positives: a few declarations in this repo (e.g.
--- `init.lua`'s `_G.require_guard`) are deliberately typed `unknown`/
--- `any` rather than left bare; this can't tell "annotated as any" from
--- "not annotated, inferred as any" apart; read the flagged line.
---
 
 ---@type string[]
 local files = {}
@@ -114,10 +109,9 @@ for _, file in ipairs(files) do
         -- *first* buffer are trustworthy; there is no client-visible
         -- "workspace indexed" event to wait on instead, so this is a
         -- fixed grace period rather than a real synchronisation point.
-        vim.wait(
-            60000,
-            function() return client ~= nil and client.initialized == true end,
-            100
+        vim.wait(60000, function()
+            return client ~= nil and client.initialized == true
+        end, 100
         )
         vim.wait(5000)
     else

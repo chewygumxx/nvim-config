@@ -15,10 +15,6 @@ std = "lua51+vim+luajit+busted"
 # (`{ "author/repo", opts = ... }`), this repo's plugin spec convention.
 mixed_table = "allow"
 
-# `_G.require_guard`/`_G.setup_guard`, this repo's own safe-require
-# convention (see CLAUDE.md), used throughout instead of a bare `require`.
-global_usage = "allow"
-
 # One-line `function() ... end` callbacks are this repo's own formatting
 # convention (luafmt collapses short callback bodies onto one line).
 multiple_statements = "allow"

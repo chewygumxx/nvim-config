@@ -1,5 +1,6 @@
-#!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+#!/usr/bin/env lua
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -14,16 +15,15 @@
 
 local M = {}
 
---- `foldtext` callback (`v:lua.cgxx_foldtext()`): renders the folded
---- line's own text, indent-collapsed into "~", followed by a right-aligned
---- "[N lines] [lvl=N]" summary. Reads fold state from `vim.v.fold*`.
+--- `foldtext` callback (`v:lua.require("option.fold").foldtext()`):
+--- renders the folded line's own text, indent-collapsed into "~", followed
+--- by a right-aligned "[N lines] [lvl=N]" summary. Reads fold state from
+--- `vim.v.fold*`.
 ---@return string text
-local foldtext = function()
+M.foldtext = function()
     -- Buffer
-    local tabstop = vim.api.nvim_get_option_value("tabstop", {})
-    if tabstop   == 0 then tabstop   = 4  end
-    local textwidth = vim.api.nvim_get_option_value("textwidth", {})
-    if textwidth == 0 then textwidth = 80 end
+    local tabstop   = vim.api.nvim_get_option_value("tabstop", {}) or 4
+    local textwidth = vim.api.nvim_get_option_value("textwidth", {}) or 80
 
     -- Metadata
     local start = vim.v.foldstart           -- Line number of fold beginning
@@ -34,7 +34,7 @@ local foldtext = function()
     local label      = vim.fn.getline(start)
         :gsub("\t", string.rep(" ", tabstop))
     local indent_pos = label:find("%S")
-    local indent     = indent_pos and (indent_pos - 1) or 0
+    local indent     = indent_pos and indent_pos - 1 or 0
 
     if indent >= 4 then
         label = label:gsub(
@@ -60,9 +60,7 @@ end
 --- option values.
 ---@return nil
 M.setup = function()
-    _G.cgxx_foldtext = foldtext
-    vim.opt.foldtext = "v:lua.cgxx_foldtext()"
-
+    vim.opt.foldtext = "v:lua.require(\"option.fold\").foldtext()"
     vim.o.foldmethod = "expr"
     vim.o.foldlevel  = 2
     vim.o.fillchars  = "fold: "

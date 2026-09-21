@@ -12,6 +12,7 @@
 ---@type vim.lsp.Config
 local M = {}
 
+---@type { [string]: vim.api.keyset.highlight }
 local hlgroup_defs = {
     ["@lsp.type.key.toml"] = { link = "@property" },
     ["@lsp.type.table.toml"] = { link = "@property" },

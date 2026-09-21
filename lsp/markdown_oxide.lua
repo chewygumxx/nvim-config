@@ -17,6 +17,7 @@ local M = {
     root_markers = { ".moxide.toml", ".git", "README", "index.md" },
 }
 
+---@type lsp.ClientCapabilities
 local extra_capabilities = {
     workspace = {
         didChangeWatchedFiles = {
@@ -28,11 +29,12 @@ local extra_capabilities = {
 ---@type lsp.ClientCapabilities
 M.capabilities = vim.tbl_deep_extend(
     "force",
-    _G.require_guard("util.lsp").capabilities(),
+    require("util.lsp").capabilities(),
     extra_capabilities
 )
 
 -- Placeholder for the inevitable overwrites later
+---@type { [string]: vim.api.keyset.highlight }
 local hlgroup_defs = {
     ["@lsp.sample.highlight.group"] = { link = "Sample" },
 }
