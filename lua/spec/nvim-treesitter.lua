@@ -30,6 +30,7 @@ local M = {
 -- from it.
 local ignore_filetypes = {
     "notify",
+    "noice",
     "fidget",
     "checkhealth",
     "lazy",
