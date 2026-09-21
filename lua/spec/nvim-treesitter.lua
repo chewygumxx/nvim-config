@@ -19,7 +19,6 @@
 ---@type LazyPluginSpec
 local M = {
     url    = "https://github.com/nvim-treesitter/nvim-treesitter.git",
-    cond   = true,
     branch = "main",
     lazy   = false,
     build  = ":TSUpdate",

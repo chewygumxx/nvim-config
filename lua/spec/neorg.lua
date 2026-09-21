@@ -14,7 +14,6 @@
 ---@type LazyPluginSpec
 local M = {
     "nvim-neorg/neorg",
-    cond = false,
     ft = { "norg" },
     opts = {},
 }

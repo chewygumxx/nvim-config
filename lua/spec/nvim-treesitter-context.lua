@@ -14,7 +14,6 @@
 ---@type LazyPluginSpec
 local M = {
     "nvim-treesitter/nvim-treesitter-context",
-    cond = false,
 
     dependencies = {
         "nvim-treesitter/nvim-treesitter",

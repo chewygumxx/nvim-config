@@ -14,7 +14,6 @@
 ---@type LazyPluginSpec
 local M = {
     "MeanderingProgrammer/render-markdown.nvim",
-    cond = false,
 
     ft = { "markdown" },
     opts = {},

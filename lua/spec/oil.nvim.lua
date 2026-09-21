@@ -15,10 +15,8 @@
 ---@type LazyPluginSpec
 local M = {
     "stevearc/oil.nvim",
-    cond = false,
+    lazy = false, -- Documentation recommends against lazy-loading
 
-    -- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
-    lazy = false,
     -- Optional dependencies
     dependencies = {
         { "nvim-mini/mini.icons", opts = {} },
@@ -26,7 +24,6 @@ local M = {
     },
 }
 
----@diagnostic disable-next-line: undefined-doc-name -- oil.nvim disabled, type stub unavailable
 ---@type oil.SetupOpts
 M.opts = {}
 

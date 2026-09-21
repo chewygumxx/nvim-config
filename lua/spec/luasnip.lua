@@ -19,7 +19,6 @@
 ---@type LazyPluginSpec
 local M = {
     "L3MON4D3/LuaSnip",
-    cond    = false,
     version = "v2.5.*",
     build   = "make install_jsregexp",
 

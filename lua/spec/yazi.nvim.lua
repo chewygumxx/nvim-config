@@ -15,7 +15,6 @@
 ---@type LazyPluginSpec
 local M = {
     "mikavilpas/yazi.nvim",
-    cond = false,
 
     version = "*",
     event = "VeryLazy",

@@ -14,7 +14,6 @@
 ---@type LazyPluginSpec
 local M = {
     "kndndrj/nvim-dbee",
-    cond = false,
 
     dependencies = {
         "MunifTanjim/nui.nvim",
