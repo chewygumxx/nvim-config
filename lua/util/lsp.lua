@@ -14,11 +14,13 @@
 -- keymaps on LspAttach. Required from spec/nvim-lspconfig.lua.
 --
 
+---@module "blink.cmp"
+
 local M = {}
 
 --- Client capabilities advertised to every LSP server: Neovim's own
 --- defaults merged with blink.cmp's completion-related capabilities.
----@return table capabilities
+---@return lsp.ClientCapabilities capabilities
 M.capabilities = function()
     local ok, blink = pcall(require, "blink.cmp")
     if not ok then

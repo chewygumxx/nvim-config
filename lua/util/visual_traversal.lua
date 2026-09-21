@@ -66,7 +66,7 @@ M.toggle = function(bufnr)
     update_keymaps(bufnr)
 end
 
----@type table<string, fun(opts: table)>
+---@type table<string, fun(opts: vim.api.keyset.create_user_command.command_args)>
 local act_func = {
     toggle  = function(_) M.toggle() end,
     enable  = function(_) M.enable() end,
@@ -75,7 +75,7 @@ local act_func = {
 
 --- Resolves act to a `nvim_create_user_command` callback.
 ---@param act string
----@return fun(opts: table)? callback nil if act isn't a known action
+---@return fun(opts: vim.api.keyset.create_user_command.command_args)? callback nil if act isn't a known action
 M.command = function(act)
     return act_func[act]
 end
