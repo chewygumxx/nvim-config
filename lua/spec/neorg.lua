@@ -10,10 +10,12 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "nvim-neorg/neorg",
     enabled = false,
+    ft = { "norg" },
     opts = {},
 }
 
