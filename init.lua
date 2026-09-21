@@ -77,33 +77,7 @@ end
 -- After  autocmd,  for augroup dependent plugin spec
 _G.setup_guard("util.lazy", {
     git  = { url_format = "git@github.com:%s.git" },
-    spec = {
-        { import = "spec" },
-        {
-            name = "overrides",
-            import = function()
-                local elide = {
-                    "folke/noice.nvim",
-                    "folke/snacks.nvim",
-                    "L3M0NAD3/LuaSnip",
-                    "mikavilpas/yazi.nvim",
-                    "stevearc/oil.nvim",
-                    "kndndrj/nvim-dbee",
-                    "MunifTanjim/nvim-nio",
-                    "OXY2DEV/markview.nvim",
-                    "folke/which-key.nvim",
-                    "nvim-neorg/neorg",
-                    "rcarriga/nvim-notify",
-                    "nvim-telescope/telescope.nvim",
-                }
-                local ret   = {}
-                for _, plugin in ipairs(elide) do
-                    table.insert(ret, { cond = false, plugin })
-                end
-                return ret
-            end,
-        },
-    },
+    spec = require("util.spec"),
 })
 
 -- After  util.lazy,  for treesitter parsing and colorscheme overwrite
