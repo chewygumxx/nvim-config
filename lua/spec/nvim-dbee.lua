@@ -10,6 +10,7 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "kndndrj/nvim-dbee",

@@ -10,6 +10,7 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "imsnif/kdl.vim",

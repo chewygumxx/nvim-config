@@ -16,6 +16,7 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "mfussenegger/nvim-lint",

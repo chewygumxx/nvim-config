@@ -16,6 +16,7 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "b0o/schemastore.nvim",

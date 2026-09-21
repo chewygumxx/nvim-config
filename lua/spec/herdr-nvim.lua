@@ -11,6 +11,7 @@
 
 ---@module "vim"
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "jtnovellis/herdr-nvim",

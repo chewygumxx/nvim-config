@@ -15,6 +15,7 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "ThePrimeagen/harpoon",

@@ -17,6 +17,7 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "mason-org/mason-lspconfig.nvim",

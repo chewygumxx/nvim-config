@@ -16,6 +16,7 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "stevearc/conform.nvim",
@@ -57,11 +58,7 @@ M.opts.formatters_by_ft.lua = function(bufnr)
 end
 
 -- Unlike prettier's "json" parser, "jsonc" honors `trailingComma` and
--- defaults to "all". A repo-local `.prettierrc`/`package.json` override can
--- disable that, but only within that repo's own tree, e.g. this repo's own
--- `.repo-metadata.jsonc`; a jsonc file edited outside such a repo would still
--- get trailing commas, which not every consumer of "JSON with comments"
--- tolerates. Force "none" here so it holds regardless of project.
+-- defaults to "all".
 M.opts.formatters.prettier_jsonc = {
     inherit = "prettier",
     append_args = { "--trailing-comma", "none" },
