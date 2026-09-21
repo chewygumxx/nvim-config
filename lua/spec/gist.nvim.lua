@@ -11,7 +11,10 @@
 
 local M = {
     "Rawnly/gist.nvim",
-    config = true,
+    lazy = true,
+
+    opts = {},
+
     cmd = { "GistCreate", "GistCreateFromFile", "GistsList" },
 }
 
