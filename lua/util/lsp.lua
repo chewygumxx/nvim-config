@@ -365,6 +365,9 @@ M.setup = function()
         desc     = "Configure buffer-local LSP keymaps on client attach",
         callback = function(event)
             local client = vim.lsp.get_client_by_id(event.data.client_id)
+            if not client then
+                return
+            end
             M.on_attach(event.buf, client)
         end,
     })
