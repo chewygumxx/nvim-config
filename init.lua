@@ -80,18 +80,18 @@ _G.setup_guard("util.lazy", {
     spec = {
         { import = "spec" },
         {
-            name = "overwrite",
+            name = "overrides",
             import = function()
                 return {
-                    { name = "noice.nvim", cond = false },
-                    { name = "snacks.nvim", cond = false },
-                    { name = "LuaSnip", cond = false },
-                    { name = "yazi.nvim", cond = false },
-                    { name = "oil.nvim", cond = false },
-                    { name = "nvim-dbee", cond = false },
-                    { name = "nvim-nio", cond = false },
-                    { name = "markview.nvim", cond = false },
-                    { name = "which-key.nvim", cond = false },
+                    { "folke/noice.nvim", cond = false },
+                    { "folke/snacks.nvim", cond = false },
+                    { "L3M0NAD3/LuaSnip", cond = false },
+                    { "mikavilpas/yazi.nvim", cond = false },
+                    { "stevearc/oil.nvim", cond = false },
+                    { "kndndrj/nvim-dbee", cond = false },
+                    { "MunifTanjim/nvim-nio", cond = false },
+                    { "OXY2DEV/markview.nvim", cond = false },
+                    { "folke/which-key.nvim", cond = false },
                 }
             end,
         },
