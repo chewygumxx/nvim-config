@@ -92,7 +92,7 @@ M.config = function()
     for _, usercmd in ipairs(usercmds) do
         vim.api.nvim_create_user_command(
             "MiniTest" .. usercmd.cmd,
-            MiniTest[usercmd.func](),
+            MiniTest[usercmd.func],
             { desc = "MiniTest: " .. usercmd.desc }
         )
     end
