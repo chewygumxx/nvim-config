@@ -21,7 +21,7 @@ local M = {
     ---@type notify.Config
     opts = {
         merge_duplicates = true,
-        background_colour = "NotifyBackground",
+        background_colour = "#000000",
         fps = 30,
         icons = {
             DEBUG = "",
