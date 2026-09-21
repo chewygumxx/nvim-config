@@ -76,8 +76,11 @@ end
 -- After  filetype, for lazy-load filetype triggers
 -- After  autocmd,  for augroup dependent plugin spec
 _G.setup_guard("util.lazy", {
-    git  = { url_format = "git@github.com:%s.git" },
     spec = require("util.spec"),
+    git  = { url_format = "git@github.com:%s.git" },
+    ui   = {
+        border = { "╔", "═", "╗", "║", "╝", "═", "╚", "║" },
+    },
 })
 
 -- After  util.lazy,  for treesitter parsing and colorscheme overwrite
