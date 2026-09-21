@@ -29,7 +29,11 @@ local M = {
 M.keys = {
     {
         "<leader>ha",
-        function() require("harpoon"):list():add() end,
+        function()
+            require("harpoon")
+                :list()
+                :add()
+        end,
         desc = "Harpoon: add file",
     },
     {
@@ -42,32 +46,56 @@ M.keys = {
     },
     {
         "<C-h>",
-        function() require("harpoon"):list():select(1) end,
+        function()
+            require("harpoon")
+                :list()
+                :select(1)
+        end,
         desc = "Harpoon: select 1",
     },
     {
         "<C-t>",
-        function() require("harpoon"):list():select(2) end,
+        function()
+            require("harpoon")
+                :list()
+                :select(2)
+        end,
         desc = "Harpoon: select 2",
     },
     {
         "<C-n>",
-        function() require("harpoon"):list():select(3) end,
+        function()
+            require("harpoon")
+                :list()
+                :select(3)
+        end,
         desc = "Harpoon: select 3",
     },
     {
         "<C-s>",
-        function() require("harpoon"):list():select(4) end,
+        function()
+            require("harpoon")
+                :list()
+                :select(4)
+        end,
         desc = "Harpoon: select 4",
     },
     {
         "<C-S-P>",
-        function() require("harpoon"):list():prev() end,
+        function()
+            require("harpoon")
+                :list()
+                :prev()
+        end,
         desc = "Harpoon: previous in list",
     },
     {
         "<C-S-N>",
-        function() require("harpoon"):list():next() end,
+        function()
+            require("harpoon")
+                :list()
+                :next()
+        end,
         desc = "Harpoon: next in list",
     },
 }
@@ -81,6 +109,8 @@ M.opts = {}
 ---@param _    LazyPlugin
 ---@param opts HarpoonPartialConfig
 ---@return nil
-M.config = function(_, opts) require("harpoon"):setup(opts) end
+M.config = function(_, opts)
+    require("harpoon"):setup(opts)
+end
 
 return M

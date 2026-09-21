@@ -14,7 +14,3 @@ std = "lua51+vim+luajit+busted"
 # LazySpec tables mix an array-part plugin name with dict-part opts
 # (`{ "author/repo", opts = ... }`), this repo's plugin spec convention.
 mixed_table = "allow"
-
-# One-line `function() ... end` callbacks are this repo's own formatting
-# convention (luafmt collapses short callback bodies onto one line).
-multiple_statements = "allow"

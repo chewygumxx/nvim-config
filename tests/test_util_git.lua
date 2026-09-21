@@ -32,7 +32,9 @@ describe("util.git", function()
         vim.fn.writefile({ "" }, file)
     end)
 
-    after_each(function() vim.fn.delete(dir, "rf") end)
+    after_each(function()
+        vim.fn.delete(dir, "rf")
+    end)
 
     it("resolves the owner/repo slug from the origin remote", function()
         eq(git.slug(file), "example-owner/example-repo")

@@ -68,9 +68,15 @@ end
 
 ---@type table<string, fun(opts: vim.api.keyset.create_user_command.command_args)>
 local act_func = {
-    toggle  = function(_) M.toggle() end,
-    enable  = function(_) M.enable() end,
-    disable = function(_) M.disable() end,
+    toggle  = function(_)
+        M.toggle()
+    end,
+    enable  = function(_)
+        M.enable()
+    end,
+    disable = function(_)
+        M.disable()
+    end,
 }
 
 --- Resolves act to a `nvim_create_user_command` callback.

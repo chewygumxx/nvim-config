@@ -27,8 +27,12 @@ end)
 describe("util.visual_traversal.enable/disable/toggle", function()
     local buf
 
-    before_each(function() buf = vim.api.nvim_create_buf(false, true) end)
-    after_each(function() vim.api.nvim_buf_delete(buf, { force = true }) end)
+    before_each(function()
+        buf = vim.api.nvim_create_buf(false, true)
+    end)
+    after_each(function()
+        vim.api.nvim_buf_delete(buf, { force = true })
+    end)
 
     it("enable sets the buffer-local flag", function()
         visual_traversal.enable(buf)
@@ -55,10 +59,9 @@ describe("util.visual_traversal.enable/disable/toggle", function()
             visual_traversal.enable(buf)
             -- `maparg()` only ever inspects buffer-local maps on the *current*
             -- buffer, so the query has to run with `buf` made current first.
-            local map = vim.api.nvim_buf_call(
-                buf,
-                function() return vim.fn.maparg("j", "n", false, true) end
-            )
+            local map = vim.api.nvim_buf_call(buf, function()
+                return vim.fn.maparg("j", "n", false, true)
+            end)
             eq(map.buffer, 1)
             eq(map.rhs, "gj")
         end
@@ -67,10 +70,10 @@ describe("util.visual_traversal.enable/disable/toggle", function()
     it("disable restores the plain motions, buffer-local", function()
         visual_traversal.enable(buf)
         visual_traversal.disable(buf)
-        local rhs = vim.api.nvim_buf_call(
-            buf,
-            function() return vim.fn.maparg("j", "n", false, true).rhs end
-        )
+        local rhs = vim.api.nvim_buf_call(buf, function()
+            return vim.fn.maparg("j", "n", false, true)
+                .rhs
+        end)
         eq(rhs, "j")
     end)
 end)

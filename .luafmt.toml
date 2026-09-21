@@ -13,7 +13,11 @@
 #
 
 [syntax]
-level = "Lua51"
+level = "LuaJIT"
+
+[indent]
+kind  = "Space"
+width = 4
 
 [layout]
 max_line_width                       = 80
@@ -23,13 +27,18 @@ prefer_chain_break_on_statement_tail = true
 prefer_binary_chain_operand_per_line = true
 
 [output]
-quote_style              = "Double"
-trailing_comma           = "Always"
-trailing_table_separator = "Multiline"
-single_arg_call_parens   = "Always"
+quote_style               = "Double"
+trailing_comma            = "Always"
+trailing_table_separator  = "Multiline"
+single_arg_call_parens    = "Always"
+simple_lambda_single_line = "Never"      # Selene doesn't like this either
 
 [spacing]
 space_before_lambda_func_paren = false
 
+[comments]
+align_in_statements = true
+
 [align]
 continuous_assign_statement = true
+table_field                 = true  # I cannot remember why I turned this off

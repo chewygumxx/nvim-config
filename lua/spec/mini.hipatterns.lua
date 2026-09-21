@@ -27,9 +27,11 @@ M.config = function()
     local gen_hex                            = require("mini.hipatterns")
         .gen_highlighter
         .hex_color({
-            "line",                     -- <style>
-            200,                        -- <priority>
-            function() return true end, -- <filter>
+            "line",                   -- <style>
+            200,                      -- <priority>
+            function()
+                return true
+            end, -- <filter>
             nil,
         })
     M.opts.hipatterns.highlighters.hex_color = gen_hex

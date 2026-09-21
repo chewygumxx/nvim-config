@@ -32,8 +32,12 @@ local function fake_chain(specs)
         }
     end
     for i, node in ipairs(nodes) do
-        node.prev_sibling = function() return nodes[i - 1] end
-        node.next_sibling = function() return nodes[i + 1] end
+        node.prev_sibling = function()
+            return nodes[i - 1]
+        end
+        node.next_sibling = function()
+            return nodes[i + 1]
+        end
     end
     return nodes
 end

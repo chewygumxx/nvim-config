@@ -24,9 +24,13 @@ local rep = require("luasnip.extras").rep
 
 local git = require("util.git")
 ---@return string?
-local slug = function() return git.slug() end
+local slug = function()
+    return git.slug()
+end
 ---@return string
-local path = function() return git.path() end
+local path = function()
+    return git.path()
+end
 
 local modeline = require("util.modeline").base({
     et = true,

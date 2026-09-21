@@ -12,7 +12,9 @@
 local eq = MiniTest.expect.equality
 
 describe("filetype.ftmatrix.setup", function()
-    setup(function() require("filetype.ftmatrix").setup() end)
+    setup(function()
+        require("filetype.ftmatrix").setup()
+    end)
 
     local match = function(filename)
         return (vim.filetype.match({ filename = filename }))
