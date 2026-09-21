@@ -14,9 +14,11 @@
 --
 
 ---@module "lazy"
+
 ---@type LazySpec
 local M = {
     "DrKJeff16/wezterm-types",
+    ft      = "lua",
     version = false,
 }
 
