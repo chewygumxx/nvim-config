@@ -14,18 +14,26 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@module "lazydev"
+
+---@type LazyPluginSpec
 local M = {
     "folke/lazydev.nvim",
-    enabled = true,
+    ft = "lua",
 
-    ft   = "lua",
+    ---@type lazydev.Config
     opts = {},
+    dependencies = {
+        "wezterm-types",
+    },
 }
 
+---@type lazydev.Library.spec[]
 M.opts.library = {
     { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-    { path = "wezterm-types", mods = { "wezterm" } }, -- https://github.com/DrKJeff16/wezterm-types
+
+    -- https://github.com/DrKJeff16/wezterm-types
+    { path = "wezterm-types", mods = { "wezterm" } },
 }
 
 return M
