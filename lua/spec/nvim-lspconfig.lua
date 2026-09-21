@@ -14,18 +14,15 @@
 --
 
 ---@module "lazy"
+
 ---@type LazyPluginSpec
 local M = {
     "neovim/nvim-lspconfig",
-    enabled = true,
-    lazy    = false,
+    lazy = false,
 }
 
 M.config = function()
-    local lsp = _G.require_guard("util.lsp")
-    if lsp and lsp.setup then
-        lsp.setup()
-    end
+    _G.setup_guard("util.lsp")
 end
 
 return M
