@@ -9,6 +9,10 @@
 --
 --
 
+---@module "lazy"
+---@module "claudecode"
+
+---@type LazyPluginSpec
 local M = {
     "coder/claudecode.nvim",
     lazy = true,
@@ -75,6 +79,7 @@ local M = {
         { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
     },
 
+    ---@type PartialClaudeCodeConfig
     opts = {},
 }
 

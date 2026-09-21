@@ -9,10 +9,15 @@
 --
 --
 
+---@module "lazy"
+---@module "gist"
+
+---@type LazyPluginSpec
 local M = {
     "Rawnly/gist.nvim",
     lazy = true,
 
+    ---@type Gist.Config
     opts = {},
 
     cmd = { "GistCreate", "GistCreateFromFile", "GistsList" },
