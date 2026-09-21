@@ -13,6 +13,8 @@
 -- LuaSnip snippet for markdown header
 --
 
+---@module "luasnip"
+
 local ls  = require("luasnip")
 local s   = ls.snippet
 local t   = ls.text_node
@@ -20,8 +22,10 @@ local i   = ls.insert_node
 local f   = ls.function_node
 local rep = require("luasnip.extras").rep
 
-local git  = require("util.git")
+local git = require("util.git")
+---@return string?
 local slug = function() return git.slug() end
+---@return string
 local path = function() return git.path() end
 
 local modeline = require("util.modeline").base({
@@ -30,10 +34,12 @@ local modeline = require("util.modeline").base({
     ft = "markdown",
     commentstring = "# %s",
 })
-local date     = function()
-    return os.date("%Y-%m-%d")
+---@return string
+local date = function()
+    return os.date("%Y-%m-%d") --[[@as string]]
 end
 
+---@type LuaSnip.Snippet
 local M = s("header/markdown", {
     t({
         "---",
