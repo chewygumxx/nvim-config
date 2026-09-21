@@ -31,6 +31,26 @@ else
 fi
 
 # --------
+# LuaLS
+# --------
+
+if command -v lua-language-server >/dev/null 2>&1; then
+    lua_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.lua' ':!**/symlink_*')
+    if [ -n "$lua_files" ]; then
+        luals_out=$(lua-language-server --check=. --checklevel=Warning 2>&1)
+        case "$luals_out" in
+            *"no problems found"*) ;;
+            *)
+                echo "$luals_out" | tail -n 40 >&2
+                status=1
+                ;;
+        esac
+    fi
+else
+    echo "pre-commit: lua-language-server not on PATH, skipping type checks" >&2
+fi
+
+# --------
 # mini.test
 # --------
 
