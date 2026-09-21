@@ -10,6 +10,7 @@
 --
 
 ---@module "lazy"
+---@module "treesitter-context"
 
 ---@type LazyPluginSpec
 local M = {
@@ -19,6 +20,7 @@ local M = {
         "nvim-treesitter/nvim-treesitter",
     },
 
+    ---@type TSContext.UserConfig
     opts = {
         mode         = "cursor", -- Line used to resolve context. ('cursor', 'topline')
         max_lines    = 0,   -- Maximum window lines. 0 = no limit.

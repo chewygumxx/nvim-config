@@ -10,6 +10,7 @@
 --
 
 ---@module "lazy"
+---@module "store"
 
 ---@type LazyPluginSpec
 local M = {
@@ -22,6 +23,7 @@ local M = {
         --{ "3rd/image.nvim", opts = {} },
     },
 
+    ---@type UserConfig
     opts = {
         layout = "tab", -- recommended when using image preview
     },

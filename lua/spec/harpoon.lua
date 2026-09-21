@@ -15,6 +15,7 @@
 --
 
 ---@module "lazy"
+---@module "harpoon"
 
 ---@type LazyPluginSpec
 local M = {
@@ -71,11 +72,15 @@ M.keys = {
     },
 }
 
+---@type HarpoonPartialConfig
 M.opts = {}
 
 -- `harpoon:setup(opts)` is a colon method call (harpoon relies on the
 -- implicit `self`, e.g. for its own autocmds); lazy.nvim's automatic
 -- `require(...).setup(opts)` handling would call it without one.
+---@param _    LazyPlugin
+---@param opts HarpoonPartialConfig
+---@return nil
 M.config = function(_, opts) require("harpoon"):setup(opts) end
 
 return M

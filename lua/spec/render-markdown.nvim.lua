@@ -10,12 +10,15 @@
 --
 
 ---@module "lazy"
+---@module "render-markdown"
 
 ---@type LazyPluginSpec
 local M = {
     "MeanderingProgrammer/render-markdown.nvim",
 
     ft = { "markdown" },
+
+    ---@type render.md.UserConfig
     opts = {},
 }
 

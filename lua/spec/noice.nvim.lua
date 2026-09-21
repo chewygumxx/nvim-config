@@ -14,6 +14,7 @@
 --
 
 ---@module "lazy"
+---@module "noice"
 
 ---@type LazyPluginSpec
 local M = {
@@ -25,6 +26,7 @@ local M = {
         "rcarriga/nvim-notify",
     },
 
+    ---@type NoiceConfig
     opts = {},
 }
 
