@@ -21,6 +21,7 @@
 -- Failure in resolving the module is reported via vim.notify rather than
 -- propagating.
 ---@param modpath string Module filepath
+---@return unknown? module nil if require() failed
 _G.require_guard = function(modpath)
     local ok, module = pcall(require, modpath)
     if not ok then
