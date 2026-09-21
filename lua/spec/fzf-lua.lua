@@ -10,7 +10,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "ibhagwan/fzf-lua",
     dependencies = {

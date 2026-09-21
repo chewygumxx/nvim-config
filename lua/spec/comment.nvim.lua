@@ -15,7 +15,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "numToStr/Comment.nvim",
     enabled = true,

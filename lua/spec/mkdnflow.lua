@@ -10,7 +10,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md
     url = "https://github.com/jakewvincent/mkdnflow.nvim",

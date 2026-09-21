@@ -10,7 +10,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "debugloop/telescope-undo.nvim",
     enabled = false,

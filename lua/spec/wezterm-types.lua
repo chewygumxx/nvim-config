@@ -15,7 +15,7 @@
 
 ---@module "lazy"
 
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "DrKJeff16/wezterm-types",
     ft      = "lua",

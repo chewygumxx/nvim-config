@@ -17,7 +17,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "mason-org/mason-lspconfig.nvim",
     enabled      = vim.env.TERMUX_VERSION == nil,

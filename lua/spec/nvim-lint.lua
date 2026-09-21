@@ -16,7 +16,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "mfussenegger/nvim-lint",
     event = "VeryLazy",

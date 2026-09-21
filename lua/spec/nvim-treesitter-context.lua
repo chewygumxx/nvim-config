@@ -10,7 +10,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "nvim-treesitter/nvim-treesitter-context",
     enabled = false,

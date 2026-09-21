@@ -11,7 +11,7 @@
 
 ---@module "vim"
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "jtnovellis/herdr-nvim",
     enabled = false,

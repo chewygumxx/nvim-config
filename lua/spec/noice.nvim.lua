@@ -14,7 +14,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "folke/noice.nvim",
     enabled = false,

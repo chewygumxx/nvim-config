@@ -14,7 +14,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "nvim-orgmode/orgmode",
 

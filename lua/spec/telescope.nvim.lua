@@ -14,7 +14,7 @@
 -- require("telescope").load_extension("fzf") for telescope-fzf-native
 -- below to have any effect.
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "nvim-telescope/telescope.nvim",
 

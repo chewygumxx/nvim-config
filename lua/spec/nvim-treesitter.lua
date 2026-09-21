@@ -15,7 +15,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     url     = "https://github.com/nvim-treesitter/nvim-treesitter.git",
     enabled = true,

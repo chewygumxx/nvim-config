@@ -17,7 +17,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     enabled      = vim.env.TERMUX_VERSION == nil,

@@ -16,7 +16,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "stevearc/conform.nvim",
     lazy = false,

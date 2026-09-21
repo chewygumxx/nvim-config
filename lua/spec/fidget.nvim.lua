@@ -16,7 +16,7 @@
 --
 
 ---@module "lazy"
----@type LazySpec
+---@type LazyPluginSpec
 local M = {
     "j-hui/fidget.nvim",
     lazy = false,
