@@ -15,6 +15,11 @@
 local M = {
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md
     url = "https://github.com/jakewvincent/mkdnflow.nvim",
+    cond = false, -- Crashes: modules.bib=false leaves mkdnflow.bib as a
+    -- boolean, but yaml/init.lua indexes it unconditionally as a table.
+    -- Also: path_resolution.fallback = "root" is no longer a valid value
+    -- in the currently installed version. Needs a config rewrite before
+    -- re-enabling.
 
     -- Populated by function 'filetype_triggers' (defined within file)
     ft = {},
