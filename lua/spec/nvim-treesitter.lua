@@ -29,6 +29,7 @@ local M = {
 -- actual registry (not guessed), so this only lists names confirmed absent
 -- from it.
 local ignore_filetypes = {
+    "notify",
     "fidget",
     "checkhealth",
     "lazy",
