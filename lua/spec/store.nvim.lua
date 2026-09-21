@@ -19,7 +19,7 @@ local M = {
 
     dependencies = {
         { "OXY2DEV/markview.nvim", opts = {} },
-        { "3rd/image.nvim", opts = {} },
+        --{ "3rd/image.nvim", opts = {} },
     },
 
     opts = {
