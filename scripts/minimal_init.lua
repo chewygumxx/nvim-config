@@ -23,8 +23,8 @@
 -- `$VIMRUNTIME .. stdpath("config")` during setup, undoing any manual
 -- `rtp` changes made beforehand. This script sidesteps both problems by
 -- only adding what test files actually need: this repo's own `lua/`, and
--- the already-installed `mini.nvim` for `mini.test`.
+-- the already-installed `mini.test`.
 --
 
 vim.opt.rtp:prepend(vim.fn.getcwd())
-vim.opt.rtp:append(vim.fn.stdpath("data") .. "/lazy/mini.nvim")
+vim.opt.rtp:append(vim.fn.stdpath("data") .. "/lazy/mini.test")
