@@ -12,8 +12,5 @@
         "teardown"
     ],
     "workspace.checkThirdParty": false,
-    "workspace.library": [
-        "~/.local/share/nvim/lazy",
-        "/usr/share/nvim/runtime/lua"
-    ]
+    "workspace.library": ["~/.local/share/nvim/lazy", "$VIMRUNTIME/lua"]
 }
