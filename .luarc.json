@@ -1,6 +1,19 @@
 {
     "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
-    "runtime.version": "Lua 5.1",
-    "diagnostics.globals": ["vim"],
-    "workspace.checkThirdParty": false
+    "runtime.version": "LuaJIT",
+    "diagnostics.globals": [
+        "vim",
+        "MiniTest",
+        "describe",
+        "it",
+        "setup",
+        "before_each",
+        "after_each",
+        "teardown"
+    ],
+    "workspace.checkThirdParty": false,
+    "workspace.library": [
+        "~/.local/share/nvim/lazy",
+        "/usr/share/nvim/runtime/lua"
+    ]
 }
