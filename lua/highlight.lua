@@ -16,6 +16,7 @@
 local M = {}
 
 -- Highlight Table
+---@type { [string]: vim.api.keyset.highlight }
 local hlgroup_defs = {
     -- Background Transparency and Anti-Eye Strain
     ["Normal"]     = { ctermbg = "none", fg = "#cad6ff", bg = "none" },

@@ -16,6 +16,7 @@ local M = {}
 
 local options = {}
 
+---@type { [string]: vim.api.keyset.highlight }
 local hlgroup_defs = {
     ["@type"]                  = { link = "@property" },
     ["@punctuation.bracket"]   = { link = "PreProc" },

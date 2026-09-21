@@ -19,6 +19,7 @@ local options = {
     spell      = true,
 }
 
+---@type { [string]: vim.api.keyset.highlight }
 local hlgroup_defs = {
     ["@markup.heading"]   = { fg = "#aaa6fa", bold = true },
     ["@markup.heading.1"] = { fg = "#7fb5ff", bold = true },
