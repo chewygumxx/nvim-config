@@ -79,15 +79,22 @@ _G.setup_guard("util.lazy", {
     git  = { url_format = "git@github.com:%s.git" },
     spec = {
         { import = "spec" },
-        { name = "noice.nvim", cond = false },
-        { name = "snacks.nvim", cond = false },
-        { name = "LuaSnip", cond = false },
-        { name = "yazi.nvim", cond = false },
-        { name = "oil.nvim", cond = false },
-        { name = "nvim-dbee", cond = false },
-        { name = "nvim-nio", cond = false },
-        { name = "markview.nvim", cond = false },
-        { name = "which-key.nvim", cond = false },
+        {
+            name = "overwrite",
+            import = function()
+                return {
+                    { name = "noice.nvim", cond = false },
+                    { name = "snacks.nvim", cond = false },
+                    { name = "LuaSnip", cond = false },
+                    { name = "yazi.nvim", cond = false },
+                    { name = "oil.nvim", cond = false },
+                    { name = "nvim-dbee", cond = false },
+                    { name = "nvim-nio", cond = false },
+                    { name = "markview.nvim", cond = false },
+                    { name = "which-key.nvim", cond = false },
+                }
+            end,
+        },
     },
 })
 
