@@ -39,6 +39,24 @@ M.slug = function(file, remote)
     return (slug:gsub("%.git$", ""))
 end
 
+--- Resolves slug's SPDX license identifier via the GitHub API.
+---@param slug string owner/repo
+---@return string? spdx_id SPDX identifier, or nil on lookup failure
+M.license = function(slug)
+    local result = vim.system({
+        "gh",
+        "api",
+        "repos/" .. slug .. "/license",
+        "--jq",
+        ".license.spdx_id",
+    }, { text = true }):wait(5000)
+    if result.code ~= 0 or not result.stdout or result.stdout == "" then
+        return
+    end
+
+    return (result.stdout:gsub("%s+$", ""))
+end
+
 --- Resolves file's path relative to its git repository root.
 ---@param file? string File to resolve from (default: current buffer)
 ---@return string path ":"-prefixed root-relative path, or a "~"-relative
