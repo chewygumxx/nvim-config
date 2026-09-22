@@ -51,12 +51,12 @@ jobs:
             - name: Add Neovim to PATH
               run: echo "$RUNNER_TEMP/nvim/bin" >> "$GITHUB_PATH"
 
-            # `main` branch, unpinned: matches `version = false` for
-            # `nvim-mini/mini.nvim` in `lua/spec/mini.nvim.lua`.
-            - name: Install mini.nvim
+            # `main` branch, unpinned: matches the lack of a `version` pin
+            # for `nvim-mini/mini.test` in `lua/spec/mini.test.lua`.
+            - name: Install mini.test
               run: |
-                  git clone --depth 1 https://github.com/nvim-mini/mini.nvim \
-                      "$HOME/.local/share/nvim/lazy/mini.nvim"
+                  git clone --depth 1 https://github.com/nvim-mini/mini.test \
+                      "$HOME/.local/share/nvim/lazy/mini.test"
 
             - name: Run tests
               run: nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
