@@ -20,6 +20,7 @@
 local M = {
     "folke/lazydev.nvim",
     ft = "lua",
+    enabled = vim.fs.root(0, ".luarc.json") == nil,
 
     ---@type lazydev.Config
     opts = {},

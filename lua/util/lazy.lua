@@ -252,26 +252,12 @@ end
 ---@param opts? LazyConfig
 ---@return nil
 M.setup = function(opts)
-    opts        = opts or {}
-    local name  = opts.name or "lazy"
-    local root  = opts.root or joinpath(data_dir, name)
-    local state = opts.state or joinpath(state_dir, name)
-
-    opts = vim.tbl_deep_extend("force", M.defaults, {
-        name     = name,
-        root     = root,
-        path     = opts.path or joinpath(root, "lazy.nvim"),
-        state    = joinpath(state, "state.json"),
-        lockfile = joinpath(state, "lock.json"),
-    }, opts
-    )
-
+    opts     = vim.tbl_deep_extend("force", M.defaults, opts or {})
     opts.url = opts.url or opts.git.url_format:format(opts[1])
 
     if not (vim.uv or vim.loop).fs_stat(opts.path) then
         M.install(opts.url, opts.path, opts.branch)
     end
-
     vim.opt.rtp:append(opts.path)
     require("lazy").setup(opts)
 end

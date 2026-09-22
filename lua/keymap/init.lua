@@ -4,7 +4,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/keymap.lua
+-- ::: :/lua/keymap/init.lua
 --
 --
 

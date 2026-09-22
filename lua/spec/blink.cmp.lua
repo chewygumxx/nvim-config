@@ -37,16 +37,19 @@ M.opts.completion = {
 }
 
 M.opts.sources = {
-    default = { "lsp", "path", "snippets", "buffer", "lazydev" },
-    providers = {
-        lazydev = {
-            name = "LazyDev",
-            module = "lazydev.integrations.blink",
-            -- make lazydev completions top priority (see `:h blink.cmp`)
-            score_offset = 100,
-        },
-    },
+    default = { "lsp", "path", "snippets", "buffer" },
+    providers = {},
 }
+
+if vim.fs.root(0, ".luarc.json") == nil then
+    table.insert(M.opts.source.default, "lazydev")
+    M.opts.sources.providers.lazydev = {
+        name = "LazyDev",
+        module = "lazydev.integrations.blink",
+        -- make lazydev completions top priority (see `:h blink.cmp`)
+        score_offset = 100,
+    }
+end
 
 M.opts.fuzzy = {
     implementation = "prefer_rust_with_warning",
