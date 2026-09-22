@@ -14,8 +14,7 @@
 ---@type LazyPluginSpec
 local M = {
     "nvim-mini/mini.test",
-    lazy = true,
-    cmds = {}, -- See usercmds
+    lazy = true, -- See M.cmd
 }
 
 M.opts = {
@@ -62,12 +61,12 @@ M.opts = {
 
 local usercmds = {
     {
-        cmd = "Run",
+        cmd  = "Run",
         func = "run",
         desc = "Run all cases",
     },
     {
-        cmd = "RunFile",
+        cmd  = "RunFile",
         func = "run_file",
         desc = "Run current file",
     },
@@ -77,15 +76,18 @@ local usercmds = {
         desc = "Run case at cursor",
     },
     {
-        cmd = "Stop",
+        cmd  = "Stop",
         func = "stop",
         desc = "Stop execution",
     },
 }
 
+---@type string[]
+local cmds = {}
 for _, usercmd in ipairs(usercmds) do
-    table.insert(M.cmds, "MiniTest" .. usercmd.cmd)
+    table.insert(cmds, "MiniTest" .. usercmd.cmd)
 end
+M.cmd = cmds
 
 M.config = function()
     local MiniTest = require("mini.test")
