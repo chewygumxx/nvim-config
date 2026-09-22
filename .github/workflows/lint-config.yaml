@@ -81,6 +81,59 @@ jobs:
             - name: Lint
               run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs -d '\n' selene
 
+    luacats:
+        name: LuaCATS
+        runs-on: ubuntu-latest
+
+        # Pinned manually to avoid an unauthenticated releases-API lookup on
+        # every run; bump by hand when a newer release is needed.
+        env:
+            NVIM_VERSION: "0.12.5" # https://github.com/neovim/neovim/releases
+            LUA_LS_VERSION: "3.19.1" # https://github.com/LuaLS/lua-language-server/releases
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            - name: Cache Neovim
+              id: cache-nvim
+              uses: actions/cache@v6
+              with:
+                  path: ${{ runner.temp }}/nvim
+                  key: nvim-${{ env.NVIM_VERSION }}
+
+            - name: Install Neovim
+              if: steps.cache-nvim.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p "$RUNNER_TEMP/nvim"
+                  curl -sL "https://github.com/neovim/neovim/releases/download/v${NVIM_VERSION}/nvim-linux-x86_64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/nvim" --strip-components=1
+
+            - name: Add Neovim to PATH
+              run: echo "$RUNNER_TEMP/nvim/bin" >> "$GITHUB_PATH"
+
+            - name: Cache lua-language-server
+              id: cache-lua-ls
+              uses: actions/cache@v6
+              with:
+                  path: ${{ runner.temp }}/lua-language-server
+                  key: lua-language-server-${{ env.LUA_LS_VERSION }}
+
+            - name: Install lua-language-server
+              if: steps.cache-lua-ls.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p "$RUNNER_TEMP/lua-language-server"
+                  curl -sL "https://github.com/LuaLS/lua-language-server/releases/download/${LUA_LS_VERSION}/lua-language-server-${LUA_LS_VERSION}-linux-x64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/lua-language-server"
+                  chmod +x "$RUNNER_TEMP/lua-language-server/bin/lua-language-server"
+
+            - name: Add lua-language-server to PATH
+              run: echo "$RUNNER_TEMP/lua-language-server/bin" >> "$GITHUB_PATH"
+
+            # Fails if lua-language-server can't infer anything more
+            # specific than any/unknown anywhere under lua/, lsp/, or
+            # init.lua. See scripts/luals_untyped.lua for how.
+            - name: Check annotation coverage
+              run: nvim --headless -u scripts/minimal_init.lua -l scripts/luals_untyped.lua
+
     toml:
         name: TOML
         runs-on: ubuntu-latest
