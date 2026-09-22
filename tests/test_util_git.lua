@@ -60,6 +60,23 @@ describe("util.git", function()
         eq(git.slug(file), nil)
     end)
 
+    it("resolves the owner/repo slug from a named remote", function()
+        vim.system({
+            "git",
+            "-C",
+            dir,
+            "remote",
+            "add",
+            "upstream",
+            "git@github.com:upstream-owner/upstream-repo.git",
+        }):wait()
+        eq(git.slug(file, "upstream"), "upstream-owner/upstream-repo")
+    end)
+
+    it("returns nil when the named remote does not exist", function()
+        eq(git.slug(file, "upstream"), nil)
+    end)
+
     it(
         "resolves a root-relative, colon-prefixed path inside the repo",
         function()
