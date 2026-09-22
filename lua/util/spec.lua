@@ -31,6 +31,7 @@ local elide = {
     "nvim-telescope/telescope.nvim",
     "jakewvincent/mkdnflow.nvim",
     "MeanderingProgrammer/render-markdown.nvim",
+    "folke/lazydev.nvim",
 }
 
 ---@return LazyPluginSpec[]
