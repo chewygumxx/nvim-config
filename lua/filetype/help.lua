@@ -18,7 +18,6 @@ local M = {}
 --- Don't export, exclusively intended for M.setup
 ---@type { [string]: number | string | boolean }
 local local_opts = {
-    winminwidth = 90,
     relativenumber = false,
     number = true,
 }
@@ -41,6 +40,7 @@ M.setup = function(opts)
 
     local win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_config(win, { split = "right", win = win })
+    vim.api.nvim_win_set_width(win, 90)
     for opt, val in pairs(local_opts) do
         vim.opt_local[opt] = val
     end
