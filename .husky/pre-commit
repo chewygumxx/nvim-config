@@ -84,7 +84,7 @@ lintfmt_json_yaml() {
 # -----
 
 test_luals() {
-    [ -z "$(get_files '*.lua')" ] && return
+    [ -z "$lua_files" ] && return
 
     cmd_exist nvim lua-language-server || return 0
 
