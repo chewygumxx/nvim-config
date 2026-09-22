@@ -35,7 +35,7 @@ M.defaults = {
     -- Name of lazy.nvim, sets directory names
     name = "lazy" or nil,
 
-    ---@LazySpec
+    ---@type LazySpec
     spec = "spec" or nil,
 
     -- Plugin installation directory
@@ -256,7 +256,10 @@ M.setup = function(opts)
     opts.url = opts.url or opts.git.url_format:format(opts[1])
 
     if not (vim.uv or vim.loop).fs_stat(opts.path) then
-        M.install(opts.url, opts.path, opts.branch)
+        local code = M.install(opts.url, opts.path, opts.branch)
+        if code ~= 0 then
+            return
+        end
     end
     vim.opt.rtp:append(opts.path)
     require("lazy").setup(opts)
