@@ -74,17 +74,19 @@ end
 
 ---@return nil
 M.setup = function()
-    --- Idempotency Guard
-    --- Resolve the callback of the Neovim builtin keymap
-    --- Protects against infinite self-assigned fallback recursion by utilising desc
-    --- as a unique identifier.
-    ---@type vim.api.keyset.get_keymap
-    local current = vim.fn.maparg("gx", "n", false, true)
-    if current.desc ~= M.desc then
-        M.fallback = current
-    end
+    vim.schedule(function()
+        --- Idempotency Guard
+        --- Resolve the callback of the Neovim builtin keymap
+        --- Protects against infinite self-assigned fallback recursion by utilising desc
+        --- as a unique identifier.
+        ---@type vim.api.keyset.get_keymap
+        local current = vim.fn.maparg("gx", "n", false, true)
+        if current.desc ~= M.desc then
+            M.fallback = current
+        end
 
-    vim.keymap.set("n", "gx", M.callback, { desc = M.desc })
+        vim.keymap.set("n", "gx", M.callback, { desc = M.desc })
+    end)
 end
 
 return M
