@@ -12,7 +12,9 @@
 # No `set -e`: each section below accumulates failures into `status` and
 # keeps running the remaining sections, so one failing check doesn't hide
 # problems in the others. A stray non-zero from any unguarded command must
-# not abort the script early.
+# not abort the script early. husky's own shim (`.husky/_/h`) runs this
+# script via `sh -e`, so `-e` must be explicitly turned back off here.
+set +e
 status=0
 
 # --------
@@ -35,8 +37,17 @@ fi
 # --------
 
 if command -v lua-language-server >/dev/null 2>&1; then
-    lua_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.lua' ':!**/symlink_*')
+    lua_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.lua')
     if [ -n "$lua_files" ]; then
+        # `VIMRUNTIME` is only set inside a running Neovim process, but
+        # `.luarc.json`'s `workspace.library` depends on it to find
+        # Neovim's own runtime type stubs. Ask a headless Neovim for it
+        # rather than hardcoding a path, same idea as `data_dir` below.
+        if command -v nvim >/dev/null 2>&1; then
+            VIMRUNTIME=$(nvim --headless --clean \
+                -c 'lua io.stdout:write(vim.env.VIMRUNTIME or "")' -c 'qa!' 2>/dev/null)
+            export VIMRUNTIME
+        fi
         luals_out=$(lua-language-server --check=. --checklevel=Warning 2>&1)
         case "$luals_out" in
             *"no problems found"*) ;;
