@@ -43,6 +43,7 @@ M.opts.sources = {
 
 if vim.fs.root(0, ".luarc.json") == nil then
     table.insert(M.opts.source.default, "lazydev")
+    M.opts.sources.providers         = M.opts.sources.providers or {}
     M.opts.sources.providers.lazydev = {
         name = "LazyDev",
         module = "lazydev.integrations.blink",
