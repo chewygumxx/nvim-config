@@ -73,32 +73,47 @@ M.insert = function(file, buf, opt)
         })
     end
 
-    -- License
-    lines[#lines + 1] = string.format(
-        commentstring,
-        "SPDX-License-Identifier: GPL-3.0-only"
-    )
-
     -- (Slug and) Path
     local slug
+    local upstream_slug
     local path = util_git.path(file)
     if path:find(":", 1, true) == 1 then
-        slug = util_git.slug(file)
+        slug          = util_git.slug(file)
+        upstream_slug = util_git.slug(file, "upstream")
     end
     if path:find("~/.config", 1, true) == 1 then
         slug = "chewygumxx/dotfiles"
         path = path:gsub("~/%.config", ":/dot_config")
     end
 
+    -- License
+    local spdx        = upstream_slug and util_git.license(upstream_slug)
+        or "GPL-3.0-only"
+    lines[#lines + 1] = string.format(
+        commentstring,
+        "SPDX-License-Identifier: " .. spdx
+    )
+
     if path then
         lines[#lines + 1] = ""
         lines[#lines + 1] = string.format(commentstring, "")
         lines[#lines + 1] = string.format(commentstring, "")
         if slug then
-            lines[#lines + 1] = string.format(
-                commentstring,
-                "~" .. slug .. ".git"
-            )
+            if upstream_slug then
+                lines[#lines + 1] = string.format(
+                    commentstring,
+                    "~" .. upstream_slug .. ".git"
+                )
+                lines[#lines + 1] = string.format(
+                    commentstring,
+                    "└─> ~" .. slug .. ".git"
+                )
+            else
+                lines[#lines + 1] = string.format(
+                    commentstring,
+                    "~" .. slug .. ".git"
+                )
+            end
             lines[#lines + 1] = string.format(commentstring, "::: " .. path)
         else
             lines[#lines + 1] = string.format(commentstring, path)
