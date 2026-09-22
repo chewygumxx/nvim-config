@@ -14,11 +14,13 @@
 
 local M = {}
 
---- Resolves the "owner/repo" slug of file's git remote "origin".
----@param file? string File to resolve from (default: current buffer)
----@return string? slug "owner/repo", or nil if file has no "origin" remote
-M.slug = function(file)
-    file = file or vim.fn.expand("%")
+--- Resolves the "owner/repo" slug of file's git remote.
+---@param file?   string File to resolve from (default: current buffer)
+---@param remote? string Remote name (default: "origin")
+---@return string? slug "owner/repo", or nil if file has no such remote
+M.slug = function(file, remote)
+    file   = file or vim.fn.expand("%")
+    remote = remote or "origin"
 
     local result = vim.system({
         "git",
@@ -26,7 +28,7 @@ M.slug = function(file)
         vim.fn.fnamemodify(file, ":p:h"),
         "remote",
         "get-url",
-        "origin",
+        remote,
     }, { text = true }):wait()
     if result.code ~= 0 or not result.stdout or result.stdout == "" then
         return
