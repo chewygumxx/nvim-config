@@ -11,15 +11,7 @@
 
 --
 -- Prints every location where `lua-language-server` can't infer anything
--- more specific than `any`/`unknown`, as a stand-in for "not annotated":
--- LuaLS has no diagnostic for missing LuaCATS, only for annotations that
--- exist and disagree with usage (`--check`, already run in
--- `.husky/pre-commit`). Its `Lua.hint.paramType`/`returnType` inlay hints
--- are otherwise editor-only (`textDocument/inlayHint`); this asks the
--- same server for the same hints over every tracked `.lua` file and
--- prints the ones whose resolved type is `any`/`unknown`, so the result
--- is greppable/CI-able instead of something you have to eyeball per
--- buffer.
+-- more specific than any/unknown.--
 --
 -- Usage: `nvim --headless -u scripts/minimal_init.lua
 --         -l scripts/luals_untyped.lua`

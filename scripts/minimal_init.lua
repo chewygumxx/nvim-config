@@ -10,8 +10,8 @@
 --
 
 --
--- Headless test bootstrap: `nvim --headless -u scripts/minimal_init.lua
--- -l scripts/minitest.lua`.
+-- Headless test bootstrap:
+-- nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
 --
 -- Deliberately does not source the real `init.lua`. `-u` only chooses
 -- which file Neovim sources, it does not change `stdpath("config")`, so
