@@ -22,8 +22,8 @@ local M = {}
 ---@return string text
 M.foldtext = function()
     -- Buffer
-    local tabstop   = vim.api.nvim_get_option_value("tabstop", {}) or 4
-    local textwidth = vim.api.nvim_get_option_value("textwidth", {}) or 80
+    local tabstop   = vim.bo.tabstop
+    local textwidth = vim.bo.textwidth ~= 0 and vim.bo.textwidth or 80
 
     -- Metadata
     local start = vim.v.foldstart           -- Line number of fold beginning

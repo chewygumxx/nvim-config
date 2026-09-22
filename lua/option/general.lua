@@ -1,5 +1,6 @@
-#!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+#!/usr/bin/env lua
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -42,7 +43,7 @@ local opts = {
     spelllang = "en",
 
     -- Consign security to oblivion
-  --modelineexpr = true,
+    --modelineexpr = true,
 }
 
 --- Applies this module's global option values.

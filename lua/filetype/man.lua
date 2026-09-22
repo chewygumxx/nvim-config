@@ -1,5 +1,5 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+-- vim:set expandtab shiftwidth=4 filetype=lua:
 
 --
 --
@@ -9,18 +9,15 @@
 --
 
 --
--- Filetype-specific configuration for manpages
+-- Filetype-specific configuration for Manpages
 --
 
 local M = {}
 
-local options = {
-    number = true,
+---@type { [string]: number | string | boolean }
+M.local_opts = {
+    number         = true,
+    relativenumber = false,
 }
-
----@return nil
-M.setup = function()
-    require("util.option").apply(options, { scope = "local" })
-end
 
 return M

@@ -15,7 +15,9 @@
 -- pure. Safe to run in any order since every case sets the same values.
 --
 
-local eq = MiniTest.expect.equality
+local eq = require("mini.test")
+    .expect
+    .equality
 
 describe("option.general.setup", function()
     it("applies its documented global option values", function()

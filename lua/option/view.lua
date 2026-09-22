@@ -1,5 +1,6 @@
-#!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+#!/usr/bin/env lua
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --

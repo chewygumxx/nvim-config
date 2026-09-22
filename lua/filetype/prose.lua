@@ -14,13 +14,9 @@
 
 local M = {}
 
-local options = {
+---@type { [string]: number | string | boolean }
+M.local_opts = {
     spell = true,
 }
-
----@return nil
-M.setup = function()
-    require("util.option").apply(options, { scope = "local" })
-end
 
 return M

@@ -1,5 +1,6 @@
-#!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+#!/usr/bin/env lua
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -14,20 +15,12 @@
 
 local M = {}
 
-local __this_module = ...
-
-local sibling_modules = {
-    "general",
-    "fold",
-    "view",
-}
-
---- Sets up each sibling option module.
+--- Calls .setup() of each option module
 ---@return nil
 M.setup = function()
-    for _, sibling in ipairs(sibling_modules) do
-        require(__this_module .. "." .. sibling).setup()
-    end
+    require("option.general").setup()
+    require("option.fold").setup()
+    require("option.view").setup()
 end
 
 return M

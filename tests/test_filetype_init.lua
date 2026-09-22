@@ -5,15 +5,17 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/tests/test_filetype_ftmatrix.lua
+-- ::: :/tests/test_filetype_init.lua
 --
 --
 
-local eq = MiniTest.expect.equality
+local eq = require("mini.test")
+    .expect
+    .equality
 
-describe("filetype.ftmatrix.setup", function()
+describe("filetype.setup", function()
     setup(function()
-        require("filetype.ftmatrix").setup()
+        require("filetype").setup()
     end)
 
     local match = function(filename)

@@ -9,30 +9,41 @@
 --
 --
 
+--
+-- Filetype-specific configuration for Neovim help
+--
+
 local M = {}
 
---- Widens the current help window and moves it to the far right, unless
---- it is the last window left (where `:wincmd L` would no-op) or the
---- buffer was merely `:edit`ed rather than opened via `:help`.
----@param _file string
----@param buf   integer
----@param _opts vim.api.keyset.create_autocmd.callback_args
+--- Don't export, exclusively intended for M.setup
+---@type { [string]: number | string | boolean }
+local local_opts = {
+    winminwidth = 90,
+    relativenumber = false,
+    number = true,
+}
+
+--- Implements filetype-specific configuration for Neovim help
+--- - Buffer opened via `:edit` rather than `:help`
+--- - It is the only window
+---@param opts vim.api.keyset.create_autocmd.callback_args
 ---@return nil
-M.setup = function(_file, buf, _opts)
-    -- Exclusively help windows, skip `:edit`ed doc files,
-    if vim.bo[buf].buftype ~= "help" then
+M.setup = function(opts)
+    -- Buffer opened via `:edit` rather than `:help`
+    if vim.bo[opts.buf].buftype ~= "help" then
         return
     end
 
-    -- Required: the API errors on the last non-floating window, where
-    -- `:wincmd L` would merely no-op.
+    -- Only one window
     if vim.fn.winlayout()[1] == "leaf" then
         return
     end
 
     local win = vim.api.nvim_get_current_win()
-    vim.api.nvim_win_set_config(win, { split = "right", win = -1 })
-    vim.api.nvim_win_set_width(win, 90)
+    vim.api.nvim_win_set_config(win, { split = "right", win = win })
+    for opt, val in pairs(local_opts) do
+        vim.opt_local[opt] = val
+    end
 end
 
 return M

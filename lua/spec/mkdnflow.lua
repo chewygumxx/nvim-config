@@ -210,13 +210,7 @@ M.opts.to_do             = {
                 content = { bold = true },
             },
             sort = { section = 1, position = "bottom" },
-            propagate = {
-                up   = function(_host_list)
-                    return "in_progress"
-                end,
-                down = function(_child_list)
-                end,
-            },
+            propagate = {},
         },
         complete = {
             marker = { "X", "x" },

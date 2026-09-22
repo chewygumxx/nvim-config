@@ -10,7 +10,9 @@
 --
 
 local text = require("util.text")
-local eq   = MiniTest.expect.equality
+local eq   = require("mini.test")
+    .expect
+    .equality
 
 describe("util.text.wrap_comment", function()
     it(

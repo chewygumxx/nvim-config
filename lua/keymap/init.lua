@@ -184,6 +184,7 @@ M.setup = function()
     M.visual_indent_persist()
     M.file_goto()
     M.file_create_or_open()
+    require("keymap.gx").setup()
 
     -- Doesn't accept arguments
     M.blackhole_register()

@@ -9,109 +9,130 @@
 #
 #
 
-# No `set -e`: each section below accumulates failures into `status` and
-# keeps running the remaining sections, so one failing check doesn't hide
-# problems in the others. A stray non-zero from any unguarded command must
-# not abort the script early. husky's own shim (`.husky/_/h`) runs this
-# script via `sh -e`, so `-e` must be explicitly turned back off here.
+# Husky executes with `sh -e`
+# Unset to ensure each validation operation is attempted.
 set +e
 status=0
+__this_file="$0"
+
 
 # --------
-# Lua
+# General
 # --------
 
-if command -v luafmt >/dev/null 2>&1 && command -v selene >/dev/null 2>&1; then
-    lua_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.lua' ':!**/symlink_*')
-    if [ -n "$lua_files" ]; then
-        echo "$lua_files" | xargs -d '\n' luafmt --write
-        echo "$lua_files" | xargs -d '\n' git add --
-        echo "$lua_files" | xargs -d '\n' selene || status=1
-    fi
-else
-    echo "pre-commit: luafmt/selene not on PATH, skipping Lua checks" >&2
-fi
+log() {
+    printf '%s: %s \n' "$__this_file" "$*"
+}
 
-# --------
-# LuaLS
-# --------
-
-if command -v lua-language-server >/dev/null 2>&1; then
-    lua_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.lua')
-    if [ -n "$lua_files" ]; then
-        # `VIMRUNTIME` is only set inside a running Neovim process, but
-        # `.luarc.json`'s `workspace.library` depends on it to find
-        # Neovim's own runtime type stubs. Ask a headless Neovim for it
-        # rather than hardcoding a path, same idea as `data_dir` below.
-        if command -v nvim >/dev/null 2>&1; then
-            VIMRUNTIME=$(nvim --headless --clean \
-                -c 'lua io.stdout:write(vim.env.VIMRUNTIME or "")' -c 'qa!' 2>/dev/null)
-            export VIMRUNTIME
+cmd_exist () {
+    not_found=0
+    for cmd in "$@"; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            log "Command not found: $cmd"
+            not_found=1
         fi
-        luals_out=$(lua-language-server --check=. --checklevel=Warning 2>&1)
-        case "$luals_out" in
-            *"no problems found"*) ;;
-            *)
-                echo "$luals_out" | tail -n 40 >&2
-                status=1
-                ;;
-        esac
+    done
+    return "$not_found"
+}
+
+get_files() {
+    git diff --cached --name-only --diff-filter=ACMR -- "$@" | while IFS= read -r f; do
+        [ -f "$f" ] && printf '%s\n' "$f"
+    done
+}
+
+
+# ----------------
+# Lint and Format
+# ----------------
+
+lintfmt_lua() {
+    lua_files=$(get_files '*.lua')
+    [ -z "$lua_files" ] && return
+
+    cmd_exist selene luafmt || return 0
+
+    echo "$lua_files" | xargs -d '\n' selene || return 1
+    echo "$lua_files" | xargs -d '\n' luafmt --verify --write || return 1
+    echo "$lua_files" | xargs -d '\n' git add --
+}
+
+lintfmt_toml() {
+    toml_files=$(get_files '*.toml')
+    [ -z "$toml_files" ] && return
+
+    cmd_exist tombi || return 0
+
+    echo "$toml_files" | xargs -d '\n' tombi lint --error-on-warnings --offline || return 1
+    echo "$toml_files" | xargs -d '\n' tombi format --offline || return 1
+    echo "$toml_files" | xargs -d '\n' git add --
+}
+
+lintfmt_json_yaml() {
+    json_yaml_files=$(get_files '*.json' '*.jsonc' '*.yaml' '*.yml')
+    [ -z "$json_yaml_files" ] && return
+
+    cmd_exist npx || return 0
+
+    echo "$json_yaml_files" | xargs -d '\n' npx --no -- prettier --write || return 1
+    echo "$json_yaml_files" | xargs -d '\n' git add --
+}
+
+
+# -----
+# Test
+# -----
+
+test_luals() {
+    [ -z "$(get_files '*.lua')" ] && return
+
+    cmd_exist nvim lua-language-server || return 0
+
+    VIMRUNTIME=$(nvim --headless --clean \
+        -c 'lua io.stdout:write(vim.env.VIMRUNTIME or "")' \
+        -c 'qa!' \
+        2>/dev/null)
+    export VIMRUNTIME
+    luals_out=$(lua-language-server --check=. --checklevel=Warning 2>&1)
+    case "$luals_out" in
+        *"no problems found"*) ;;
+        *)
+            echo "$luals_out" | tail -n 40 >&2
+            log "LuaLS found Warnings"
+            return 1
+            ;;
+    esac
+}
+
+test_minitest() {
+    [ -z "$(get_files 'lua/' 'tests/')" ] && return
+
+    cmd_exist nvim || return 0
+
+    data_dir=$(nvim --headless --clean \
+        -c 'lua io.stdout:write(vim.fn.stdpath("data"))' \
+        -c 'qa!' \
+        2>/dev/null)
+    if [ ! -d "$data_dir/lazy/mini.test" ]; then
+        log "mini.test not found at: $data_dir/lazy/mini.test"
+        return 1
     fi
-else
-    echo "pre-commit: lua-language-server not on PATH, skipping type checks" >&2
-fi
+
+    nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua || return 1
+}
+
 
 # --------
-# mini.test
+# Execute
 # --------
 
-if command -v nvim >/dev/null 2>&1; then
-    test_files=$(git diff --cached --name-only --diff-filter=ACMR -- 'lua/*' 'tests/*' ':!**/symlink_*')
-    if [ -n "$test_files" ]; then
-        data_dir=$(nvim --headless --clean \
-            -c 'lua io.stdout:write(vim.fn.stdpath("data"))' -c 'qa!' 2>/dev/null)
-        if [ -d "$data_dir/lazy/mini.test" ]; then
-            nvim --headless -u scripts/minimal_init.lua \
-                -l scripts/minitest.lua || status=1
-        else
-            echo "pre-commit: mini.test not installed, skipping tests" >&2
-        fi
-    fi
-else
-    echo "pre-commit: nvim not on PATH, skipping tests" >&2
-fi
+cmd_exist git xargs || exit 127
 
-# --------
-# TOML
-# --------
+lintfmt_lua || status=1
+lintfmt_toml || status=1
+lintfmt_json_yaml || status=1
 
-if command -v tombi >/dev/null 2>&1; then
-    toml_files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.toml' ':!**/symlink_*')
-    if [ -n "$toml_files" ]; then
-        echo "$toml_files" | xargs -d '\n' tombi format --offline
-        echo "$toml_files" | xargs -d '\n' git add --
-        echo "$toml_files" | xargs -d '\n' tombi lint --error-on-warnings --offline || status=1
-    fi
-else
-    echo "pre-commit: tombi not on PATH, skipping TOML checks" >&2
-fi
-
-# --------
-# JSON/YAML
-# --------
-
-if command -v npx >/dev/null 2>&1; then
-    json_yaml_files=$(
-        git diff --cached --name-only --diff-filter=ACMR \
-            -- '*.json' '*.jsonc' '*.yaml' '*.yml' ':!**/symlink_*' |
-            while IFS= read -r f; do [ -L "$f" ] || printf '%s\n' "$f"; done
-    )
-    if [ -n "$json_yaml_files" ]; then
-        echo "$json_yaml_files" | xargs -d '\n' npx --no -- prettier --write
-        echo "$json_yaml_files" | xargs -d '\n' git add --
-    fi
-else
-    echo "pre-commit: npx not on PATH, skipping JSON/YAML checks" >&2
-fi
+test_luals || status=1
+test_minitest || status=1
 
 exit $status

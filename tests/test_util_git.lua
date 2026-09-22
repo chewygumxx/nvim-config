@@ -10,7 +10,9 @@
 --
 
 local git = require("util.git")
-local eq  = MiniTest.expect.equality
+local eq  = require("mini.test")
+    .expect
+    .equality
 
 describe("util.git", function()
     local dir, file

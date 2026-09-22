@@ -12,13 +12,45 @@
 -- Filetype module initialisation
 --
 
-local M             = {}
-local __this_module = ...
+local M = {}
 
--- Maps a detected filetype to the specialised module that handles it.
--- Several real filetypes can share one module (e.g. the various ini-syntax
--- filetypes Neovim assigns distinct names to all route to "dosini").
-local ft_specialised_mods = {
+---@type vim.filetype.add.filetypes
+M.filetypes = {
+    extension = {
+        conf      = "dosini",
+        automount = "dosini",
+        device    = "dosini",
+        mount     = "dosini",
+        path      = "dosini",
+        scope     = "dosini",
+        service   = "dosini",
+        slice     = "dosini",
+        snapshot  = "dosini",
+        socket    = "dosini",
+        swap      = "dosini",
+        target    = "dosini",
+        timer     = "dosini",
+    },
+
+    filename = {
+        ["ignore"]         = "gitignore",
+        [".chezmoiignore"] = "gitignore",
+        [".assetsignore"]  = "gitignore", -- CloudFlare Worker wrangler config
+    },
+
+    pattern = {
+        [".*gnupg/.*%.conf"] = "gpg",
+        [".*/hypr/.*%.conf"] = "hyprlang",
+
+        [".*config/zsh/.*"]       = "zsh",
+        [".*zsh/func/[^/]*"]      = "zsh",
+        [".*zsh/functions/[^/]*"] = "zsh",
+    },
+}
+
+--- Maps a detected filetype to the specialised module that handles it.
+---@type { [string]: string } { [Filetype]: Module }
+M.modmap = {
     man          = "man",
     markdown     = "markdown",
     kdl          = "kdl",
@@ -32,36 +64,59 @@ local ft_specialised_mods = {
     help         = "help",
 }
 
+---@param opts vim.api.keyset.create_autocmd.callback_args
+---@return nil
+M.config = function(opts)
+    if type(M.modmap[opts.match]) ~= "string" then
+        return
+    end
+
+    local success, module = pcall(require, "filetype." .. M.modmap[opts.match])
+    if not success then
+        vim.notify(
+            "Filetype module for " .. opts.match
+                .. " is registered but none found: filetype."
+                .. M.modmap[opts.match],
+            vim.log.levels.ERROR
+        )
+        return
+    end
+
+    if type(module.local_opts) == "table" then
+        for opt, val in pairs(module.local_opts) do
+            vim.opt_local[opt] = val
+        end
+    end
+
+    if type(module.hlgroup_defs) == "table" and not module.highlights_defined then
+        for hlgroup, defmap in pairs(module.hlgroup_defs) do
+            vim.api.nvim_set_hl(0, hlgroup, defmap)
+        end
+        module.highlights_defined = true
+    end
+
+    if type(module.setup) == "function" then
+        module.setup(opts)
+    end
+end
+
 --- Registers the FileType autocmd that dispatches to a specialised
 --- filetype module, if one is mapped for the triggering filetype.
 ---@return nil
-local ft_specialised = function()
+M.autocmd = function()
     vim.api.nvim_create_autocmd("FileType", {
-        desc     = "If available, instantiates filetype-specialised lua module",
-        group    = vim.api.nvim_create_augroup("cgxx.filetype_specialised", {
+        desc     = "If exists, implements filetype-specific configuration",
+        group    = vim.api.nvim_create_augroup("cgxx.filetype", {
             clear = true,
         }),
-        callback = function(opts)
-            local modname = ft_specialised_mods[opts.match]
-            if not modname then
-                return
-            end
-
-            local module = require(__this_module .. "." .. modname)
-            if not module or not module.setup then
-                return
-            end
-
-            module.setup(opts.file, opts.buf, opts)
-        end,
+        callback = M.config,
     })
 end
 
---- Sets up custom filetype detection and specialised filetype dispatch.
+--- Sets up custom filetype detection.
 ---@return nil
 M.setup = function()
-    require(__this_module .. ".ftmatrix").setup()
-    ft_specialised()
+    vim.filetype.add(M.filetypes)
 end
 
 return M

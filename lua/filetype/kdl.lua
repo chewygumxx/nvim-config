@@ -14,8 +14,6 @@
 
 local M = {}
 
-local options = {}
-
 ---@type { [string]: vim.api.keyset.highlight }
 local hlgroup_defs = {
     ["@type"]                  = { link = "@property" },
@@ -23,14 +21,10 @@ local hlgroup_defs = {
     ["@punctuation.delimiter"] = { link = "Macro" },
 }
 
--- Highlight links are session-global; only need to be defined once.
+---@type { [string]: vim.api.keyset.highlight }
+M.hlgroup_defs = {}
 for hlgroup, defmap in pairs(hlgroup_defs) do
-    vim.api.nvim_set_hl(0, hlgroup .. ".kdl", defmap)
-end
-
----@return nil
-M.setup = function()
-    require("util.option").apply(options, { scope = "local" })
+    M.hlgroup_defs[hlgroup .. ".kdl"] = defmap
 end
 
 return M

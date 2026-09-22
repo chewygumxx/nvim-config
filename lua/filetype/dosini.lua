@@ -9,18 +9,13 @@
 --
 
 --
--- dosini filetype settings
+-- Filetype settings: dosini
 --
 
 local M = {}
 
-local options = {
+M.local_opts = {
     commentstring = "# %s",
 }
-
----@return nil
-M.setup = function()
-    require("util.option").apply(options, { scope = "local" })
-end
 
 return M

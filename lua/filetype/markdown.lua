@@ -9,12 +9,13 @@
 --
 
 --
--- Markdown filetype settings
+-- Filetype-specific configuration for Markdown
 --
 
 local M = {}
 
-local options = {
+---@type { [string]: number | string | boolean }
+M.local_opts = {
     shiftwidth = 2,
     spell      = true,
 }
@@ -40,15 +41,11 @@ local hlgroup_defs = {
     ["@label"]               = { link = "@punctuation.special.markdown" },
 }
 
--- Highlight links are session-global; only need to be defined once.
+---@type { [string]: vim.api.keyset.highlight }
+M.hlgroup_defs = {}
 for hlgroup, defmap in pairs(hlgroup_defs) do
-    vim.api.nvim_set_hl(0, hlgroup .. ".markdown", defmap)
-    vim.api.nvim_set_hl(0, hlgroup .. ".markdown_inline", defmap)
-end
-
----@return nil
-M.setup = function()
-    require("util.option").apply(options, { scope = "local" })
+    M.hlgroup_defs[hlgroup .. ".markdown"]        = defmap
+    M.hlgroup_defs[hlgroup .. ".markdown_inline"] = defmap
 end
 
 return M

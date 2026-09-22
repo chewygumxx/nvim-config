@@ -9,6 +9,13 @@
 --
 local M = {}
 
+--- Creates the shared "cgxx.file_entry" augroup and registers this
+--- module's autocmds.
+---@type integer
+M.augroup_file_entry = vim.api.nvim_create_augroup("cgxx.file_entry", {
+    clear = true,
+})
+
 --- Registers the `BufReadPost` autocmd that restores the cursor to its
 --- last position in the file (skipped if something already moved it,
 --- e.g. `gF`, a line-number arg).
@@ -50,20 +57,13 @@ local unmodifiable_q_quit = function()
     })
 end
 
---- Creates the shared "cgxx.file_entry" augroup and registers this
---- module's autocmds.
+--- Creates Autocommands
 ---@return nil
 M.setup = function()
-    ---@type integer
-    M.augroup_file_entry = vim.api.nvim_create_augroup("cgxx.file_entry", {
-        clear = true,
-    })
     cursor_last_position()
     unmodifiable_q_quit()
-    local header = require("util.header")
-    if header then
-        header.autocmd()
-    end
+    require("util.header").autocmd()
+    require("filetype").autocmd()
 end
 
 return M

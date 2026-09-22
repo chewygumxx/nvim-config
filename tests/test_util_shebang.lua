@@ -10,7 +10,9 @@
 --
 
 local shebang = require("util.shebang")
-local eq      = MiniTest.expect.equality
+local eq      = require("mini.test")
+    .expect
+    .equality
 
 describe("util.shebang.get", function()
     it(
