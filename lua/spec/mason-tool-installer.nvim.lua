@@ -33,7 +33,6 @@ local M = {
         ensure_installed = {
             "stylua",
             "luafmt",
-            "luassert",
             "selene",
             "busted",
 
