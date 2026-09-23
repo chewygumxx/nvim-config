@@ -28,8 +28,9 @@ M.defaults = {
     --- Repository URL or GitHub slug
     "chewygumxx/lazy.nvim" or nil,
 
-    -- Resolved URL
-    url = "https://github.com/chewygumxx/lazy.nvim" or nil,
+    -- Resolved URL: left unset so `M.setup()` derives it from `git.url_format`
+    -- unless a caller passes one explicitly.
+    url = nil,
 
     -- Repository branch
     branch = "chewygumxx" or nil,
