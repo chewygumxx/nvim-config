@@ -37,11 +37,13 @@ local cursor_last_position = function()
     })
 end
 
---- Registers the `BufReadPost` autocmd that maps "q" to quit, buffer-local,
---- for buffers opened readonly or otherwise unmodifiable.
+--- Registers the autocmd that maps "q" to quit, buffer-local, for buffers
+--- opened readonly or otherwise unmodifiable. Listens on `BufEnter` as well
+--- as `BufReadPost`, since `nofile`/scratch buffers (`:checkhealth`, the
+--- quickfix window, etc.) are never the target of an actual file read.
 ---@return nil
 local unmodifiable_q_quit = function()
-    vim.api.nvim_create_autocmd("BufReadPost", {
+    vim.api.nvim_create_autocmd({ "BufReadPost", "BufEnter" }, {
         desc     = "For unmodifiable buffers: Keymap (nv) q->quit ",
         group    = M.augroup_file_entry,
         callback = function(event)
