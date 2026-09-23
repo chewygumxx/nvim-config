@@ -23,3 +23,13 @@
 
 ---@class cgxx.spec.telescope.Opts
 ---@field extensions? table<string, table>
+
+--
+-- Local stand-in for the `require("telescope.builtin")` module itself
+-- (distinct from the setup opts type above), covering only the fields
+-- lua/spec/telescope.nvim.lua actually touches.
+--
+
+---@class telescope.builtin
+---@field loclist  fun(opts?: table)
+---@field quickfix fun(opts?: table)

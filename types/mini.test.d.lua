@@ -32,3 +32,21 @@
 ---@field execute?     MiniTest.ExecuteOpts
 ---@field script_path? string
 ---@field silent?      boolean
+
+--
+-- Local stand-in for the `require("mini.test")` module itself (distinct
+-- from the MiniTest.Config opts type above), covering only the fields
+-- tests/*.lua and scripts/minitest.lua actually touch.
+--
+
+---@class mini.test.Expect
+---@field equality fun(left: any, right: any, opts?: table)
+
+---@class mini.test
+---@field expect          mini.test.Expect
+---@field setup           fun(config?: MiniTest.Config)
+---@field run             fun(opts?: table)
+---@field run_file        fun(file?: string, opts?: table)
+---@field run_at_location fun(location?: table, opts?: table)
+---@field stop            fun(opts?: table)
+---@field [string]        fun(...: any)

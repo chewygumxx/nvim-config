@@ -80,9 +80,18 @@
 ---@field section?  integer
 ---@field position? cgxx.spec.mkdnflow.ToDoSortPosition
 
+---@class (exact) cgxx.spec.mkdnflow.ToDoItemStatus
+---@field name string
+
+---@class (exact) cgxx.spec.mkdnflow.ToDoItem
+---@field status cgxx.spec.mkdnflow.ToDoItemStatus
+
+---@class (exact) cgxx.spec.mkdnflow.ToDoList
+---@field items cgxx.spec.mkdnflow.ToDoItem[]
+
 ---@class (exact) cgxx.spec.mkdnflow.ToDoStatusPropagateOpts
----@field up?   fun(host_list: table): string
----@field down? fun(child_list: table): string[]
+---@field up?   fun(host_list: cgxx.spec.mkdnflow.ToDoList): string
+---@field down? fun(child_list: cgxx.spec.mkdnflow.ToDoList): string[]
 
 ---@class (exact) cgxx.spec.mkdnflow.ToDoStatusOpts
 ---@field marker?    string | string[]

@@ -27,3 +27,16 @@
 
 ---@class MiniHipatterns.Config
 ---@field highlighters? table<string, MiniHipatterns.HighlighterOpts>
+
+--
+-- Local stand-in for the `require("mini.hipatterns")` module itself
+-- (distinct from the MiniHipatterns.Config opts type above), covering
+-- only the fields lua/spec/mini.hipatterns.lua actually touches.
+--
+
+---@class mini.hipatterns.gen_highlighter
+---@field hex_color fun(opts?: table): MiniHipatterns.HighlighterOpts
+
+---@class mini.hipatterns
+---@field gen_highlighter mini.hipatterns.gen_highlighter
+---@field setup           fun(config?: MiniHipatterns.Config)

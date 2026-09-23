@@ -52,7 +52,13 @@ lintfmt_lua() {
 
     cmd_exist selene luafmt || return 0
 
-    echo "$lua_files" | xargs -d '\n' selene || return 1
+    # types/*.d.lua are lua_ls-only ---@meta declaration stubs, never
+    # required or executed; selene has no way to know that and flags
+    # their intentional global declarations as real-code bugs.
+    selene_files=$(printf '%s\n' "$lua_files" | grep -v '^types/')
+    [ -n "$selene_files" ] \
+        && { printf '%s\n' "$selene_files" | xargs -d '\n' selene || return 1; }
+
     echo "$lua_files" | xargs -d '\n' luafmt --verify --write || return 1
     echo "$lua_files" | xargs -d '\n' git add --
 }
