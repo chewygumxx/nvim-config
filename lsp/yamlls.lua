@@ -16,7 +16,7 @@ local M = {
             -- schemastore.nvim supplies the catalog instead, avoids a
             -- redundant fetch from yaml-language-server's own store.
             schemaStore = { enable = false, url = "" },
-            schemas = require("schemastore")
+            schemas = require("schemastore") --[[@as schemastore]]
                 .yaml
                 .schemas(),
         },
