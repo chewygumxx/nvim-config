@@ -43,7 +43,7 @@ M.config = function()
             local win = vim.api.nvim_get_current_win()
             local loc = vim.fn.getwininfo(win)[1].loclist == 1
             vim.schedule(function()
-                local builtin = require("telescope.builtin")
+                local builtin = require("telescope.builtin") --[[@as telescope.builtin]]
                 if loc then
                     vim.cmd("lclose")
                     builtin.loclist()

@@ -316,14 +316,15 @@ M.config = function()
     -- crate misdetects the host toolchain as a cross-compiler and looks for
     -- a nonexistent `aarch64-linux-android-gcc` instead.
     if vim.env.TERMUX_VERSION then
-        vim.env.CC  = vim.env.CC or vim.env.PREFIX .. "/bin/clang"
-        vim.env.CXX = vim.env.CXX or vim.env.PREFIX .. "/bin/clang++"
+        local prefix = vim.env.PREFIX                          --[[@as string]]
+        vim.env.CC   = vim.env.CC or prefix .. "/bin/clang"
+        vim.env.CXX  = vim.env.CXX or prefix .. "/bin/clang++"
     end
 
     vim.treesitter.language.register("ini", "conf")
     vim.treesitter.language.register("gotmpl", "template")
 
-    local ts = require("nvim-treesitter")
+    local ts = require("nvim-treesitter") --[[@as nvim-treesitter]]
     -- Install core parsers after lazy.nvim finishes loading all plugins
     vim.api.nvim_create_autocmd("User", {
         pattern  = "LazyDone",
@@ -334,9 +335,12 @@ M.config = function()
     })
 
     -- State tracking for async parser loading
-    local parsers_loaded  = {}
+    ---@type table<string, boolean>
+    local parsers_loaded = {}
+    ---@type { buf: integer, lang: string } []
     local parsers_pending = {}
-    local parsers_failed  = {}
+    ---@type table<string, boolean>
+    local parsers_failed = {}
 
     -- Helper to start highlighting and indentation
     local start = function(buf, lang)

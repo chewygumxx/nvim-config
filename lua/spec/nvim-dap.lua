@@ -80,7 +80,7 @@ local M = {
 }
 
 M.config = function()
-    local dap = require("dap")
+    local dap = require("dap") --[[@as dap]]
 
     -- mason-nvim-dap.nvim has no working JS/TS handler ("node2" is the
     -- deprecated vscode-node-debug2 adapter; its "js" mapping has no
@@ -124,7 +124,7 @@ M.config = function()
                 type = "pwa-node",
                 request = "attach",
                 name = "Attach to process",
-                processId = require("dap.utils").pick_process,
+                processId = (require("dap.utils") --[[@as dap.utils]]).pick_process,
                 cwd = "${workspaceFolder}",
             },
             {

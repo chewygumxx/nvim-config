@@ -25,7 +25,7 @@ local M = {
 }
 
 M.config = function()
-    local gen_hex                            = require("mini.hipatterns")
+    local gen_hex                            = require("mini.hipatterns") --[[@as mini.hipatterns]]
         .gen_highlighter
         .hex_color({
             "line",                   -- <style>

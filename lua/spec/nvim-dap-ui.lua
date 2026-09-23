@@ -35,6 +35,7 @@ local M = {
 }
 
 M.config = function()
+    ---@type dap, dapui
     local dap, dapui = require("dap"), require("dapui")
     dapui.setup()
 
