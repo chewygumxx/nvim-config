@@ -28,7 +28,6 @@ local M = {
         "jakewvincent/mkdnflow.nvim",
         "kndndrj/nvim-dbee",
         "mikavilpas/yazi.nvim",
-        "nvim-neorg/neorg",
         "nvim-telescope/telescope.nvim",
         "nvim-treesitter/nvim-treesitter-context",
         "rcarriga/nvim-notify",
