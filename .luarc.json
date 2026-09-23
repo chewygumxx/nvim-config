@@ -3,7 +3,6 @@
     "runtime.version": "LuaJIT",
     "runtime.pathStrict": true,
     "diagnostics.globals": [
-        "vim",
         "MiniTest",
         "describe",
         "it",
