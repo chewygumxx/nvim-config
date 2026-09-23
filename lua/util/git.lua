@@ -34,8 +34,11 @@ M.slug = function(file, remote)
         return
     end
 
-    local slug = result.stdout:gsub("%s+$", ""):match("([%w_.%-]+/[%w_.%-]+)$")
-        or ""
+    local slug = result.stdout:gsub("%s+$", "")
+        :match("([%w_.%-]+/[%w_.%-]+)$")
+    if not slug then
+        return
+    end
     return (slug:gsub("%.git$", ""))
 end
 
