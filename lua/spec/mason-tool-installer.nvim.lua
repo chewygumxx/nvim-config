@@ -22,7 +22,7 @@
 ---@type LazyPluginSpec
 local M = {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
-    enabled      = vim.env.TERMUX_VERSION == nil,
+    enabled      = vim.env.HERDR_ENV == nil and vim.env.TERMUX_VERSION == nil,
     lazy         = false,
     dependencies = {
         "mason-org/mason.nvim",
