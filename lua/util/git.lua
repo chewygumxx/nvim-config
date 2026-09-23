@@ -57,7 +57,11 @@ M.license = function(slug)
         return
     end
 
-    return (result.stdout:gsub("%s+$", ""))
+    local spdx_id = result.stdout:gsub("%s+$", "")
+    if spdx_id == "null" then
+        return
+    end
+    return spdx_id
 end
 
 --- Resolves file's path relative to its git repository root.
