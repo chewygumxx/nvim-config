@@ -47,6 +47,7 @@ M.opts.load = {
 
             ---@param completed number Total number of completed tasks
             ---@param total     number Total number of tasks
+            ---@return string
             format = function(completed, total)
                 return string.format(
                     "[%d/%d] [%d%%]",

@@ -169,6 +169,7 @@ M.opts.dashboard = {
         header = { "%s", align = "center" },
         ---@param item snacks.dashboard.Item
         ---@param ctx  snacks.dashboard.Format.ctx
+        ---@return { [1]: string, hl: string } []
         file = function(item, ctx)
             -- `snacks.dashboard.Item` has a `[string]: any` catch-all
             -- alongside its own `file?: string` field, so `item.file`

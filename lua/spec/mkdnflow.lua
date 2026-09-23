@@ -182,6 +182,8 @@ M.opts.to_do             = {
             },
             sort = { section = 2, position = "top" },
             propagate = {
+                ---@param host_list cgxx.spec.mkdnflow.ToDoList
+                ---@return string
                 up = function(host_list)
                     local no_items_started = true
                     for _, item in ipairs(host_list.items) do
@@ -221,6 +223,8 @@ M.opts.to_do             = {
             },
             sort = { section = 3, position = "top" },
             propagate = {
+                ---@param host_list cgxx.spec.mkdnflow.ToDoList
+                ---@return string
                 up = function(host_list)
                     local all_items_complete = true
                     for _, item in ipairs(host_list.items) do
