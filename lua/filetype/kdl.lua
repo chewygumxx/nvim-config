@@ -19,12 +19,13 @@ local hlgroup_defs = {
     ["@type"]                  = { link = "@property" },
     ["@punctuation.bracket"]   = { link = "PreProc" },
     ["@punctuation.delimiter"] = { link = "Macro" },
+    ["kdlNode"]                = { link = "@property" },
 }
 
 ---@type { [string]: vim.api.keyset.highlight }
 M.hlgroup_defs = {}
 for hlgroup, defmap in pairs(hlgroup_defs) do
-    M.hlgroup_defs[hlgroup .. ".kdl"] = defmap
+    M.hlgroup_defs[hlgroup] = defmap
 end
 
 return M
