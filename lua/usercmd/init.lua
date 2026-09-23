@@ -26,10 +26,16 @@ local visual_traversal = function()
         return
     end
     local vt = mod.command
-    usercmd("XXVisTrav", vt("toggle"), { desc = "Toggle: " .. desc })
-    usercmd("XXVisTravToggle", vt("toggle"), { desc = "Toggle: " .. desc })
-    usercmd("XXVisTravEnable", vt("enable"), { desc = "Enable: " .. desc })
-    usercmd("XXVisTravDisable", vt("disable"), { desc = "Disable: " .. desc })
+    usercmd("XXVisTrav", assert(vt("toggle")), { desc = "Toggle: " .. desc })
+    usercmd("XXVisTravToggle", assert(vt("toggle")), {
+        desc = "Toggle: " .. desc,
+    })
+    usercmd("XXVisTravEnable", assert(vt("enable")), {
+        desc = "Enable: " .. desc,
+    })
+    usercmd("XXVisTravDisable", assert(vt("disable")), {
+        desc = "Disable: " .. desc,
+    })
 end
 
 --- Registers the `XXInterpretEscape` user command.
@@ -82,6 +88,23 @@ local insert_header = function()
     usercmd("XXInsertHeader", ih.command, { desc = desc })
 end
 
+--- Registers the `XXLuaChecker` user command, backed by
+--- `usercmd.lua_checker`/`util.lua_checker`.
+---@return nil
+local lua_checker = function()
+    local desc = "Switch nvim-lint's lua type checker "
+        .. "(luals_check/emmylua_check); bare toggles"
+    local mod  = require("usercmd.lua_checker")
+    if not mod then
+        return
+    end
+    usercmd("XXLuaChecker", mod.command, {
+        desc = desc,
+        nargs = "?",
+        complete = mod.complete,
+    })
+end
+
 --- Registers every user command this config defines.
 ---@return nil
 M.setup = function()
@@ -89,6 +112,7 @@ M.setup = function()
     interpret_escape()
     redirect_awkward_pager()
     insert_header()
+    lua_checker()
 end
 
 return M

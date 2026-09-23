@@ -76,7 +76,11 @@ M.blink_linenumber = function(lhs, desc)
         vim.o.relativenumber = false
 
         vim.defer_fn(function()
-            vim.api.nvim_set_hl(0, "LineNr", old_hl_linenr)
+            vim.api.nvim_set_hl(
+                0,
+                "LineNr",
+                old_hl_linenr --[[@as vim.api.keyset.highlight]]
+            )
             vim.o.number         = old_o_number
             vim.o.relativenumber = old_o_relativenumber
         end, 3000)

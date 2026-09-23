@@ -27,6 +27,7 @@ local function range_text(source, row, start_col, end_col)
         return vim.api.nvim_buf_get_text(source, row, start_col, row, end_col, {})[1]
             or ""
     end
+    ---@cast source string
     if cached_source ~= source then
         cached_source, cached_lines = source, vim.split(source, "\n", {
                 plain = true,

@@ -244,7 +244,8 @@ M.diagnostics_workspace = function(buf, lhs, desc)
     lhs  = lhs or "<leader>eq"
     desc = desc or "LSP: Diagnostics (workspace)"
     vim.keymap.set("n", lhs, function()
-        require("fzf-lua").diagnostics_workspace()
+        local fzf = require("fzf-lua") --[[@as fzf-lua]]
+        fzf.diagnostics_workspace()
     end, { buffer = buf, desc = desc }
     )
 end
@@ -258,7 +259,8 @@ M.diagnostics_document = function(buf, lhs, desc)
     lhs  = lhs or "<leader>el"
     desc = desc or "LSP: Diagnostics (document)"
     vim.keymap.set("n", lhs, function()
-        require("fzf-lua").diagnostics_document()
+        local fzf = require("fzf-lua") --[[@as fzf-lua]]
+        fzf.diagnostics_document()
     end, { buffer = buf, desc = desc }
     )
 end
@@ -272,7 +274,8 @@ M.document_symbols = function(buf, lhs, desc)
     lhs  = lhs or "<leader>ss"
     desc = desc or "LSP: Document symbols"
     vim.keymap.set("n", lhs, function()
-        require("fzf-lua").lsp_document_symbols()
+        local fzf = require("fzf-lua") --[[@as fzf-lua]]
+        fzf.lsp_document_symbols()
     end, { buffer = buf, desc = desc }
     )
 end
@@ -286,7 +289,8 @@ M.workspace_symbols = function(buf, lhs, desc)
     lhs  = lhs or "<leader>sS"
     desc = desc or "LSP: Workspace symbols"
     vim.keymap.set("n", lhs, function()
-        require("fzf-lua").lsp_workspace_symbols()
+        local fzf = require("fzf-lua") --[[@as fzf-lua]]
+        fzf.lsp_workspace_symbols()
     end, { buffer = buf, desc = desc }
     )
 end
