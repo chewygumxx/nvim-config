@@ -1,16 +1,19 @@
 {
     "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
     "runtime.version": "LuaJIT",
+    "runtime.path": ["lua/?.lua", "lua/?/init.lua"],
     "runtime.pathStrict": true,
-    "diagnostics.globals": [
-        "MiniTest",
-        "describe",
-        "it",
-        "setup",
-        "before_each",
-        "after_each",
-        "teardown"
-    ],
     "workspace.checkThirdParty": false,
-    "workspace.library": ["~/.local/share/nvim/lazy", "$VIMRUNTIME/lua"]
+    "workspace.library": ["$VIMRUNTIME/lua"],
+    "diagnostics.groupFileStatus": {
+        "luadoc": "Any",
+        "strict": "Any",
+        "strong": "Any",
+        "type-check": "Any"
+    },
+    "type.checkTableShape": true,
+    "type.inferParamType": false,
+    "type.castNumberToInteger": false,
+    "type.weakNilCheck": false,
+    "type.weakUnionCheck": false
 }
