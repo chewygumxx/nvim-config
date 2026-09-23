@@ -51,7 +51,10 @@ M.foldtext = function()
 
     -- Info
     local fold_info = string.format("[%d lines] [lvl=%i]", count, level)
-    local alignment = string.rep(" ", textwidth - #label - #fold_info - 1)
+    local alignment = string.rep(
+        " ",
+        textwidth - vim.fn.strdisplaywidth(label) - #fold_info - 1
+    )
 
     return label .. alignment .. fold_info
 end
