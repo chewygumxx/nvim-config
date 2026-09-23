@@ -34,7 +34,6 @@ local M = {
             "stylua",
             "luafmt",
             "selene",
-            "busted",
 
             "prettier",
             "tombi",
