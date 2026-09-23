@@ -104,7 +104,15 @@ M.config = function(opts)
     end
 
     if type(module.setup) == "function" then
-        module.setup(opts)
+        local ok, err = pcall(module.setup, opts)
+        if not ok then
+            vim.notify(
+                "Filetype module for " .. opts.match
+                    .. " failed in setup(): filetype." .. M.modmap[opts.match]
+                    .. ": " .. err,
+                vim.log.levels.ERROR
+            )
+        end
     end
 end
 
