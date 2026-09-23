@@ -19,6 +19,9 @@ local M = {}
 ---@param remote? string Remote name (default: "origin")
 ---@return string? slug "owner/repo", or nil if file has no such remote
 M.slug = function(file, remote)
+    if vim.fn.executable("git") == 0 then
+        return
+    end
     file   = file or vim.fn.expand("%")
     remote = remote or "origin"
 
@@ -46,6 +49,10 @@ end
 ---@param slug string owner/repo
 ---@return string? spdx_id SPDX identifier, or nil on lookup failure
 M.license = function(slug)
+    if vim.fn.executable("gh") == 0 then
+        return
+    end
+
     local result = vim.system({
         "gh",
         "api",
@@ -70,6 +77,9 @@ end
 ---  path if file isn't inside a git repository
 M.path = function(file)
     file = file or vim.fn.expand("%")
+    if vim.fn.executable("git") == 0 then
+        return vim.fn.fnamemodify(file, ":~")
+    end
 
     local result = vim.system({
         "git",
