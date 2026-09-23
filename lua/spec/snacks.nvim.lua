@@ -158,7 +158,7 @@ M.opts.dashboard = {
     -- item field formatters
     formats = {
         icon = function(item)
-            if item.file and item.icon == "file" or item.icon == "directory" then
+            if item.file and (item.icon == "file" or item.icon == "directory") then
                 return require("snacks")
                     .dashboard
                     .icon(item.file, item.icon)
