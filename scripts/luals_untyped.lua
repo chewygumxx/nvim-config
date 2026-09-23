@@ -53,6 +53,7 @@ local function hint_text(label)
     if type(label) == "string" then
         return label
     end
+    ---@type string[]
     local parts = {}
     for _, part in ipairs(label) do
         parts[#parts + 1] = part.value
