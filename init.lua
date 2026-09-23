@@ -28,7 +28,7 @@ require("usercmd").setup()
 -- After  filetype, for lazy-load filetype triggers
 -- After  autocmd,  for augroup dependent plugin spec
 require("util.lazy").setup({
-    spec = require("util.spec"),
+    spec = require("spec").import(),
     git  = { url_format = "git@github.com:%s.git" },
     ui   = {
         --border = { "╔", "═", "╗", "║", "╝", "═", "╚", "║" },
