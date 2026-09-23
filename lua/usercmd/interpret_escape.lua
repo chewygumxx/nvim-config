@@ -133,13 +133,4 @@ M.command = function(opts)
     interpret_escape(opts.bang)
 end
 
---- Registers the `XXInterpretEscape` user command.
----@return nil
-M.setup = function()
-    vim.api.nvim_create_user_command("XXInterpretEscape", M.command, {
-        desc = "Translate and interpret escape codes in terminal buffer",
-        bang = true,
-    })
-end
-
 return M
