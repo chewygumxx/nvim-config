@@ -27,14 +27,7 @@ require("usercmd").setup()
 -- After  keymap,   for lazy-load keymap triggers involving vim.g.mapleader
 -- After  filetype, for lazy-load filetype triggers
 -- After  autocmd,  for augroup dependent plugin spec
-require("util.lazy").setup({
-    spec = require("spec").import(),
-    git  = { url_format = "git@github.com:%s.git" },
-    ui   = {
-        --border = { "╔", "═", "╗", "║", "╝", "═", "╚", "║" },
-        border = { "┌", "─", "┐", "│", "┘", "─", "└", "│" },
-    },
-})
+require("plugin").setup()
 
 -- After  util.lazy,  for treesitter parsing and colorscheme overwrite
 require("highlight").setup()
