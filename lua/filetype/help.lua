@@ -41,8 +41,9 @@ M.setup = function(opts)
     local win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_config(win, { split = "right", win = win })
     vim.api.nvim_win_set_width(win, 90)
+    local set_local = vim.opt_local --[[@as table<string, boolean | number | string>]]
     for opt, val in pairs(local_opts) do
-        vim.opt_local[opt] = val
+        set_local[opt] = val
     end
 end
 

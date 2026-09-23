@@ -64,6 +64,12 @@ M.modmap = {
     help         = "help",
 }
 
+---@class (exact) cgxx.filetype.Module
+---@field local_opts?         table<string, boolean | number | string>
+---@field hlgroup_defs?       table<string, vim.api.keyset.highlight>
+---@field highlights_defined? boolean
+---@field setup?              fun(opts: vim.api.keyset.create_autocmd.callback_args)
+
 ---@param opts vim.api.keyset.create_autocmd.callback_args
 ---@return nil
 M.config = function(opts)
@@ -81,10 +87,12 @@ M.config = function(opts)
         )
         return
     end
+    ---@cast module cgxx.filetype.Module
 
     if type(module.local_opts) == "table" then
+        local set_local = vim.opt_local --[[@as table<string, boolean | number | string>]]
         for opt, val in pairs(module.local_opts) do
-            vim.opt_local[opt] = val
+            set_local[opt] = val
         end
     end
 
