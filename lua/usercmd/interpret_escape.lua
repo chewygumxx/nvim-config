@@ -66,13 +66,19 @@ local translate_ansi_colons = function(lines)
     -- to match within a broader CSI sequence and substitute only the matching
     -- subportion, which complicates things considerably. Worth checking whether
     -- the actual input ever chains parameters like that before investing in it.
-    return vim.tbl_map(function(line)
-        line = line:gsub(
-            "\027%[([%d]+:2::[%d]+:[%d]+:[%d]+)m",
-            expand_chained_truecolour_params
-        )
-        return line
-    end, lines)
+    return vim.tbl_map(
+        ---@param line string
+        ---@return string
+        function(line)
+            ---@type string
+            line = line:gsub(
+                "\027%[([%d]+:2::[%d]+:[%d]+:[%d]+)m",
+                expand_chained_truecolour_params
+            )
+            return line
+        end,
+        lines
+    )
 end
 
 --- Re-renders the current buffer's raw escape codes in a terminal buffer.
