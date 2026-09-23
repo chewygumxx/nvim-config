@@ -28,20 +28,25 @@ local M = {
 M.config = function()
     local dap = require("dap")
 
-    dap.adapters.nlua      = function(callback, config)
+    dap.adapters.nlua = function(callback, config)
         callback({
             type = "server",
             host = config.host or "127.0.0.1",
             port = config.port or 8086,
         })
     end
-    dap.configurations.lua = {
+    -- Append rather than assign: nvim-dap.lua also populates
+    -- dap.configurations.lua (local-lua-debugger-vscode), and lazy-load
+    -- order between the two (ft="lua" here, keys-triggered there) isn't
+    -- guaranteed.
+    dap.configurations.lua = dap.configurations.lua or {}
+    vim.list_extend(dap.configurations.lua, {
         {
             type = "nlua",
             request = "attach",
             name = "Attach to running Neovim instance",
         },
-    }
+    })
 end
 
 return M

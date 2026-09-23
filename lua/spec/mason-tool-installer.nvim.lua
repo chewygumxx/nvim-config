@@ -44,6 +44,7 @@ local M = {
             "debugpy",
             "bash-debug-adapter",
             "js-debug-adapter",
+            "local-lua-debugger-vscode",
         },
     },
 }
