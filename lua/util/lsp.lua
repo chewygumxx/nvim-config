@@ -313,9 +313,10 @@ M.signature_help_on_type = function(buf, client)
     end
 
     ---@type integer
-    local group = vim.api.nvim_create_augroup("UtilLspSignatureHelp:" .. buf, {
-        clear = true,
-    })
+    local group = vim.api.nvim_create_augroup(
+        string.format("UtilLspSignatureHelp:%d:%d", buf, client.id),
+        { clear = true }
+    )
     vim.api.nvim_create_autocmd("InsertCharPre", {
         group    = group,
         buffer   = buf,
