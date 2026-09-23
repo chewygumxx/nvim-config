@@ -26,9 +26,15 @@ local M = {
 M.config = function()
     local lint         = require("lint")
     lint.linters_by_ft = {
-        lua    = { "selene" },
-        python = { "ruff" },
-        sh     = { "shellcheck" },
+        lua      = { "selene" },
+        python   = { "ruff" },
+        sh       = { "shellcheck" },
+        yaml     = { "yamllint" },
+        markdown = { "markdownlint-cli2" },
+        -- jsonlint rejects comments, so only plain "json" is linted;
+        -- "jsonc" (tsconfig.json, VSCode settings, etc.) relies on
+        -- jsonls's own diagnostics instead.
+        json = { "jsonlint" },
     }
 
     ---@type integer

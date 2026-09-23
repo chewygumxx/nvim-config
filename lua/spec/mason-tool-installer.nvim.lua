@@ -39,6 +39,9 @@ local M = {
             "ruff",
             "shellcheck",
             "shfmt",
+            "jsonlint",
+            "yamllint",
+            "markdownlint-cli2",
 
             -- DAP adapters
             "debugpy",
