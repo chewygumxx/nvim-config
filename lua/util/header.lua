@@ -52,6 +52,7 @@ M.insert = function(file, buf, opt)
     end
 
     -- Modeline
+    ---@type string[]
     local lines = {}
     if vim.bo[buf].filetype == "markdown" then
         -- Markdown Frontmatter Start
@@ -74,7 +75,9 @@ M.insert = function(file, buf, opt)
     end
 
     -- (Slug and) Path
+    ---@type string?
     local slug
+    ---@type string?
     local upstream_slug
     local path = util_git.path(file)
     if path:find(":", 1, true) == 1 then

@@ -33,7 +33,9 @@ M.wrap_comment = function(text, width, opt)
         or (vim.bo[buffer].commentstring ~= "" and vim.bo[buffer].commentstring)
         or "%s"
 
-    local lines   = {}
+    ---@type string[]
+    local lines = {}
+    ---@type string
     local current = ""
     for word in text:gmatch("%S+") do
         local candidate = current == "" and word or current .. " " .. word
@@ -43,6 +45,7 @@ M.wrap_comment = function(text, width, opt)
             end
             current = word
         else
+            ---@type string
             current = candidate
         end
     end

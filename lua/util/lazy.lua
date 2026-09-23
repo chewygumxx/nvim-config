@@ -20,6 +20,8 @@ local M = {}
 local joinpath  = vim.fs.joinpath
 local data_dir  = vim.fn.stdpath("data")
 local state_dir = vim.fn.stdpath("state")
+---@type string?
+local browser = vim.env.BROWSER
 
 ---@class LazyConfig
 M.defaults = {
@@ -181,12 +183,13 @@ M.defaults = {
         border    = "none", -- `nvim_open_win()` config.border
         title     = nil,
         title_pos = "center",
-        browser   = vim.env.BROWSER,
+        browser   = browser,
         throttle  = 20, -- Redraw throttle (ms)
 
         -- Shown in `:Lazy` help
         custom_keys = {
             ["<localleader>t"] = {
+                ---@param plugin LazyPlugin
                 function(plugin)
                     require("lazy.util").float_term(nil, { cwd = plugin.dir })
                 end,

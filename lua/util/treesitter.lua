@@ -15,7 +15,10 @@
 local M = {}
 
 -- #adjacent? @a @b ...
-local cached_source, cached_lines
+---@type string?
+local cached_source
+---@type string[]?
+local cached_lines
 
 ---@param source    integer | string Buffer number, or raw source text
 ---@param row       integer          0-indexed row
@@ -33,7 +36,7 @@ local function range_text(source, row, start_col, end_col)
                 plain = true,
             })
     end
-    local line = cached_lines[row + 1] or ""
+    local line = (cached_lines or {})[row + 1] or ""
     return line:sub(start_col + 1, end_col)
 end
 
@@ -60,9 +63,10 @@ end
 ---@param predicate string[]                 `{ "adjacent?", "@a", "@b", ... }`
 ---@return boolean
 M.adjacent = function(match, _, source, predicate)
+    ---@type TSNode[]
     local nodes = {}
     for i = 2, #predicate do
-        local list = match[predicate[i]]
+        local list = match[predicate[i]] --[[@as TSNode[]?]]
         if list then
             vim.list_extend(nodes, list)
         end
@@ -94,18 +98,20 @@ end
 ---@param predicate string[]                 `{ "last-matching?", "@a", pat }`
 ---@return boolean
 M.last_matching = function(match, _, source, predicate)
-    local nodes   = match[predicate[2]]
+    local nodes   = match[predicate[2]] --[[@as TSNode[]?]]
     local pattern = predicate[3]
     if not nodes then
         return true
     end
 
     for _, node in ipairs(nodes) do
+        ---@type TSNode?
         local sibling = node:next_sibling()
         while sibling do
             if vim.treesitter.get_node_text(sibling, source):match(pattern) then
                 return false
             end
+            ---@type TSNode?
             sibling = sibling:next_sibling()
         end
     end
@@ -121,11 +127,13 @@ end
 local function maximal_adjacent_run(node, source)
     local first, last = node, node
 
+    ---@type TSNode?
     local prev = first:prev_sibling()
     while prev and whitespace_only_gap(source, prev, first) do
         first, prev = prev, prev:prev_sibling()
     end
 
+    ---@type TSNode?
     local nxt = last:next_sibling()
     while nxt and whitespace_only_gap(source, last, nxt) do
         last, nxt = nxt, nxt:next_sibling()
@@ -153,7 +161,7 @@ local HEADER_LINE_PATTERNS = {
 ---@param predicate string[]                 `{ "header-line?", "@a", shape }`
 ---@return boolean
 M.header_line = function(match, _, source, predicate)
-    local nodes = match[predicate[2]]
+    local nodes = match[predicate[2]] --[[@as TSNode[]?]]
     if not nodes then
         return true
     end
