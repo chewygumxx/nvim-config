@@ -49,7 +49,11 @@ M.opts = {
         "marksman",
         "markdown_oxide",
 
-        -- bashls, pyright,
+        -- Shell
+        "bashls",
+
+        -- Python
+        "pyright",
     },
     automatic_enable = true,
 }
