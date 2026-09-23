@@ -33,14 +33,21 @@ local M = {
         ensure_installed = {
             "stylua",
             "luafmt",
+            "luaasert",
+            "selene",
+            "busted",
+
             "prettier",
             "tombi",
-            "selene",
             "ruff",
+            "sqlfluff",
             "shellcheck",
             "shfmt",
             "jsonlint",
+            "dotenv-linter",
             "yamllint",
+            "terraformls",
+            "editorconfig-checker",
             "markdownlint-cli2",
 
             -- DAP adapters

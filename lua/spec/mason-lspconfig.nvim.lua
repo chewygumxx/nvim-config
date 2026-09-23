@@ -54,6 +54,12 @@ M.opts = {
 
         -- Python
         "pyright",
+
+        -- SQL
+        "sqls",
+
+        -- Zsh
+        "shuck",
     },
     automatic_enable = true,
 }

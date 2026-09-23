@@ -41,6 +41,10 @@ M.opts = {
         toml     = { "tombi" },
         python   = { "ruff_format" },
         sh       = { "shfmt" },
+        sql      = { "sqlfluff" },
+        -- shfmt has no zsh dialect; shuck is the one formatter here that
+        -- understands zsh-specific syntax.
+        zsh = { "shuck" },
     },
     formatters = {},
     format_on_save = {
@@ -64,6 +68,34 @@ end
 M.opts.formatters.prettier_jsonc = {
     inherit = "prettier",
     append_args = { "--trailing-comma", "none" },
+}
+
+-- sqlfluff refuses to run without a dialect, and conform's built-in
+-- definition sets require_cwd = true against markers (.sqlfluff,
+-- pyproject.toml, etc.) that a fresh SQL file won't have yet; default to
+-- sqlite and always run, so a project's own .sqlfluff can still override
+-- the dialect later.
+M.opts.formatters.sqlfluff = {
+    append_args = { "--dialect", "sqlite" },
+    require_cwd = false,
+}
+
+-- Not bundled with conform.nvim. --dialect is forced rather than relying
+-- on shuck's own auto-detection, same rationale as sqlfluff's --dialect
+-- above: deterministic regardless of shebang or file extension.
+M.opts.formatters.shuck = {
+    command = "shuck",
+    stdin   = true,
+    args    = function(_, ctx)
+        return {
+            "format",
+            "-",
+            "--dialect",
+            "zsh",
+            "--stdin-filename",
+            ctx.filename,
+        }
+    end,
 }
 
 -- Not bundled with conform.nvim
