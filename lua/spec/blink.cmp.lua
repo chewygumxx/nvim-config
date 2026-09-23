@@ -42,17 +42,6 @@ M.opts.sources = {
     providers = {},
 }
 
-if vim.fs.root(0, ".luarc.json") == nil then
-    table.insert(M.opts.sources.default, "lazydev")
-    M.opts.sources.providers         = M.opts.sources.providers or {}
-    M.opts.sources.providers.lazydev = {
-        name = "LazyDev",
-        module = "lazydev.integrations.blink",
-        -- make lazydev completions top priority (see `:h blink.cmp`)
-        score_offset = 100,
-    }
-end
-
 M.opts.fuzzy = {
     implementation = "prefer_rust_with_warning",
 }
