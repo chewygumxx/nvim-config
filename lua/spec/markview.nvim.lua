@@ -21,6 +21,8 @@ local M = {
     ft = "markdown",
 
     dependencies = { "saghen/blink.cmp" },
+
+    ---@type markview.config
     opts = {},
 }
 

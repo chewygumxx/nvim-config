@@ -25,6 +25,7 @@ local M = {
     ft = {},
 }
 
+---@type cgxx.spec.mkdnflow.Config
 M.opts                  = {
     -- Wrap to file beginning/end when traversing links/headings,
     -- https://github.com/jakewvincent/mkdnflow.nvim/blob/main/README.md#wrap

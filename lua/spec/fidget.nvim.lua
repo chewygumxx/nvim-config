@@ -22,6 +22,7 @@ local M = {
     "j-hui/fidget.nvim",
     lazy = false,
 
+    ---@type cgxx.spec.fidget.Options
     opts = {},
 }
 

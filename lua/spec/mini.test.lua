@@ -17,6 +17,7 @@ local M = {
     lazy = true, -- See M.cmd
 }
 
+---@type MiniTest.Config
 M.opts = {
     -- Options for collection of test cases. See `:h MiniTest.collect()`.
     collect = {

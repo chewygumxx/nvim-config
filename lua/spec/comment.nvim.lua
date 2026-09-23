@@ -22,6 +22,7 @@ local M = {
     lazy = true, -- See M.keys
 }
 
+---@type CommentConfig
 M.opts = {
     padding   = false, -- Add a space between comment and content
     sticky    = true,   -- Whether the cursor should remain at its position

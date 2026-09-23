@@ -28,6 +28,7 @@ local M = {
             desc = "undo history",
         },
     },
+    ---@type cgxx.spec.telescope.Opts
     opts = {
         -- don't use `defaults = { }` here, do this in the main telescope spec
         extensions = {

@@ -15,6 +15,8 @@
 local M = {
     "nvim-neorg/neorg",
     ft = { "norg" },
+
+    ---@type cgxx.spec.neorg.Config
     opts = {},
 }
 

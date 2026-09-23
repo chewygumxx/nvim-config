@@ -28,6 +28,7 @@ local M = {
     end,
 }
 
+---@type cgxx.spec.starry.Config
 M.opts = {
     -- * Options
     -- Referenced/Unpacked at:

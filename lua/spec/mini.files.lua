@@ -29,6 +29,7 @@ local M = {
     },
 }
 
+---@type MiniFiles.Config
 M.opts = {
     -- Customization of shown content
     content = {

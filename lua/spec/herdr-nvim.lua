@@ -21,6 +21,7 @@ local M = {
     lazy  = vim.env.HERDR_NVIM_DAEMON ~= "1",
     build = "sh scripts/build.sh",
 
+    ---@type cgxx.spec.herdr.Config
     opts = {},
 }
 

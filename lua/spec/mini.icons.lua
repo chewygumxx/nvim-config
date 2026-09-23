@@ -18,6 +18,7 @@ local M = {
     version = false, -- Stable branch
     lazy    = false,
 
+    ---@type MiniIcons.Config
     opts = {
         -- Icon style: 'glyph' or 'ascii'
         style = "glyph",

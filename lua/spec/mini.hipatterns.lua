@@ -16,6 +16,7 @@ local M = {
     "nvim-mini/mini.hipatterns",
     lazy = false,
 
+    ---@type MiniHipatterns.Config
     opts = {
         hipatterns = {
             highlighters = {},

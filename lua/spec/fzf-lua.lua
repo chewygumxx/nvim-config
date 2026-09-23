@@ -20,6 +20,7 @@ local M = {
         "nvim-treesitter/nvim-treesitter-context",
     },
 
+    ---@type fzf-lua.Config
     opts = {},
 }
 

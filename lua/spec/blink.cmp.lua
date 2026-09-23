@@ -17,6 +17,7 @@ local M = {
     version      = "1.*",
     dependencies = { "rafamadriz/friendly-snippets" },
 
+    ---@type blink.cmp.Config
     opts        = {},
     opts_extend = { "sources.default" },
 }

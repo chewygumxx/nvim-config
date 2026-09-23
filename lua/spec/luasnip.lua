@@ -22,6 +22,7 @@ local M = {
     version = "v2.5.*",
     build   = "make install_jsregexp",
 
+    ---@type cgxx.spec.luasnip.Config
     opts = {},
 }
 

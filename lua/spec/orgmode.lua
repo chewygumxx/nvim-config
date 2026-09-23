@@ -20,6 +20,8 @@ local M = {
     "nvim-orgmode/orgmode",
 
     ft = { "org" },
+
+    ---@type OrgConfigOpts
     opts = {
         org_agenda_files = "~/nexus/orgmode/**/*",
         org_default_notes_file = "~/nexus/orgmode/refile.org",

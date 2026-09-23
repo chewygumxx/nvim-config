@@ -20,6 +20,7 @@ local M = {
     -- before Telescope would otherwise have been triggered to load.
     lazy = false,
 
+    ---@type cgxx.spec.telescope.Opts
     opts = {},
 
     dependencies = {
