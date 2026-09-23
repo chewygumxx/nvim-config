@@ -49,10 +49,13 @@ M.blink_relativenumber = function(lhs, desc)
     lhs  = lhs or "<leader>nn"
     desc = desc or "Blink relativenumber"
     vim.keymap.set("n", lhs, function()
-        local old_relativenumber = vim.o.relativenumber
-        vim.o.relativenumber     = not old_relativenumber
+        local win                  = vim.api.nvim_get_current_win()
+        local old_relativenumber   = vim.wo[win].relativenumber
+        vim.wo[win].relativenumber = not old_relativenumber
         vim.defer_fn(function()
-            vim.o.relativenumber = old_relativenumber
+            if vim.api.nvim_win_is_valid(win) then
+                vim.wo[win].relativenumber = old_relativenumber
+            end
         end, 2000)
     end, { desc = desc }
     )
@@ -67,13 +70,14 @@ M.blink_linenumber = function(lhs, desc)
     lhs  = lhs or "<leader>ln"
     desc = desc or "Blink line number in gutter"
     vim.keymap.set({ "n" }, lhs, function()
-        local old_o_number         = vim.o.number
-        local old_o_relativenumber = vim.o.relativenumber
+        local win                  = vim.api.nvim_get_current_win()
+        local old_o_number         = vim.wo[win].number
+        local old_o_relativenumber = vim.wo[win].relativenumber
         local old_hl_linenr        = vim.api.nvim_get_hl(0, { name = "LineNr" })
 
         vim.api.nvim_set_hl(0, "LineNr", { link = "ErrorMsg" })
-        vim.o.number         = true
-        vim.o.relativenumber = false
+        vim.wo[win].number         = true
+        vim.wo[win].relativenumber = false
 
         vim.defer_fn(function()
             vim.api.nvim_set_hl(
@@ -81,8 +85,10 @@ M.blink_linenumber = function(lhs, desc)
                 "LineNr",
                 old_hl_linenr --[[@as vim.api.keyset.highlight]]
             )
-            vim.o.number         = old_o_number
-            vim.o.relativenumber = old_o_relativenumber
+            if vim.api.nvim_win_is_valid(win) then
+                vim.wo[win].number         = old_o_number
+                vim.wo[win].relativenumber = old_o_relativenumber
+            end
         end, 3000)
     end, { desc = desc }
     )
