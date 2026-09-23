@@ -15,7 +15,7 @@
 -- pure. Safe to run in any order since every case sets the same values.
 --
 
-local eq = require("mini.test")
+local eq = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 

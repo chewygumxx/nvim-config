@@ -10,7 +10,7 @@
 --
 
 local visual_traversal = require("util.visual_traversal")
-local eq               = require("mini.test")
+local eq               = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
@@ -27,6 +27,7 @@ describe("util.visual_traversal.command", function()
 end)
 
 describe("util.visual_traversal.enable/disable/toggle", function()
+    ---@type integer
     local buf
 
     before_each(function()

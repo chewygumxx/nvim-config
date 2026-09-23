@@ -10,7 +10,7 @@
 --
 
 local text = require("util.text")
-local eq   = require("mini.test")
+local eq   = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 

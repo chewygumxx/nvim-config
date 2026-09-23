@@ -17,7 +17,7 @@
 --
 
 local treesitter = require("util.treesitter")
-local eq         = require("mini.test")
+local eq         = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
@@ -25,6 +25,7 @@ local eq         = require("mini.test")
 ---@param specs { row: integer, start_col: integer, end_col: integer } []
 ---@return table[] nodes
 local function fake_chain(specs)
+    ---@type table[]
     local nodes = {}
     for i, s in ipairs(specs) do
         nodes[i] = {

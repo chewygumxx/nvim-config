@@ -10,7 +10,7 @@
 --
 
 local modeline = require("util.modeline")
-local eq       = require("mini.test")
+local eq       = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 

@@ -10,11 +10,12 @@
 --
 
 local git = require("util.git")
-local eq  = require("mini.test")
+local eq  = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
 describe("util.git", function()
+    ---@type string, string
     local dir, file
 
     before_each(function()
