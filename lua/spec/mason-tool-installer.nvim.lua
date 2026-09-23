@@ -39,6 +39,11 @@ local M = {
             "ruff",
             "shellcheck",
             "shfmt",
+
+            -- DAP adapters
+            "debugpy",
+            "bash-debug-adapter",
+            "js-debug-adapter",
         },
     },
 }
