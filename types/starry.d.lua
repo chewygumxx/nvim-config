@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/starry.lua
+-- ::: :/types/starry.d.lua
 --
 --
 

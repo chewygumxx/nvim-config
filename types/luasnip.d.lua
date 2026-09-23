@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/luasnip.lua
+-- ::: :/types/luasnip.d.lua
 --
 --
 

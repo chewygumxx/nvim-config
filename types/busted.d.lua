@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/busted.d.lua
+-- ::: :/types/busted.d.lua
 --
 --
 

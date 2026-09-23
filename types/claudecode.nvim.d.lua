@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/claudecode.nvim.lua
+-- ::: :/types/claudecode.nvim.d.lua
 --
 --
 

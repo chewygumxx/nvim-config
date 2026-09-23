@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/oil.nvim.lua
+-- ::: :/types/oil.nvim.d.lua
 --
 --
 

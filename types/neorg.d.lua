@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/neorg.lua
+-- ::: :/types/neorg.d.lua
 --
 --
 

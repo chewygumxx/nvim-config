@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/mkdnflow.lua
+-- ::: :/types/mkdnflow.d.lua
 --
 --
 

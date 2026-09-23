@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/render-markdown.nvim.lua
+-- ::: :/types/render-markdown.nvim.d.lua
 --
 --
 

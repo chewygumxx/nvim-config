@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/markview.nvim.lua
+-- ::: :/types/markview.nvim.d.lua
 --
 --
 

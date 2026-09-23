@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/mini.test.lua
+-- ::: :/types/mini.test.d.lua
 --
 --
 

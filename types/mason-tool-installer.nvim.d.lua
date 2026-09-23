@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/mason-tool-installer.nvim.lua
+-- ::: :/types/mason-tool-installer.nvim.d.lua
 --
 --
 
