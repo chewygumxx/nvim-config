@@ -76,14 +76,19 @@ M.path = function(file)
         "-C",
         vim.fn.fnamemodify(file, ":p:h"),
         "rev-parse",
-        "--show-toplevel",
+        "--show-prefix",
     }, { text = true }):wait()
-    if result.code ~= 0 or not result.stdout or result.stdout == "" then
+    if result.code ~= 0 or not result.stdout then
         return vim.fn.fnamemodify(file, ":~")
     end
 
-    local root = result.stdout:gsub("%s+$", "")
-    return ":" .. vim.fn.fnamemodify(file, ":p"):sub(#root + 1)
+    -- `--show-prefix` (rather than slicing `:p` at `--show-toplevel`'s
+    -- length) keeps this correct when file is reached through a symlinked
+    -- path: git resolves both sides of that comparison itself, in the same
+    -- invocation, instead of comparing a resolved toplevel against an
+    -- unresolved `:p` path.
+    local prefix = result.stdout:gsub("%s+$", "")
+    return ":/" .. prefix .. vim.fn.fnamemodify(file, ":t")
 end
 
 ---@class cgxx.git.gh.opts
