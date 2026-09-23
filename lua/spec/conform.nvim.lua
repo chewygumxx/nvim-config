@@ -39,6 +39,8 @@ M.opts = {
         -- doesn't recognize.
         markdown = { "prettier" },
         toml     = { "tombi" },
+        python   = { "ruff_format" },
+        sh       = { "shfmt" },
     },
     formatters = {},
     format_on_save = {

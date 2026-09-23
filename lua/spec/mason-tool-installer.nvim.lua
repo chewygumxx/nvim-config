@@ -36,6 +36,9 @@ local M = {
             "prettier",
             "tombi",
             "selene",
+            "ruff",
+            "shellcheck",
+            "shfmt",
         },
     },
 }
