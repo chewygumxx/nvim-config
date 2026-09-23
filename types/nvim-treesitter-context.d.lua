@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/nvim-treesitter-context.lua
+-- ::: :/types/nvim-treesitter-context.d.lua
 --
 --
 

@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/mini.hipatterns.lua
+-- ::: :/types/mini.hipatterns.d.lua
 --
 --
 

@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/snacks.nvim.lua
+-- ::: :/types/snacks.nvim.d.lua
 --
 --
 

@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/nvim-notify.lua
+-- ::: :/types/nvim-notify.d.lua
 --
 --
 

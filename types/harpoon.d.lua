@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/harpoon.lua
+-- ::: :/types/harpoon.d.lua
 --
 --
 

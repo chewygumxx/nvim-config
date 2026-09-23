@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/noice.nvim.lua
+-- ::: :/types/noice.nvim.d.lua
 --
 --
 

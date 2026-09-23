@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/orgmode.lua
+-- ::: :/types/orgmode.d.lua
 --
 --
 

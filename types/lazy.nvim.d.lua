@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/lazy.nvim.lua
+-- ::: :/types/lazy.nvim.d.lua
 --
 --
 

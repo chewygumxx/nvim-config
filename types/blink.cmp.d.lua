@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/types/blink.cmp.lua
+-- ::: :/types/blink.cmp.d.lua
 --
 --
 
