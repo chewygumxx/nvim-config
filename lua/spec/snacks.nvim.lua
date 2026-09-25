@@ -33,7 +33,6 @@ M.opts = {
     },
     indent       = { enabled = false },
     input        = { enabled = false },
-    picker       = { enabled = false },
     notifier     = { enabled = false },
     quickfile    = { enabled = false },
     scope        = { enabled = false },
@@ -42,7 +41,7 @@ M.opts = {
     words        = { enabled = false },
 }
 
-M.opts.bigfile   = {
+M.opts.bigfile = {
     notify      = true,
     size        = 1024 * 1024, -- 1MB
     line_length = 1000, -- average line length (minified files)
@@ -71,6 +70,14 @@ M.opts.bigfile   = {
             end
         end)
     end,
+}
+-- Enabled only for `util.nex`'s tag multi-select, which needs a picker
+-- that can return several items; `fzf-lua` stays this config's finder.
+-- `ui_select` is off for the same reason: taking over `vim.ui.select`
+-- globally is a side effect nothing here asked for.
+M.opts.picker    = {
+    enabled   = true,
+    ui_select = false,
 }
 M.opts.dashboard = {
     -- Dashboard Position, nil for center
@@ -119,6 +126,12 @@ M.opts.dashboard = {
                 key    = "n",
                 desc   = "New File",
                 action = ":ene | startinsert",
+            },
+            {
+                icon   = "󰎚 ",
+                key    = "N",
+                desc   = "New Note",
+                action = ":XXNexNote",
             },
             {
                 icon   = " ",
