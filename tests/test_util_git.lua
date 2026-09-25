@@ -195,7 +195,14 @@ describe("util.git.info", function()
         local settled = function()
             return called
         end
-        vim.wait(10000, settled, 20)
+        -- Asserted, not merely waited on: `got` is `nil` both when the
+        -- callback reported "no repository" and when it never ran at
+        -- all, so without this the cases expecting nil would pass just
+        -- as happily against an `M.info` that dropped its callback
+        assert(
+            vim.wait(10000, settled, 20),
+            "util.git.info never called back for " .. target
+        )
         return got, fast
     end
 

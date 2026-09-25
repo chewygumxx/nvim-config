@@ -80,7 +80,13 @@ local await = function(bufnr)
     local settled = function()
         return vim.b[bufnr].cgxx_statusline ~= nil
     end
-    vim.wait(10000, settled, 20)
+    -- Asserted rather than waited out: a segment that never resolves
+    -- leaves the cache empty, which several of the assertions below
+    -- would otherwise read as a legitimate "nothing to show"
+    assert(
+        vim.wait(10000, settled, 20),
+        "no segment resolved for buffer " .. bufnr
+    )
 end
 
 --- Loads file into a buffer and blocks until its segment has resolved.

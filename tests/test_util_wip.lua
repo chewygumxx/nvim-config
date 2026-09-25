@@ -113,10 +113,16 @@ describe("util.wip.snapshot", function()
     ---@return string tip
     local advanced = function(before)
         local at = before
-        vim.wait(10000, function()
-            at = tip(dir, ref)
-            return at ~= "" and at ~= before
-        end, 20
+        -- Asserted rather than waited out: every caller goes on to
+        -- compare the returned tip, and a snapshot that never happened
+        -- would otherwise be reported as whatever `before` was
+        assert(
+            vim.wait(10000, function()
+                at = tip(dir, ref)
+                return at ~= "" and at ~= before
+            end, 20
+            ),
+            ref .. " never moved off " .. (before == "" and "unborn" or before)
         )
         return at
     end
