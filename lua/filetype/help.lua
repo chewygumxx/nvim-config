@@ -17,10 +17,7 @@ local M = {}
 
 --- Don't export, exclusively intended for M.setup
 ---@type { [string]: number | string | boolean }
-local local_opts = {
-    relativenumber = false,
-    number = true,
-}
+local local_opts = {}
 
 --- Implements filetype-specific configuration for Neovim help
 --- - Buffer opened via `:edit` rather than `:help`
