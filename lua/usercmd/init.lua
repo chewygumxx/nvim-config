@@ -106,10 +106,14 @@ end
 --- the dashboard's "New Note" action (see `lua/spec/snacks.nvim.lua`).
 ---@return nil
 local nex_note = function()
-    local desc = "Scaffold a new note in ~chewygumxx/nex.git "
-        .. "(prompts title/description/tags)"
+    local desc = "Notes in ~chewygumxx/nex.git "
+        .. "(new/commit/toggle/enable/disable); bare scaffolds a new one"
     local mod  = require("util.nex")
-    usercmd("XXNexNote", mod.command, { desc = desc })
+    usercmd("XXNexNote", mod.command, {
+        desc     = desc,
+        nargs    = "?",
+        complete = mod.complete,
+    })
 end
 
 --- Registers every user command this config defines.

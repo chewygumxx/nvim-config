@@ -381,10 +381,207 @@ M.new_note = function()
     end)
 end
 
---- `XXNexNote` callback.
+--- Stages one note and commits it, from a single async `vim.system`
+--- call. Every git invocation is scoped to that one path:
+---
+--- * the `-- "$path"` pathspec on `commit` builds the commit from HEAD
+---   plus that path alone, so anything else the user happens to have
+---   staged stays staged and uncommitted rather than being swept in;
+--- * `diff --cached --quiet` is the "did this write change anything"
+---   test, so a `:w` that altered nothing exits before `commit` does,
+---   instead of failing with "nothing to commit";
+--- * `cat-file -e HEAD:$path` picks the verb exactly, and fails (giving
+---   "Add") on an unborn HEAD, so the very first note in a freshly
+---   `git init`ed repository commits cleanly.
+---
+--- Signing is forced off for the same reason `util.wip` forces it off:
+--- a gpg passphrase prompt has nowhere to go from an async `vim.system`
+--- call, so honouring `commit.gpgsign` here would hang on every write.
+---@type string
+local commit_sh = [[
+set -eu
+
+path=$1
+
+if git cat-file -e "HEAD:$path" 2>/dev/null; then
+    verb=Update
+else
+    verb=Add
+fi
+
+git add -- "$path"
+
+# The write left this path byte-identical to what is already recorded
+if git diff --cached --quiet -- "$path"; then
+    exit 0
+fi
+
+git -c commit.gpgsign=false commit --quiet -m "$verb $path" -- "$path"
+printf '%s %s\n' "$verb" "$path"
+]]
+
+--- Resolves path to an absolute, symlink-free form with no trailing
+--- slash, so two spellings of one location compare equal.
+---@param path string
+---@return string path
+local normalise = function(path)
+    local full = vim.fn.resolve(vim.fn.fnamemodify(path, ":p"))
+    return (full:gsub("/+$", ""))
+end
+
+--- Whether path is a note file inside this repository's note directory.
+--- Resolved by location rather than by filetype: where the file sits is
+--- what decides whether committing it is this module's business.
+---@param path? string
+---@return boolean
+M.is_note = function(path)
+    if not path or path == "" then
+        return false
+    end
+    if path:sub(-#M.extension) ~= M.extension then
+        return false
+    end
+    local dir = normalise(M.root .. "/" .. M.subdir) .. "/"
+    return normalise(path):sub(1, #dir) == dir
+end
+
+--- Whether bufnr's write should be committed.
+---@param bufnr integer
+---@return boolean eligible
+local eligible = function(bufnr)
+    if vim.g.cgxx_nex_commit == false or vim.b[bufnr].cgxx_nex_commit == false then
+        return false
+    end
+    return M.is_note(vim.api.nvim_buf_get_name(bufnr))
+end
+
+--- Stages and commits the note at path.
+---@param path    string  Absolute path of a note inside `M.root`
+---@param report? boolean Notify when the write changed nothing, too
 ---@return nil
-M.command = function()
-    M.new_note()
+M.commit = function(path, report)
+    if not M.is_note(path) then
+        if report then
+            vim.notify(
+                "Nex: buffer is not a note under " .. M.root,
+                vim.log.levels.WARN
+            )
+        end
+        return
+    end
+
+    -- Bound separately rather than chained: `luafmt` splits a chained
+    -- call across lines here, which Lua then reads as two statements
+    local prefix = normalise(M.root) .. "/"
+    local rel    = normalise(path):sub(#prefix + 1)
+
+    vim.system(
+        { "sh", "-c", commit_sh, "sh", rel },
+        {
+            cwd  = M.root,
+            text = true,
+        },
+        function(result)
+            local out = (result.stdout or ""):gsub("%s+$", "")
+            local err = (result.stderr or ""):gsub("%s+$", "")
+            vim.schedule(function()
+                if result.code ~= 0 then
+                    vim.notify(
+                        "Nex commit failed: " .. err,
+                        vim.log.levels.ERROR
+                    )
+                elseif out == "" then
+                    if report then
+                        vim.notify("Nex: no change since last commit")
+                    end
+                elseif report or vim.g.cgxx_verbose then
+                    vim.notify("Nex: " .. out)
+                end
+            end)
+        end
+    )
+end
+
+--- Enables commit-on-write for bufnr.
+---@param bufnr? integer Default: current buffer
+---@return nil
+M.enable = function(bufnr)
+    bufnr                        = bufnr or 0
+    vim.b[bufnr].cgxx_nex_commit = true
+    vim.notify("Nex commit-on-write: ON")
+end
+
+--- Disables commit-on-write for bufnr.
+---@param bufnr? integer Default: current buffer
+---@return nil
+M.disable = function(bufnr)
+    bufnr                        = bufnr or 0
+    vim.b[bufnr].cgxx_nex_commit = false
+    vim.notify("Nex commit-on-write: OFF")
+end
+
+--- Toggles commit-on-write for bufnr.
+---@param bufnr? integer Default: current buffer
+---@return nil
+M.toggle = function(bufnr)
+    bufnr = bufnr or 0
+    if vim.b[bufnr].cgxx_nex_commit == false then
+        M.enable(bufnr)
+    else
+        M.disable(bufnr)
+    end
+end
+
+--- Registers this module's autocmds in the "cgxx.nex" augroup.
+---@return nil
+M.autocmd = function()
+    vim.api.nvim_create_autocmd("BufWritePost", {
+        desc     = "Stage and commit a written nex note",
+        group    = vim.api.nvim_create_augroup("cgxx.nex", { clear = true }),
+        callback = function(event)
+            if eligible(event.buf) then
+                M.commit(vim.api.nvim_buf_get_name(event.buf))
+            end
+        end,
+    })
+end
+
+---@type table<string, fun()>
+local act_func = {
+    new     = function()
+        M.new_note()
+    end,
+    commit  = function()
+        M.commit(vim.api.nvim_buf_get_name(0), true)
+    end,
+    toggle  = function()
+        M.toggle()
+    end,
+    enable  = function()
+        M.enable()
+    end,
+    disable = function()
+        M.disable()
+    end,
+}
+
+--- `nvim_create_user_command` callback backing `XXNexNote`.
+---@param opts vim.api.keyset.create_user_command.command_args
+---@return nil
+M.command = function(opts)
+    local act = opts.fargs[1] or "new"
+    local fn  = act_func[act]
+    if not fn then
+        vim.notify("XXNexNote: unknown action " .. act, vim.log.levels.ERROR)
+        return
+    end
+    fn()
+end
+
+--- `nvim_create_user_command` completion for `XXNexNote`.
+---@return string[] actions
+M.complete = function()
+    return vim.fn.sort(vim.tbl_keys(act_func))
 end
 
 return M
