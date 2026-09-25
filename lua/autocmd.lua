@@ -70,6 +70,7 @@ M.setup = function()
     require("util.wip").autocmd()
     require("util.nex").autocmd()
     require("util.markdown_table").autocmd()
+    require("util.statusline").autocmd()
 end
 
 return M

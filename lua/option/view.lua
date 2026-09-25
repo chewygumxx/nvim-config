@@ -37,6 +37,10 @@ M.setup = function()
     for opt, value in pairs(opts) do
         vim.api.nvim_set_option_value(opt, value, {})
     end
+
+    -- Can't join `opts`: the value is derived from 'statusline' itself, by
+    -- splicing a git repository segment over the default's leading `%f`
+    require("util.statusline").setup()
 end
 
 return M
