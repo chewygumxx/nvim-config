@@ -39,6 +39,14 @@ local M = {
     },
 }
 
+if vim.env.TERMUX_VERSION ~= nil then
+    vim.list_extend(M.condemn, {
+        "mason-org/mason-lspconfig.nvim.lua",
+        "jay-babu/mason-nvim-dap.nvim",
+        "WhoIsSethDaniel/mason-tool-installer.nvim",
+    })
+end
+
 --- Returns a function that returns the LazySpecImport of the provided group:
 --- bare `{ slug, cond/enabled = false }` overrides, merged by lazy.nvim into
 --- each plugin's real spec from `{ import = "spec" }` regardless of order.

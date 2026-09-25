@@ -22,7 +22,6 @@
 ---@type LazyPluginSpec
 local M = {
     "mason-org/mason-lspconfig.nvim",
-    enabled      = vim.env.HERDR_ENV == nil and vim.env.TERMUX_VERSION == nil,
     lazy         = false,
     dependencies = {
         "mason-org/mason.nvim",
