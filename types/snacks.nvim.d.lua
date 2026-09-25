@@ -19,6 +19,9 @@
 -- callbacks actually read; upstream's real `Item` also carries a
 -- `[string]: any` catch-all (see that file's own comment).
 --
+-- `snacks.Picker`/`snacks.picker.finder.Item` likewise cover only what
+-- lua/util/nex.lua's tag multi-select touches.
+--
 
 ---@meta
 
@@ -34,6 +37,15 @@
 
 ---@class snacks.dashboard.Format.ctx
 ---@field width? integer
+
+---@class snacks.picker.finder.Item
+---@field text     string
+---@field idx?     integer
+---@field [string] any
+
+---@class snacks.Picker
+---@field selected fun(self: snacks.Picker, opts?: { fallback?: boolean }): snacks.picker.finder.Item[]
+---@field close    fun(self: snacks.Picker)
 
 ---@class snacks.Config
 ---@field animate?      table
