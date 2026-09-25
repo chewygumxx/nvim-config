@@ -48,4 +48,16 @@ for hlgroup, defmap in pairs(hlgroup_defs) do
     M.hlgroup_defs[hlgroup .. ".markdown_inline"] = defmap
 end
 
+--- Attaches the buffer-local table keymaps from `util.markdown_table`.
+---
+--- `lua/filetype/init.lua` dispatches exactly one module per filetype, so
+--- the compound Markdown filetypes cannot inherit this by being Markdown:
+--- `filetype.nex_note` and `filetype.claude` call it themselves, the same
+--- way they already copy `local_opts` and `hlgroup_defs`.
+---@param opts vim.api.keyset.create_autocmd.callback_args
+---@return nil
+M.setup = function(opts)
+    require("util.markdown_table").keymap(opts.buf)
+end
+
 return M

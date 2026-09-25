@@ -69,6 +69,7 @@ M.setup = function()
     require("util.claude").autocmd()
     require("util.wip").autocmd()
     require("util.nex").autocmd()
+    require("util.markdown_table").autocmd()
 end
 
 return M

@@ -55,4 +55,10 @@ M.local_opts = vim.tbl_extend("force", markdown.local_opts, {
 ---@type { [string]: vim.api.keyset.highlight }
 M.hlgroup_defs = markdown.hlgroup_defs
 
+--- Markdown's own `setup()`, unchanged: the table keymaps are as welcome in
+--- a note as in any other Markdown buffer, and a note gets them only
+--- because it asks — `lua/filetype/init.lua` runs one module per filetype.
+---@type fun(opts: vim.api.keyset.create_autocmd.callback_args)
+M.setup = markdown.setup
+
 return M

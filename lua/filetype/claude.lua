@@ -27,6 +27,10 @@ M.hlgroup_defs = markdown.hlgroup_defs
 ---@param opts vim.api.keyset.create_autocmd.callback_args
 ---@return nil
 M.setup = function(opts)
+    -- Before the early return below: a prompt buffer with no divider is
+    -- still Markdown, and should still get the table keymaps.
+    markdown.setup(opts)
+
     if not require("util.claude").reply_divider_line(opts.buf) then
         return
     end

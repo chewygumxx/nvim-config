@@ -442,9 +442,10 @@ describe("util.markdown_table buffer operations", function()
     it("attaches its keymaps buffer-locally, not globally", function()
         mdtable.keymap(bufnr)
         ---@type table<string, true>
-        local lhs = {}
-        for _, map in ipairs(vim.api.nvim_buf_get_keymap(bufnr, "n")) do
-            lhs[map.lhs] = true
+        local lhs  = {}
+        local maps = vim.api.nvim_buf_get_keymap(bufnr, "n")
+        for _, map in ipairs(maps) do
+            lhs[map.lhs or ""] = true
         end
         -- `\` is this config's leader, per `lua/keymap/init.lua`.
         eq(lhs["\\tf"], true)

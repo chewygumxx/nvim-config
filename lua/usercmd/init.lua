@@ -116,6 +116,21 @@ local nex_note = function()
     })
 end
 
+--- Registers the `XXMdTable` user command, backed by `util.markdown_table`.
+--- Also the buffer-local keymaps attached by `filetype.markdown`.
+---@return nil
+local md_table = function()
+    local desc = "Markdown pipe tables "
+        .. "(format/buffer/left/center/right/none/toggle/enable/disable); "
+        .. "bare formats the one under the cursor"
+    local mod  = require("util.markdown_table")
+    usercmd("XXMdTable", mod.command, {
+        desc     = desc,
+        nargs    = "?",
+        complete = mod.complete,
+    })
+end
+
 --- Registers every user command this config defines.
 ---@return nil
 M.setup = function()
@@ -126,6 +141,7 @@ M.setup = function()
     lua_checker()
     wip()
     nex_note()
+    md_table()
 end
 
 return M
