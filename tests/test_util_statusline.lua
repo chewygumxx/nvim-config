@@ -36,6 +36,12 @@ local fixture = function(opt)
     local dir = vim.fn.tempname()
     vim.fn.mkdir(dir, "p")
     git(dir, "init", "--quiet", "--initial-branch=stl-test")
+    -- An identity has to be set per fixture rather than inherited: a CI
+    -- runner has no global `user.name`/`user.email`, and without one
+    -- `git commit` fails outright, so a fixture that goes on to detach
+    -- HEAD would silently stay on its branch instead
+    git(dir, "config", "user.email", "test@example.invalid")
+    git(dir, "config", "user.name", "Test")
     if opt.remote ~= false then
         git(
             dir,

@@ -21,7 +21,29 @@ describe("util.git", function()
     before_each(function()
         dir = vim.fn.tempname()
         vim.fn.mkdir(dir, "p")
-        vim.system({ "git", "-C", dir, "init", "--quiet" }):wait()
+        -- `--initial-branch` pins the ref name: without it the fixture
+        -- would inherit whatever `init.defaultBranch` is configured to
+        vim.system({
+            "git",
+            "-C",
+            dir,
+            "init",
+            "--quiet",
+            "--initial-branch=git-test",
+        }):wait()
+        -- An identity has to be set per fixture rather than inherited:
+        -- a CI runner has no global `user.name`/`user.email`, and without
+        -- one `git commit` fails outright, leaving later setup steps
+        -- (`checkout --detach`) with nothing to act on
+        vim.system({
+            "git",
+            "-C",
+            dir,
+            "config",
+            "user.email",
+            "test@example.invalid",
+        }):wait()
+        vim.system({ "git", "-C", dir, "config", "user.name", "Test" }):wait()
         vim.system({
             "git",
             "-C",
@@ -98,11 +120,14 @@ describe("util.git", function()
     )
 
     it("resolves the checked out branch", function()
-        -- The fixture's `git init` inherits whatever `init.defaultBranch`
-        -- is configured to, so rename to a known value rather than
-        -- asserting against an ambient one
-        vim.system({ "git", "-C", dir, "branch", "-M", "git-test" }):wait()
+        -- Pinned by the fixture's `--initial-branch`, never the machine's
+        -- `init.defaultBranch`
         eq(git.branch(file), "git-test")
+    end)
+
+    it("follows a branch rename", function()
+        vim.system({ "git", "-C", dir, "branch", "-M", "renamed" }):wait()
+        eq(git.branch(file), "renamed")
     end)
 
     it("returns nil for a detached HEAD", function()
@@ -186,6 +211,10 @@ describe("util.git.info", function()
         -- `--initial-branch` pins the ref name: without it the fixture
         -- would inherit whatever `init.defaultBranch` is configured to
         run("init", "--quiet", "--initial-branch=info-test")
+        -- An identity has to be set per fixture rather than inherited: a
+        -- CI runner has no global one, and `git commit` fails without it
+        run("config", "user.email", "test@example.invalid")
+        run("config", "user.name", "Test")
         run(
             "remote",
             "add",
