@@ -252,3 +252,217 @@ describe("util.markdown_table cursor mapping", function()
         eq(mdtable.cell_col("a | b", 2, 0), 4)
     end)
 end)
+
+describe("util.markdown_table buffer operations", function()
+    ---@type integer
+    local bufnr
+
+    --- A scratch markdown buffer holding `lines`, current in the window so
+    --- the cursor calls under test have somewhere to land.
+    ---
+    --- Re-assigning 'undolevels' to itself breaks undo, so filling the
+    --- fixture is its own undo block. Without it a single `undo` would
+    --- step past the reflow all the way back to the empty buffer.
+    ---@param lines string[]
+    ---@return nil
+    local scratch = function(lines)
+        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+        vim.bo[bufnr].undolevels = vim.bo[bufnr].undolevels
+        vim.bo[bufnr].modified   = false
+    end
+
+    ---@return string[]
+    local buffer = function()
+        return vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    end
+
+    before_each(function()
+        bufnr                  = vim.api.nvim_create_buf(false, true)
+        vim.bo[bufnr].filetype = "markdown"
+        vim.api.nvim_set_current_buf(bufnr)
+    end)
+
+    after_each(function()
+        vim.api.nvim_buf_delete(bufnr, { force = true })
+    end)
+
+    it("formats the table the cursor is in", function()
+        scratch({ "# doc", "", "| a | bb |", "|---|---|", "| 1 | 2 |" })
+        vim.api.nvim_win_set_cursor(0, { 3, 2 })
+        eq(mdtable.format(bufnr), true)
+        eq(buffer(), {
+            "# doc",
+            "",
+            "| a   | bb  |",
+            "| --- | --- |",
+            "| 1   | 2   |",
+        })
+    end)
+
+    it("leaves the cursor in the cell it started in", function()
+        scratch({ "| a | bb |", "|---|---|", "| 1 | 2 |" })
+        -- On the first "b" of "bb", byte 6 before the reflow.
+        vim.api.nvim_win_set_cursor(0, { 1, 6 })
+        mdtable.format(bufnr)
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        eq(cursor[1], 1)
+        eq(
+            vim.api
+                .nvim_buf_get_lines(bufnr, 0, 1, false)
+                [1]
+                :sub(cursor[2] + 1, cursor[2] + 1),
+            "b"
+        )
+    end)
+
+    it("writes nothing when the table is already formatted", function()
+        scratch({ "| a   | b   |", "| --- | --- |", "| 1   | 2   |" })
+        vim.api.nvim_win_set_cursor(0, { 1, 2 })
+        -- The no-op guard: an identical set_lines would still dirty the
+        -- buffer and push an undo state.
+        eq(mdtable.format(bufnr), false)
+        eq(vim.bo[bufnr].modified, false)
+    end)
+
+    it("reflows as a single undo step", function()
+        scratch({ "| a | bb | ccc |", "|---|---|---|", "| 1 | 2 | 3 |" })
+        vim.api.nvim_win_set_cursor(0, { 1, 2 })
+        mdtable.format(bufnr)
+        vim.cmd("silent undo")
+        eq(buffer(), { "| a | bb | ccc |", "|---|---|---|", "| 1 | 2 | 3 |" })
+    end)
+
+    it("will not touch a table inside a fenced code block", function()
+        scratch({ "```", "| a | b |", "|---|---|", "| 1 | 2 |", "```" })
+        eq(mdtable.in_code_block(bufnr, 1), true)
+        vim.api.nvim_win_set_cursor(0, { 2, 2 })
+        eq(mdtable.format(bufnr), false)
+        eq(buffer(), { "```", "| a | b |", "|---|---|", "| 1 | 2 |", "```" })
+    end)
+
+    it("formats a half-typed table Tree-sitter cannot see", function()
+        -- No delimiter row, so this is not a `pipe_table` node at all;
+        -- only the line-scan fallback finds it.
+        scratch({ "| a | b |", "| 1 | 2 |" })
+        vim.api.nvim_win_set_cursor(0, { 1, 2 })
+        eq(mdtable.format(bufnr), true)
+        eq(buffer(), { "| a   | b   |", "| --- | --- |", "| 1   | 2   |" })
+    end)
+
+    it("sets the alignment of the column under the cursor", function()
+        scratch({ "| a | bb |", "|---|---|", "| 1 | 2 |" })
+        vim.api.nvim_win_set_cursor(0, { 1, 6 })
+        eq(mdtable.set_align("right", bufnr), true)
+        eq(buffer(), {
+            "| a   |  bb |",
+            "| --- | --: |",
+            "| 1   |   2 |",
+        })
+    end)
+
+    it("centres and clears an alignment it previously set", function()
+        scratch({ "| a | bb |", "|---|--:|", "| 1 | 2 |" })
+        vim.api.nvim_win_set_cursor(0, { 1, 6 })
+        mdtable.set_align("center", bufnr)
+        eq(vim.api.nvim_buf_get_lines(bufnr, 1, 2, false), { "| --- | :-: |" })
+        mdtable.set_align("none", bufnr)
+        eq(vim.api.nvim_buf_get_lines(bufnr, 1, 2, false), { "| --- | --- |" })
+    end)
+
+    it("formats every table in the buffer, whatever their heights", function()
+        scratch({
+            "| a | b |",
+            "|---|---|",
+            "| 1 | 2 |",
+            "",
+            "| ccc | d |",
+            "|---|---|",
+            "| 1 | 2 |",
+            "| 3 | 4 |",
+        })
+        eq(mdtable.format_buffer(bufnr), 2)
+        eq(buffer(), {
+            "| a   | b   |",
+            "| --- | --- |",
+            "| 1   | 2   |",
+            "",
+            "| ccc | d   |",
+            "| --- | --- |",
+            "| 1   | 2   |",
+            "| 3   | 4   |",
+        })
+    end)
+
+    it("skips fenced tables when formatting the whole buffer", function()
+        scratch({
+            "| a | b |",
+            "|---|---|",
+            "| 1 | 2 |",
+            "",
+            "```",
+            "| c | d |",
+            "|---|---|",
+            "```",
+        })
+        eq(mdtable.format_buffer(bufnr), 1)
+        eq(vim.api.nvim_buf_get_lines(bufnr, 4, 8, false), {
+            "```",
+            "| c | d |",
+            "|---|---|",
+            "```",
+        })
+    end)
+
+    it("reports the table's extent, and nothing for a plain line", function()
+        scratch({ "text", "", "| a | b |", "|---|---|", "| 1 | 2 |", "" })
+        eq({ mdtable.table_range(bufnr, 3) }, { 2, 4 })
+        eq({ mdtable.table_range(bufnr, 0) }, {})
+    end)
+
+    it("is opt-in per buffer for reformat-as-you-edit", function()
+        -- Keep toggle's own progress notifications out of the reporter.
+        local notify = vim.notify
+        vim.notify   = function(_, level)
+            if level and level >= vim.log.levels.ERROR then
+                notify(_, level)
+            end
+        end
+
+        -- The autocmd does nothing until a buffer asks for it, so that
+        -- typing a table is never reflowed out from under you.
+        eq(vim.b[bufnr].cgxx_mdtable, nil)
+        mdtable.toggle(bufnr)
+        eq(vim.b[bufnr].cgxx_mdtable, true)
+        mdtable.toggle(bufnr)
+        eq(vim.b[bufnr].cgxx_mdtable, false)
+
+        vim.notify = notify
+    end)
+
+    it("attaches its keymaps buffer-locally, not globally", function()
+        mdtable.keymap(bufnr)
+        ---@type table<string, true>
+        local lhs = {}
+        for _, map in ipairs(vim.api.nvim_buf_get_keymap(bufnr, "n")) do
+            lhs[map.lhs] = true
+        end
+        -- `\` is this config's leader, per `lua/keymap/init.lua`.
+        eq(lhs["\\tf"], true)
+        eq(lhs["\\tr"], true)
+        eq(lhs["\\tt"], true)
+    end)
+
+    it("offers every action it dispatches as a completion", function()
+        eq(mdtable.complete(), {
+            "buffer",
+            "center",
+            "disable",
+            "enable",
+            "format",
+            "left",
+            "none",
+            "right",
+            "toggle",
+        })
+    end)
+end)
