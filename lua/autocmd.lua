@@ -67,6 +67,7 @@ M.setup = function()
     require("util.header").autocmd()
     require("filetype").autocmd()
     require("util.claude").autocmd()
+    require("util.wip").autocmd()
 end
 
 return M

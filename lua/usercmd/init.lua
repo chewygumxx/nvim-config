@@ -88,6 +88,20 @@ local lua_checker = function()
     })
 end
 
+--- Registers the `XXWip` user command, backed by `util.wip`.
+---@return nil
+local wip = function()
+    local desc = "WIP snapshots to refs/wip/<branch> "
+        .. "(toggle/enable/disable/snapshot/drop); bare toggles"
+    local mod  = require("util.wip")
+    usercmd("XXWip", mod.command, {
+        desc     = desc,
+        nargs    = "?",
+        bang     = true,
+        complete = mod.complete,
+    })
+end
+
 --- Registers every user command this config defines.
 ---@return nil
 M.setup = function()
@@ -96,6 +110,7 @@ M.setup = function()
     redirect_awkward_pager()
     insert_header()
     lua_checker()
+    wip()
 end
 
 return M
