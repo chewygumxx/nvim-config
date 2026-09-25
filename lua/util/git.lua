@@ -14,6 +14,19 @@
 
 local M = {}
 
+--- Extracts the "owner/repo" slug from a remote URL, in either the SSH or
+--- the HTTPS spelling.
+---@param url string Remote URL, trailing whitespace permitted
+---@return string? slug "owner/repo", or nil if url carries no such pair
+local slug_of_url = function(url)
+    local slug = url:gsub("%s+$", "")
+        :match("([%w_.%-]+/[%w_.%-]+)$")
+    if not slug then
+        return
+    end
+    return (slug:gsub("%.git$", ""))
+end
+
 --- Resolves the "owner/repo" slug of file's git remote.
 ---@param file?   string File to resolve from (default: current buffer)
 ---@param remote? string Remote name (default: "origin")
@@ -37,12 +50,7 @@ M.slug = function(file, remote)
         return
     end
 
-    local slug = result.stdout:gsub("%s+$", "")
-        :match("([%w_.%-]+/[%w_.%-]+)$")
-    if not slug then
-        return
-    end
-    return (slug:gsub("%.git$", ""))
+    return slug_of_url(result.stdout)
 end
 
 --- Resolves slug's SPDX license identifier via the GitHub API.
