@@ -37,6 +37,13 @@ describe("filetype.nex_note", function()
         eq(nex_note.hlgroup_defs, markdown.hlgroup_defs)
     end)
 
+    it("delegates setup to markdown, so it gets the table keymaps", function()
+        -- `lua/filetype/init.lua` runs one module per filetype, so a note
+        -- reaches markdown's `setup()` only by naming it.
+        eq(nex_note.setup, markdown.setup)
+        eq(type(nex_note.setup), "function")
+    end)
+
     it("leaves markdown's own options untouched", function()
         eq(markdown.local_opts.linebreak, nil)
         eq(markdown.local_opts.foldmethod, nil)

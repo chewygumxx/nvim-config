@@ -276,6 +276,19 @@ describe("util.markdown_table buffer operations", function()
         return vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
     end
 
+    --- Swaps `vim.notify` for one that drops anything below ERROR, keeping
+    --- `enable`/`disable`'s progress messages out of the reporter.
+    ---@return fun(msg: string, level?: integer) original
+    local quieten = function()
+        local notify = vim.notify
+        vim.notify   = function(msg, level)
+            if level and level >= vim.log.levels.ERROR then
+                notify(msg, level)
+            end
+        end
+        return notify
+    end
+
     before_each(function()
         bufnr                  = vim.api.nvim_create_buf(false, true)
         vim.bo[bufnr].filetype = "markdown"
@@ -420,13 +433,7 @@ describe("util.markdown_table buffer operations", function()
     end)
 
     it("is opt-in per buffer for reformat-as-you-edit", function()
-        -- Keep toggle's own progress notifications out of the reporter.
-        local notify = vim.notify
-        vim.notify   = function(_, level)
-            if level and level >= vim.log.levels.ERROR then
-                notify(_, level)
-            end
-        end
+        local notify = quieten()
 
         -- The autocmd does nothing until a buffer asks for it, so that
         -- typing a table is never reflowed out from under you.
@@ -435,6 +442,49 @@ describe("util.markdown_table buffer operations", function()
         eq(vim.b[bufnr].cgxx_mdtable, true)
         mdtable.toggle(bufnr)
         eq(vim.b[bufnr].cgxx_mdtable, false)
+
+        vim.notify = notify
+    end)
+
+    it("reflows on edit once enabled, and not before", function()
+        local notify = quieten()
+        mdtable.autocmd()
+
+        local ragged = { "| a   | b   |", "| --- | --- |", "| 1111 | 2 |" }
+        scratch(ragged)
+        vim.api.nvim_win_set_cursor(0, { 3, 2 })
+
+        -- Disabled: the autocmd sees the buffer and declines.
+        vim.cmd("doautocmd TextChanged")
+        eq(buffer(), ragged)
+
+        mdtable.enable(bufnr)
+        vim.cmd("doautocmd TextChanged")
+        eq(buffer(), {
+            "| a    | b   |",
+            "| ---- | --- |",
+            "| 1111 | 2   |",
+        })
+
+        -- And stops again on request.
+        mdtable.disable(bufnr)
+        scratch(ragged)
+        vim.api.nvim_win_set_cursor(0, { 3, 2 })
+        vim.cmd("doautocmd TextChanged")
+        eq(buffer(), ragged)
+
+        vim.notify = notify
+    end)
+
+    it("reflows on leaving insert mode too", function()
+        local notify = quieten()
+        mdtable.autocmd()
+        mdtable.enable(bufnr)
+
+        scratch({ "| a | bb |", "|---|---|", "| 1 | 2 |" })
+        vim.api.nvim_win_set_cursor(0, { 1, 2 })
+        vim.cmd("doautocmd InsertLeave")
+        eq(buffer(), { "| a   | bb  |", "| --- | --- |", "| 1   | 2   |" })
 
         vim.notify = notify
     end)
