@@ -54,11 +54,10 @@ M.filetypes = {
 --- Maps a detected filetype to the specialised module that handles it.
 ---@type { [string]: string } { [Filetype]: Module }
 M.modmap = {
-    man                 = "man",
-    markdown            = "markdown",
-    ["markdown.claude"] = "claude",
-    -- Notes are Markdown; their own settings ride their modeline
-    ["markdown.nex-note"] = "markdown",
+    man                   = "man",
+    markdown              = "markdown",
+    ["markdown.claude"]   = "claude",
+    ["markdown.nex-note"] = "nex_note",
     kdl                   = "kdl",
     dosini                = "dosini",
     confini               = "dosini",
