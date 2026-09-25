@@ -47,6 +47,7 @@ M.filetypes = {
         [".*zsh/functions/[^/]*"] = "zsh",
 
         [require("util.claude").prompt_path_pattern] = "markdown.claude",
+        [require("util.nex").note_path_pattern]      = "markdown.nex-note",
     },
 }
 
@@ -56,15 +57,17 @@ M.modmap = {
     man                 = "man",
     markdown            = "markdown",
     ["markdown.claude"] = "claude",
-    kdl                 = "kdl",
-    dosini              = "dosini",
-    confini             = "dosini",
-    gitconfig           = "dosini",
-    cfg                 = "dosini",
-    editorconfig        = "dosini",
-    gitcommit           = "prose",
-    text                = "prose",
-    help                = "help",
+    -- Notes are Markdown; their own settings ride their modeline
+    ["markdown.nex-note"] = "markdown",
+    kdl                   = "kdl",
+    dosini                = "dosini",
+    confini               = "dosini",
+    gitconfig             = "dosini",
+    cfg                   = "dosini",
+    editorconfig          = "dosini",
+    gitcommit             = "prose",
+    text                  = "prose",
+    help                  = "help",
 }
 
 ---@class (exact) cgxx.filetype.Module
