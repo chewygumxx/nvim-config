@@ -128,6 +128,36 @@ jobs:
             - name: Add lua-language-server to PATH
               run: echo "$RUNNER_TEMP/lua-language-server/bin" >> "$GITHUB_PATH"
 
+            # The same whole-repo check `.husky/pre-commit` runs, repeated
+            # here because that hook is skippable (`--no-verify`) and
+            # silently no-ops on a machine without lua-language-server.
+            # `VIMRUNTIME` has to be exported for the `$VIMRUNTIME/lua`
+            # entry in `.luarc.json`'s `workspace.library` to resolve. The
+            # exit code is not trusted on its own: some releases report
+            # problems and still exit 0, so the summary line is what is
+            # actually asserted on.
+            - name: Typecheck
+              run: |
+                  VIMRUNTIME=$(nvim --headless --clean \
+                      -c 'lua io.stdout:write(vim.env.VIMRUNTIME or "")' \
+                      -c 'qa!' 2>/dev/null)
+                  export VIMRUNTIME
+                  # `set +e` so a non-zero exit does not abort the step
+                  # before its output has been printed
+                  set +e
+                  out=$(lua-language-server --check=. --checklevel=Warning 2>&1)
+                  status=$?
+                  set -e
+                  printf '%s\n' "$out" | tail -n 60
+                  case "$out" in
+                      *"no problems found"*) ;;
+                      *)
+                          echo "::error::lua-language-server found Warnings"
+                          exit 1
+                          ;;
+                  esac
+                  exit "$status"
+
             # Fails if lua-language-server can't infer anything more
             # specific than any/unknown anywhere under lua/, lsp/, or
             # init.lua. See scripts/luals_untyped.lua for how.
