@@ -14,18 +14,54 @@ local eq  = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
---- Runs git in dir and returns its trimmed stdout, "" on failure.
+--- Runs git in dir and returns its trimmed stdout.
+---
+--- A fixture command that fails is a broken test rather than a result to
+--- assert on, so this raises instead of folding the failure into "": a
+--- swallowed setup failure only resurfaces later, as a puzzling assertion
+--- about something else entirely.
 ---@param dir string Repository to run in
 ---@param ... string git arguments
 ---@return string stdout
 local git = function(dir, ...)
-    local cmd = { "git", "-C", dir }
-    vim.list_extend(cmd, { ... })
+    local args = { ... }
+    local cmd  = { "git", "-C", dir }
+    vim.list_extend(cmd, args)
+
     local result = vim.system(cmd, { text = true }):wait()
-    if result.code ~= 0 or not result.stdout then
-        return ""
+    if result.code ~= 0 then
+        error(
+            string.format(
+                "fixture `git %s` failed (%d): %s",
+                table.concat(args, " "),
+                result.code,
+                result.stderr or ""
+            )
+        )
     end
-    return (result.stdout:gsub("%s+$", ""))
+    return ((result.stdout or ""):gsub("%s+$", ""))
+end
+
+--- The commit ref points at, "" when it does not exist.
+---
+--- The one query that deliberately tolerates a non-zero exit:
+--- `rev-parse --verify --quiet` fails for a ref that was never created,
+--- and "no snapshot was taken" is an answer these tests assert on rather
+--- than a broken fixture.
+---@param dir string Repository to run in
+---@param ref string Ref to resolve
+---@return string commit
+local tip = function(dir, ref)
+    local result = vim.system({
+        "git",
+        "-C",
+        dir,
+        "rev-parse",
+        "--verify",
+        "--quiet",
+        ref,
+    }, { text = true }):wait()
+    return ((result.stdout or ""):gsub("%s+$", ""))
 end
 
 --- Replaces `vim.notify` with one that drops anything below ERROR, so
@@ -76,13 +112,13 @@ describe("util.wip.snapshot", function()
     ---@param before string Tip to wait for a change from ("" if unborn)
     ---@return string tip
     local advanced = function(before)
-        local tip = before
+        local at = before
         vim.wait(10000, function()
-            tip = git(dir, "rev-parse", "--verify", "--quiet", ref)
-            return tip ~= "" and tip ~= before
+            at = tip(dir, ref)
+            return at ~= "" and at ~= before
         end, 20
         )
-        return tip
+        return at
     end
 
     --- Opens path in a new current buffer and returns its number.
@@ -166,7 +202,7 @@ describe("util.wip.snapshot", function()
         vim.wait(2000, function()
             return false
         end)
-        eq(git(dir, "rev-parse", "--verify", "--quiet", ref), first)
+        eq(tip(dir, ref), first)
 
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "second" })
         wip.snapshot(buf)
@@ -241,7 +277,7 @@ describe("util.wip.snapshot", function()
         end)
 
         eq(vim.b[scratch].cgxx_wip_location, false)
-        eq(git(dir, "rev-parse", "--verify", "--quiet", ref), "")
+        eq(tip(dir, ref), "")
         vim.api.nvim_buf_delete(scratch, { force = true })
     end)
 
@@ -283,7 +319,7 @@ describe("util.wip.snapshot", function()
         )
 
         eq(dropped, "WIP: deleted " .. ref)
-        eq(git(dir, "rev-parse", "--verify", "--quiet", ref), "")
+        eq(tip(dir, ref), "")
     end)
 end)
 

@@ -14,18 +14,32 @@ local eq         = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
---- Runs git in dir and returns its trimmed stdout, "" on failure.
+--- Runs git in dir and returns its trimmed stdout.
+---
+--- A fixture command that fails is a broken test rather than a result to
+--- assert on, so this raises instead of folding the failure into "": a
+--- swallowed setup failure only resurfaces later, as a puzzling assertion
+--- about something else entirely.
 ---@param dir string Repository to run in
 ---@param ... string git arguments
 ---@return string stdout
 local git = function(dir, ...)
-    local cmd = { "git", "-C", dir }
-    vim.list_extend(cmd, { ... })
+    local args = { ... }
+    local cmd  = { "git", "-C", dir }
+    vim.list_extend(cmd, args)
+
     local result = vim.system(cmd, { text = true }):wait()
-    if result.code ~= 0 or not result.stdout then
-        return ""
+    if result.code ~= 0 then
+        error(
+            string.format(
+                "fixture `git %s` failed (%d): %s",
+                table.concat(args, " "),
+                result.code,
+                result.stderr or ""
+            )
+        )
     end
-    return (result.stdout:gsub("%s+$", ""))
+    return ((result.stdout or ""):gsub("%s+$", ""))
 end
 
 --- Builds a repository fixture holding one file.

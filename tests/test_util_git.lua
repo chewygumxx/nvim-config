@@ -14,6 +14,36 @@ local eq  = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
+--- Runs git in dir and returns its trimmed stdout.
+---
+--- A fixture command that fails is a broken test rather than a result to
+--- assert on, so this raises instead of folding the failure into "". A
+--- swallowed setup failure does not stay quiet, it resurfaces later as a
+--- puzzling assertion about something else entirely: a `git commit` with
+--- no identity configured is what once left `checkout --detach` with
+--- nothing to detach from, failing three cases in CI only.
+---@param dir string Repository to run in
+---@param ... string git arguments
+---@return string stdout
+local git_in = function(dir, ...)
+    local args = { ... }
+    local cmd  = { "git", "-C", dir }
+    vim.list_extend(cmd, args)
+
+    local result = vim.system(cmd, { text = true }):wait()
+    if result.code ~= 0 then
+        error(
+            string.format(
+                "fixture `git %s` failed (%d): %s",
+                table.concat(args, " "),
+                result.code,
+                result.stderr or ""
+            )
+        )
+    end
+    return ((result.stdout or ""):gsub("%s+$", ""))
+end
+
 describe("util.git", function()
     ---@type string, string
     local dir, file
@@ -23,36 +53,20 @@ describe("util.git", function()
         vim.fn.mkdir(dir, "p")
         -- `--initial-branch` pins the ref name: without it the fixture
         -- would inherit whatever `init.defaultBranch` is configured to
-        vim.system({
-            "git",
-            "-C",
-            dir,
-            "init",
-            "--quiet",
-            "--initial-branch=git-test",
-        }):wait()
+        git_in(dir, "init", "--quiet", "--initial-branch=git-test")
         -- An identity has to be set per fixture rather than inherited:
         -- a CI runner has no global `user.name`/`user.email`, and without
         -- one `git commit` fails outright, leaving later setup steps
         -- (`checkout --detach`) with nothing to act on
-        vim.system({
-            "git",
-            "-C",
-            dir,
-            "config",
-            "user.email",
-            "test@example.invalid",
-        }):wait()
-        vim.system({ "git", "-C", dir, "config", "user.name", "Test" }):wait()
-        vim.system({
-            "git",
-            "-C",
+        git_in(dir, "config", "user.email", "test@example.invalid")
+        git_in(dir, "config", "user.name", "Test")
+        git_in(
             dir,
             "remote",
             "add",
             "origin",
-            "git@github.com:example-owner/example-repo.git",
-        }):wait()
+            "git@github.com:example-owner/example-repo.git"
+        )
         file = dir .. "/file.lua"
         vim.fn.writefile({ "" }, file)
     end)
@@ -66,33 +80,29 @@ describe("util.git", function()
     end)
 
     it("strips a trailing .git suffix from the remote URL", function()
-        vim.system({
-            "git",
-            "-C",
+        git_in(
             dir,
             "remote",
             "set-url",
             "origin",
-            "https://github.com/example-owner/example-repo.git",
-        }):wait()
+            "https://github.com/example-owner/example-repo.git"
+        )
         eq(git.slug(file), "example-owner/example-repo")
     end)
 
     it("returns nil when there is no origin remote", function()
-        vim.system({ "git", "-C", dir, "remote", "remove", "origin" }):wait()
+        git_in(dir, "remote", "remove", "origin")
         eq(git.slug(file), nil)
     end)
 
     it("resolves the owner/repo slug from a named remote", function()
-        vim.system({
-            "git",
-            "-C",
+        git_in(
             dir,
             "remote",
             "add",
             "upstream",
-            "git@github.com:upstream-owner/upstream-repo.git",
-        }):wait()
+            "git@github.com:upstream-owner/upstream-repo.git"
+        )
         eq(git.slug(file, "upstream"), "upstream-owner/upstream-repo")
     end)
 
@@ -126,33 +136,23 @@ describe("util.git", function()
     end)
 
     it("follows a branch rename", function()
-        vim.system({ "git", "-C", dir, "branch", "-M", "renamed" }):wait()
+        git_in(dir, "branch", "-M", "renamed")
         eq(git.branch(file), "renamed")
     end)
 
     it("returns nil for a detached HEAD", function()
         vim.fn.writefile({ "" }, file)
-        vim.system({ "git", "-C", dir, "add", "-A" }):wait()
-        vim.system({
-            "git",
-            "-C",
+        git_in(dir, "add", "-A")
+        git_in(
             dir,
             "-c",
             "commit.gpgsign=false",
             "commit",
             "--quiet",
             "-m",
-            "init",
-        }):wait()
-        vim.system({
-            "git",
-            "-C",
-            dir,
-            "checkout",
-            "--quiet",
-            "--detach",
-            "HEAD",
-        }):wait()
+            "init"
+        )
+        git_in(dir, "checkout", "--quiet", "--detach", "HEAD")
         eq(git.branch(file), nil)
     end)
 
@@ -168,17 +168,11 @@ describe("util.git.info", function()
     ---@type string, string
     local dir, file
 
-    --- Runs git in dir and returns its trimmed stdout, "" on failure.
+    --- Runs git in this describe's fixture, raising if it fails.
     ---@param ... string git arguments
     ---@return string stdout
     local run = function(...)
-        local cmd = { "git", "-C", dir }
-        vim.list_extend(cmd, { ... })
-        local result = vim.system(cmd, { text = true }):wait()
-        if result.code ~= 0 or not result.stdout then
-            return ""
-        end
-        return (result.stdout:gsub("%s+$", ""))
+        return git_in(dir, ...)
     end
 
     --- Calls `M.info` and blocks until its callback has run.
