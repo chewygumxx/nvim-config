@@ -37,7 +37,10 @@ M.debounce = 2000
 --- read for the blob's file mode, so every subsequent plumbing call
 --- scribbles on a throwaway index instead of the one the user stages
 --- into. `commit-tree` writes the object directly, which also means the
---- `pre-commit`/`commit-msg` hooks never fire for these.
+--- `pre-commit`/`commit-msg` hooks never fire for these. Signing is
+--- forced off: a snapshot every few seconds is throwaway, and a gpg
+--- passphrase prompt has nowhere to go from an async `vim.system` call,
+--- so honouring `commit.gpgsign` here would hang the snapshot.
 ---@type string
 local snapshot_sh = [[
 set -eu
@@ -72,10 +75,11 @@ if [ -n "$base" ] && [ "$tree" = "$(git rev-parse "$base^{tree}")" ]; then
     exit 0
 fi
 
+msg="wip($branch): $path"
 if [ -n "$base" ]; then
-    commit=$(git commit-tree "$tree" -p "$base" -m "wip($branch): $path")
+    commit=$(git -c commit.gpgsign=false commit-tree "$tree" -p "$base" -m "$msg")
 else
-    commit=$(git commit-tree "$tree" -m "wip($branch): $path")
+    commit=$(git -c commit.gpgsign=false commit-tree "$tree" -m "$msg")
 fi
 
 # The old value pins the update against a concurrent snapshot; an empty
