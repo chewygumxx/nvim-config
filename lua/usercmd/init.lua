@@ -102,6 +102,16 @@ local wip = function()
     })
 end
 
+--- Registers the `XXNexNote` user command, backed by `util.nex`. Also
+--- the dashboard's "New Note" action (see `lua/spec/snacks.nvim.lua`).
+---@return nil
+local nex_note = function()
+    local desc = "Scaffold a new note in ~chewygumxx/nex.git "
+        .. "(prompts title/description/tags)"
+    local mod  = require("util.nex")
+    usercmd("XXNexNote", mod.command, { desc = desc })
+end
+
 --- Registers every user command this config defines.
 ---@return nil
 M.setup = function()
@@ -111,6 +121,7 @@ M.setup = function()
     insert_header()
     lua_checker()
     wip()
+    nex_note()
 end
 
 return M
