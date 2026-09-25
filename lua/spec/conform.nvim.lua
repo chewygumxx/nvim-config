@@ -86,15 +86,33 @@ M.opts.formatters.sqlfluff = {
 M.opts.formatters.shuck = {
     command = "shuck",
     stdin   = true,
+    cwd     = function(_, ctx)
+        return vim.fs.root(ctx.dirname, { ".shuck.toml", "shuck.toml" })
+    end,
     args    = function(_, ctx)
-        return {
+        local ret     = {
             "format",
             "-",
-            "--dialect",
-            "zsh",
             "--stdin-filename",
             ctx.filename,
+            "--dialect",
+            "zsh",
         }
+        local default = {
+            "--indent-style",
+            "space",
+            "--indent-width",
+            "4",
+            "--space-redirects",
+            "--keep-padding",
+            "--switch-case-indent",
+        }
+
+        if not vim.fs.root(ctx.dirname, { ".shuck.toml", "shuck.toml" }) then
+            vim.list_extend(ret, default)
+        end
+
+        return ret
     end,
 }
 
