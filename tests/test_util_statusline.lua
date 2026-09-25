@@ -186,14 +186,15 @@ describe("util.statusline.segment", function()
         eq(statusline.fallback(bufnr), "")
     end)
 
-    it("discards an answer for a name the buffer no longer has", function()
+    it("resolves the name the buffer has when the work starts", function()
         local _, file = track(fixture())
         local bufnr   = vim.fn.bufadd(file)
         vim.fn.bufload(bufnr)
 
-        -- Start a resolve for the original name, then rename before it can
-        -- land. The in-flight answer describes a file this buffer is no
-        -- longer showing, so it must be dropped rather than cached.
+        -- A cache miss only *schedules* the resolve, so a rename landing
+        -- in the same tick is picked up before any git call is issued.
+        -- What happens to an answer already in flight is a separate
+        -- question, and a real race: see "util.statusline in flight".
         statusline.segment(bufnr)
         local _, renamed = track(fixture({ name = "elsewhere.lua" }))
         vim.api.nvim_buf_set_name(bufnr, renamed)
@@ -217,6 +218,135 @@ describe("util.statusline.segment", function()
             statusline.segment(bufnr),
             "~example-owner/example-repo.git:renamed:/file.lua"
         )
+    end)
+end)
+
+--- One held git call: the name it was issued for, and the callback that
+--- answers it whenever the test decides to.
+---@class cgxx.test.inflight
+---@field name    string                         Name the call resolves
+---@field resolve fun(info: cgxx.git.info?): nil Answers the call
+
+describe("util.statusline in flight", function()
+    -- Every case here is about *when* an answer lands rather than what it
+    -- says, so `util.git.info` is replaced by a queue the test drains in
+    -- the order it chooses. Real git calls resolve in milliseconds and
+    -- always in issue order, which is precisely why the two guards these
+    -- cases cover cannot be reached with a real one.
+    local util_git = require("util.git")
+
+    ---@type fun(file: string?, callback: fun(info: cgxx.git.info?)): nil
+    local real_info
+
+    ---@type cgxx.test.inflight[]
+    local calls
+
+    ---@type integer[]
+    local bufs
+
+    before_each(function()
+        calls     = {}
+        bufs      = {}
+        real_info = util_git.info
+        ---@diagnostic disable-next-line: duplicate-set-field
+        util_git.info = function(file, callback)
+            calls[#calls + 1] = { name = file or "", resolve = callback }
+        end
+    end)
+
+    after_each(function()
+        util_git.info = real_info
+        for _, bufnr in ipairs(bufs) do
+            if vim.api.nvim_buf_is_valid(bufnr) then
+                vim.api.nvim_buf_delete(bufnr, { force = true })
+            end
+        end
+    end)
+
+    --- Loads path into a buffer registered for teardown. The file need
+    --- not exist: nothing here reaches git or the disk.
+    ---@param path string
+    ---@return integer bufnr
+    local opened = function(path)
+        local bufnr = vim.fn.bufadd(path)
+        vim.fn.bufload(bufnr)
+        bufs[#bufs + 1] = bufnr
+        return bufnr
+    end
+
+    --- Asks for bufnr's segment and returns the git call it started.
+    ---
+    --- The resolve is scheduled rather than immediate, so the queue only
+    --- grows once the event loop has turned; `vim.wait` is what turns it.
+    ---@param bufnr integer
+    ---@return cgxx.test.inflight call
+    local started = function(bufnr)
+        local before = #calls
+        statusline.segment(bufnr)
+
+        local arrived = function()
+            return #calls > before
+        end
+        assert(vim.wait(1000, arrived, 5), "no git call was started")
+        return calls[#calls]
+    end
+
+    --- A repository-less answer, as `util.git.info` would report one for
+    --- a file at the root of a checkout with no "origin" remote.
+    ---@return cgxx.git.info info
+    local answer = function()
+        return { prefix = "", branch = "stl-test", slug = nil }
+    end
+
+    it("drops an answer invalidated by a refresh", function()
+        local bufnr = opened(vim.fn.tempname() .. "/file.lua")
+        local call  = started(bufnr)
+
+        -- A checkout in another terminal is what `M.refresh_all` reacts
+        -- to, and it changes the branch without changing any buffer's
+        -- name. The answer already in flight was composed against the
+        -- old branch, so it is stale despite naming the right file, and
+        -- only the in-flight marker records that.
+        statusline.refresh(bufnr)
+        call.resolve(answer())
+
+        eq(vim.b[bufnr].cgxx_statusline, nil)
+    end)
+
+    it("drops an answer for a name the buffer no longer has", function()
+        local bufnr = opened(vim.fn.tempname() .. "/old.lua")
+        local call  = started(bufnr)
+
+        -- Renamed with the call already issued and no refresh in
+        -- between, so the in-flight marker still matches: the buffer's
+        -- current name is the only thing left that can tell this answer
+        -- is about a file this buffer no longer shows
+        vim.api.nvim_buf_set_name(bufnr, vim.fn.tempname() .. "/new.lua")
+        call.resolve(answer())
+
+        eq(vim.b[bufnr].cgxx_statusline, nil)
+    end)
+
+    it("keeps the newer answer when a rename supersedes one", function()
+        local bufnr = opened(vim.fn.tempname() .. "/old.lua")
+        local first = started(bufnr)
+
+        local new = vim.fn.tempname() .. "/new.lua"
+        vim.api.nvim_buf_set_name(bufnr, new)
+        -- What `BufFilePost` does in a real session, see
+        -- "util.statusline.autocmd"
+        statusline.refresh(bufnr)
+        local second = started(bufnr)
+
+        eq(first.name ~= second.name, true)
+        eq(second.name, new)
+
+        -- Out of order on purpose: the newer answer lands first, then the
+        -- stale one, which must not overwrite it
+        second.resolve(answer())
+        first.resolve(answer())
+
+        eq(vim.b[bufnr].cgxx_statusline, "<local>:stl-test:/new.lua")
     end)
 end)
 
