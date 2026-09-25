@@ -50,4 +50,28 @@ describe("filetype.setup", function()
             eq(match("/home/x/zsh/functions/baz"), "zsh")
         end
     )
+
+    it(
+        "maps a note under a nex note/ directory to markdown.nex-note",
+        function()
+            eq(
+                match("/home/x/dev/nex/note/2026-09-26-a-note.note.md"),
+                "markdown.nex-note"
+            )
+        end
+    )
+
+    it("leaves plain markdown outside the nex repository alone", function()
+        eq(match("/home/x/dev/nex/README.md"), "markdown")
+        eq(match("/home/x/notes/a.note.md"), "markdown")
+    end)
+
+    it("routes every mapped filetype to a module that loads", function()
+        for filetype, module in pairs(require("filetype").modmap) do
+            -- Bound to a local first: `pcall` also returns the module
+            -- itself, which would otherwise expand into this table
+            local loads = pcall(require, "filetype." .. module)
+            eq({ filetype, loads }, { filetype, true })
+        end
+    end)
 end)
