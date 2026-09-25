@@ -139,6 +139,100 @@ M.branch = function(file)
     return (result.stdout:gsub("%s+$", ""))
 end
 
+---@class cgxx.git.info
+---@field prefix string  Directory prefix relative to the repository root,
+---  "" at the root itself
+---@field branch string  Short branch name, "" on a detached HEAD
+---@field slug   string? "owner/repo" of the "origin" remote, nil without one
+
+--- Everything `M.path`, `M.branch` and `M.slug` answer separately, in one
+--- process and without blocking.
+---
+--- The sync trio costs three spawns, which is fine once for a header or a
+--- user command but not on a path that runs per buffer displayed: three
+--- `:wait()` calls stall the UI for as long as git takes, multiplied by
+--- every buffer in a sweep. One `sh -c` collapses that to a single
+--- non-blocking spawn, the same trade `util.wip` makes for its snapshots.
+---
+--- Deliberately reports a detached HEAD as an empty branch rather than an
+--- abbreviated SHA, leaving the substitution to the caller.
+---@param file?    string                    Default: current buffer
+---@param callback fun(info: cgxx.git.info?) Receives nil if file isn't
+---  inside a git repository, or if git fails or times out. Always called
+---  outside a fast event, so it may touch buffers and options.
+---@return nil
+M.info = function(file, callback)
+    file = file or vim.fn.expand("%")
+
+    local done = function(info)
+        vim.schedule(function()
+            callback(info)
+        end)
+    end
+
+    if vim.fn.executable("git") == 0 or vim.fn.executable("sh") == 0 then
+        done(nil)
+        return
+    end
+
+    local dir = vim.fn.fnamemodify(file, ":p:h")
+
+    -- `git -C` on a directory that doesn't exist yet (`:e new/dir/file`)
+    -- is a guaranteed failure, so skip the spawn entirely
+    if vim.fn.isdirectory(dir) == 0 then
+        done(nil)
+        return
+    end
+
+    -- `|| true` on the optional two: `set -e` would otherwise abort the
+    -- script for the ordinary cases of a detached HEAD or no remote, and
+    -- a failure there is information rather than an error. `--show-prefix`
+    -- has no such guard on purpose -- when it fails, this is not a
+    -- repository and the whole answer is nil.
+    local info_sh = [[
+set -eu
+
+prefix=$(git rev-parse --show-prefix)
+branch=$(git symbolic-ref --quiet --short HEAD || true)
+url=$(git config --get remote.origin.url || true)
+
+printf '%s\n%s\n%s\n' "$prefix" "$branch" "$url"
+]]
+
+    -- `vim.system` raises synchronously when the executable is missing,
+    -- and a hung git on a network filesystem would otherwise never call
+    -- back at all
+    local ok = pcall(
+        vim.system,
+        { "sh", "-c", info_sh, "sh" },
+        { cwd = dir, text = true, timeout = 2000 },
+        function(result)
+            if result.code ~= 0 or not result.stdout then
+                done(nil)
+                return
+            end
+
+            -- Exactly the three fields plus the trailing newline's empty
+            -- tail. Anything else means a field contained a newline, ie. a
+            -- pathological path, and is rejected rather than mis-parsed.
+            local lines = vim.split(result.stdout, "\n", { plain = true })
+            if #lines ~= 4 then
+                done(nil)
+                return
+            end
+
+            done({
+                prefix = lines[1],
+                branch = lines[2],
+                slug   = lines[3] ~= "" and slug_of_url(lines[3]) or nil,
+            })
+        end
+    )
+    if not ok then
+        done(nil)
+    end
+end
+
 ---@class cgxx.git.gh.opts
 ---@field fmt cgxx.git.gh.opts.fmt
 
