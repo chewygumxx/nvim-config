@@ -45,23 +45,26 @@ M.filetypes = {
         [".*config/zsh/.*"]       = "zsh",
         [".*zsh/func/[^/]*"]      = "zsh",
         [".*zsh/functions/[^/]*"] = "zsh",
+
+        [require("util.claude").prompt_path_pattern] = "markdown.claude",
     },
 }
 
 --- Maps a detected filetype to the specialised module that handles it.
 ---@type { [string]: string } { [Filetype]: Module }
 M.modmap = {
-    man          = "man",
-    markdown     = "markdown",
-    kdl          = "kdl",
-    dosini       = "dosini",
-    confini      = "dosini",
-    gitconfig    = "dosini",
-    cfg          = "dosini",
-    editorconfig = "dosini",
-    gitcommit    = "prose",
-    text         = "prose",
-    help         = "help",
+    man                 = "man",
+    markdown            = "markdown",
+    ["markdown.claude"] = "claude",
+    kdl                 = "kdl",
+    dosini              = "dosini",
+    confini             = "dosini",
+    gitconfig           = "dosini",
+    cfg                 = "dosini",
+    editorconfig        = "dosini",
+    gitcommit           = "prose",
+    text                = "prose",
+    help                = "help",
 }
 
 ---@class (exact) cgxx.filetype.Module

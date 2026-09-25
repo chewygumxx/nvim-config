@@ -66,6 +66,7 @@ M.setup = function()
     unmodifiable_q_quit()
     require("util.header").autocmd()
     require("filetype").autocmd()
+    require("util.claude").autocmd()
 end
 
 return M
