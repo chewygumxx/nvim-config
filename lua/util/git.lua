@@ -109,6 +109,36 @@ M.path = function(file)
     return ":/" .. prefix .. vim.fn.fnamemodify(file, ":t")
 end
 
+--- Resolves the branch checked out by file's git repository.
+---@param file? string File to resolve from (default: current buffer)
+---@return string? branch Branch name, or nil if file's repository has a
+---  detached HEAD, or file isn't inside a git repository
+M.branch = function(file)
+    if vim.fn.executable("git") == 0 then
+        return
+    end
+    file = file or vim.fn.expand("%")
+
+    -- `symbolic-ref` rather than `rev-parse --abbrev-ref HEAD`: the latter
+    -- answers "HEAD" on a detached checkout, a valid-looking branch name
+    -- the caller would then have to special-case. Failing outright leaves
+    -- the "no branch" decision where it belongs.
+    local result = vim.system({
+        "git",
+        "-C",
+        vim.fn.fnamemodify(file, ":p:h"),
+        "symbolic-ref",
+        "--quiet",
+        "--short",
+        "HEAD",
+    }, { text = true }):wait()
+    if result.code ~= 0 or not result.stdout or result.stdout == "" then
+        return
+    end
+
+    return (result.stdout:gsub("%s+$", ""))
+end
+
 ---@class cgxx.git.gh.opts
 ---@field fmt cgxx.git.gh.opts.fmt
 
