@@ -96,4 +96,45 @@ describe("util.git", function()
             vim.fn.delete(outside)
         end
     )
+
+    it("resolves the checked out branch", function()
+        -- The fixture's `git init` inherits whatever `init.defaultBranch`
+        -- is configured to, so rename to a known value rather than
+        -- asserting against an ambient one
+        vim.system({ "git", "-C", dir, "branch", "-M", "git-test" }):wait()
+        eq(git.branch(file), "git-test")
+    end)
+
+    it("returns nil for a detached HEAD", function()
+        vim.fn.writefile({ "" }, file)
+        vim.system({ "git", "-C", dir, "add", "-A" }):wait()
+        vim.system({
+            "git",
+            "-C",
+            dir,
+            "-c",
+            "commit.gpgsign=false",
+            "commit",
+            "--quiet",
+            "-m",
+            "init",
+        }):wait()
+        vim.system({
+            "git",
+            "-C",
+            dir,
+            "checkout",
+            "--quiet",
+            "--detach",
+            "HEAD",
+        }):wait()
+        eq(git.branch(file), nil)
+    end)
+
+    it("returns nil outside any git repository", function()
+        local outside = vim.fn.tempname()
+        vim.fn.writefile({ "" }, outside)
+        eq(git.branch(outside), nil)
+        vim.fn.delete(outside)
+    end)
 end)
