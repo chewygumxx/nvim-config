@@ -25,15 +25,23 @@ jobs:
         name: Lua
         runs-on: ubuntu-latest
 
-        # Pinned manually to avoid an unauthenticated releases-API lookup on
-        # every run; bump by hand when a newer release is needed.
-        env:
-            LUAFMT_VERSION: "0.25.1" # https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases
-            SELENE_VERSION: "0.31.0" # https://github.com/Kampfkarren/selene/releases
-
         steps:
             - name: Checkout
               uses: actions/checkout@v7
+
+            # Pinned rather than resolved, to avoid an unauthenticated
+            # releases-API lookup on every run, but read from `mise.toml`
+            # rather than restated here: a version named in both places is
+            # a version that can disagree with itself, and the one a
+            # contributor's `PATH` supplies is the one that matters.
+            # Exported into `$GITHUB_ENV` so the cache keys below can key
+            # on it.
+            - name: Read the tool pins
+              run: |
+                  python3 .github/scripts/tool_version.py \
+                      LUAFMT_VERSION=luafmt \
+                      SELENE_VERSION=github:Kampfkarren/selene \
+                      >> "$GITHUB_ENV"
 
             - name: Cache luafmt
               id: cache-luafmt
@@ -85,16 +93,19 @@ jobs:
         name: LuaCATS
         runs-on: ubuntu-latest
 
-        # Pinned manually to avoid an unauthenticated releases-API lookup on
-        # every run; bump by hand when a newer release is needed. Neovim's
-        # own pin lives in `.github/actions/setup-neovim`, which the test
-        # workflow shares.
-        env:
-            LUA_LS_VERSION: "3.19.1" # https://github.com/LuaLS/lua-language-server/releases
-
         steps:
             - name: Checkout
               uses: actions/checkout@v7
+
+            # As in the `lua` job: pinned, but named only in `mise.toml`.
+            # Neovim's pin lives there too and is read by
+            # `.github/actions/setup-neovim`, which the test workflow
+            # shares. https://github.com/LuaLS/lua-language-server/releases
+            - name: Read the tool pins
+              run: |
+                  python3 .github/scripts/tool_version.py \
+                      LUA_LS_VERSION=aqua:LuaLS/lua-language-server \
+                      >> "$GITHUB_ENV"
 
             - name: Setup Neovim
               uses: ./.github/actions/setup-neovim
@@ -156,15 +167,19 @@ jobs:
         name: TOML
         runs-on: ubuntu-latest
 
-        # Pinned manually to avoid an unauthenticated releases-API lookup on
-        # every run; bump by hand when a newer tombi release is needed.
-        # https://github.com/tombi-toml/tombi/releases
-        env:
-            TOMBI_VERSION: "v1.5.5"
-
         steps:
             - name: Checkout
               uses: actions/checkout@v7
+
+            # As in the `lua` job: pinned, but named only in `mise.toml`.
+            # That names the bare version, so the `v` the release tag
+            # carries is added at the URL below rather than stored here.
+            # https://github.com/tombi-toml/tombi/releases
+            - name: Read the tool pins
+              run: |
+                  python3 .github/scripts/tool_version.py \
+                      TOMBI_VERSION=aqua:tombi-toml/tombi \
+                      >> "$GITHUB_ENV"
 
             - name: Cache tombi
               id: cache-tombi
@@ -177,7 +192,7 @@ jobs:
               if: steps.cache-tombi.outputs.cache-hit != 'true'
               run: |
                   mkdir -p "$RUNNER_TEMP/tombi"
-                  curl -sL "https://github.com/tombi-toml/tombi/releases/download/${TOMBI_VERSION}/tombi-cli-${TOMBI_VERSION#v}-x86_64-unknown-linux-musl.tar.gz" | tar xzf - -C "$RUNNER_TEMP/tombi" --strip-components=1
+                  curl -sL "https://github.com/tombi-toml/tombi/releases/download/v${TOMBI_VERSION}/tombi-cli-${TOMBI_VERSION}-x86_64-unknown-linux-musl.tar.gz" | tar xzf - -C "$RUNNER_TEMP/tombi" --strip-components=1
                   chmod +x "$RUNNER_TEMP/tombi/tombi"
 
             - name: Add tombi to PATH
