@@ -1,0 +1,77 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/.github/actions/install-lazy/action.yaml
+#
+#
+
+name: Install lazy.nvim
+description: Clone the lazy.nvim commit lazy-lock.json pins.
+
+#
+# `tests/test_lazy_integration.lua` hands this configuration's specs to a
+# real lazy.nvim, so one has to be present for the suite to run here. The
+# commit comes from `lazy-lock.json` rather than a branch tip, which is the
+# first thing tracking that file buys: the plugin manager the merge is
+# checked against is the one a machine running this config would have,
+# rather than whatever landed upstream this morning.
+#
+# Cloned from `folke/lazy.nvim`, deliberately, even though
+# `lua/util/lazy.lua`'s `M.defaults` names `chewygumxx/lazy.nvim` on branch
+# `chewygumxx`. The installed copy this lock was written from has
+# `folke/lazy.nvim` as its origin and sits on `main`, so upstream is where
+# the locked commit is known to exist. That disagreement between the
+# bootstrap spec and the installed reality is worth resolving, but not by
+# guessing here.
+#
+# Requires Neovim on PATH already, for `stdpath("data")`: use
+# `./.github/actions/setup-neovim` first.
+#
+
+runs:
+    using: composite
+
+    steps:
+        - name: Resolve the pinned commit
+          id: pin
+          shell: bash
+          run: |
+              commit=$(python3 -c 'import json; print(json.load(open("lazy-lock.json"))["lazy.nvim"]["commit"])')
+              if [ -z "$commit" ]; then
+                  echo '::error::lazy-lock.json pins no commit for lazy.nvim'
+                  exit 1
+              fi
+              echo "commit=$commit" >> "$GITHUB_OUTPUT"
+
+              data_dir=$(nvim --headless --clean \
+                  -c 'lua io.stdout:write(vim.fn.stdpath("data"))' \
+                  -c 'qa!' 2>/dev/null)
+              echo "dir=$data_dir/lazy/lazy.nvim" >> "$GITHUB_OUTPUT"
+
+        - name: Cache lazy.nvim
+          id: cache
+          uses: actions/cache@v6
+          with:
+              path: ${{ steps.pin.outputs.dir }}
+              key: lazy-nvim-${{ steps.pin.outputs.commit }}
+
+        # Fetched by commit rather than cloned and checked out, which keeps
+        # this to one shallow object transfer. GitHub serves a fetch of an
+        # explicit sha, so no full history is needed to reach it.
+        - name: Clone lazy.nvim
+          if: steps.cache.outputs.cache-hit != 'true'
+          shell: bash
+          run: |
+              dir='${{ steps.pin.outputs.dir }}'
+              mkdir -p "$dir"
+              git -C "$dir" init -q
+              git -C "$dir" remote add origin https://github.com/folke/lazy.nvim.git
+              git -C "$dir" fetch -q --depth 1 origin '${{ steps.pin.outputs.commit }}'
+              git -C "$dir" checkout -q FETCH_HEAD
+
+        - name: Report the commit installed
+          shell: bash
+          run: git -C '${{ steps.pin.outputs.dir }}' log --oneline -1

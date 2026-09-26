@@ -64,5 +64,13 @@ jobs:
             - name: Install mini.test
               uses: ./.github/actions/install-mini-test
 
+            # `tests/test_lazy_integration.lua` resolves the spec directory
+            # through a real lazy.nvim, so the suite needs one present. It
+            # is pinned by `lazy-lock.json`, which is also the cache key, so
+            # this costs one shallow fetch per lockfile change rather than
+            # one per run.
+            - name: Install lazy.nvim
+              uses: ./.github/actions/install-lazy
+
             - name: Run tests
               run: nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
