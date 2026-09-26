@@ -425,17 +425,35 @@ describe("util.statusline.value", function()
 
     it("preserves the rest of the default statusline", function()
         -- The default carries far more than `%f`; dropping any of it would
-        -- be a silent regression
-        for _, item in ipairs({
-            "%h%w%m%r",
-            "diagnostic.status",
-            "rulerformat",
-            "keymap_name",
-            "busy",
-            "progress_status",
-        }) do
-            has(vim.o.statusline, item)
-        end
+        -- be a silent regression.
+        --
+        -- Asserted against the default as the running Neovim words it,
+        -- rather than against substrings copied out of one release's
+        -- version of it. That wording is upstream's to change and it does:
+        -- 0.13-dev replaced the `b:keymap_name` expression this used to
+        -- look for with the `%k` item, which failed here while nothing
+        -- about this module had changed. The claim worth making is that
+        -- everything other than the filename item survived, which is the
+        -- same claim on any release.
+        local info = vim.api.nvim_get_option_info2("statusline", {})
+
+        -- Cast the way `M.value()` casts the same read, and for the same
+        -- reason: `nvim_get_option_info2` types `default` as any option's
+        -- value type, ie. `string|integer|boolean`, and 'statusline' is
+        -- always a string. A `---@type` annotation cannot narrow an
+        -- assignment this wide, and `luafmt` leaves an inline cast alone
+        -- here because this is a plain assignment rather than a call
+        -- argument
+        local default = info.default --[[@as string]]
+        local leader  = "%<%f"
+
+        local at = default:find(leader, 1, true)
+        assert(at, "the default statusline no longer holds " .. leader)
+
+        -- Both sides of the splice, so a tail dropped from `M.value()` is a
+        -- failure and a default that grows a head is covered too
+        has(vim.o.statusline, default:sub(1, at - 1))
+        has(vim.o.statusline, default:sub(at + #leader))
     end)
 
     it("is idempotent", function()
