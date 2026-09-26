@@ -53,13 +53,14 @@ local covered_by = {
 
     -- The specialised filetype modules are reached through
     -- `filetype.config`, which is what applies their declarations
-    ["lua/filetype/claude.lua"]   = "tests/test_filetype_modules.lua",
-    ["lua/filetype/dosini.lua"]   = "tests/test_filetype_modules.lua",
-    ["lua/filetype/help.lua"]     = "tests/test_filetype_modules.lua",
-    ["lua/filetype/kdl.lua"]      = "tests/test_filetype_modules.lua",
-    ["lua/filetype/man.lua"]      = "tests/test_filetype_modules.lua",
-    ["lua/filetype/markdown.lua"] = "tests/test_filetype_modules.lua",
-    ["lua/filetype/prose.lua"]    = "tests/test_filetype_modules.lua",
+    ["lua/filetype/claude.lua"]    = "tests/test_filetype_modules.lua",
+    ["lua/filetype/dosini.lua"]    = "tests/test_filetype_modules.lua",
+    ["lua/filetype/help.lua"]      = "tests/test_filetype_modules.lua",
+    ["lua/filetype/kdl.lua"]       = "tests/test_filetype_modules.lua",
+    ["lua/filetype/man.lua"]       = "tests/test_filetype_modules.lua",
+    ["lua/filetype/markdown.lua"]  = "tests/test_filetype_modules.lua",
+    ["lua/filetype/prose.lua"]     = "tests/test_filetype_modules.lua",
+    ["lua/filetype/gitcommit.lua"] = "tests/test_filetype_modules.lua",
 
     -- Command wrappers, covered through the command they back
     ["lua/usercmd/lua_checker.lua"]            = "tests/test_usercmd.lua",

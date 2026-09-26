@@ -316,6 +316,21 @@ inherit that by being Markdown; `filetype.nex_note` aliases `markdown.setup`
 outright and `filetype.claude` calls it before its own work, which is why adding
 to `markdown.setup` covers all three.
 
+`lua/filetype/gitcommit.lua` takes both `gitcommit` and `gitrebase`, and is
+purely declarative: it parses nothing, because `tree-sitter-gitcommit` and
+`tree-sitter-git-rebase` are both in `lua/spec/nvim-treesitter.lua`'s
+`ensure_installed` and the grammar already yields `(prefix (type))`,
+`(prefix (scope))`, the surrounding punctuation, the `!` breaking marker,
+`(subject)`, `(trailer (token))` and `(breaking_change (token))`. The module is
+a `hlgroup_defs` table over those captures, ie. `@keyword.gitcommit` for the
+Conventional Commit type, `@variable.parameter.gitcommit` for the scope, and so
+on. It took prose's `spell` with it, since the dispatcher runs one module per
+filetype. The 50 character header cap is shown by 'colorcolumn' (`51,73`, the
+second being git's body width) and deliberately not by the bundled syntax's
+`gitcommitOverflow`, which exists for exactly this and cannot be seen here:
+`vim.treesitter.start` draws above Vim syntax and the grammar captures the whole
+`(subject)` node, overflow included.
+
 ### Markdown list continuation (`lua/util/markdown_list.lua`)
 
 Neovim will not continue a Markdown list, and not by omission:

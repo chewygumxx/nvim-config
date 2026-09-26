@@ -64,7 +64,8 @@ M.modmap = {
     gitconfig             = "dosini",
     cfg                   = "dosini",
     editorconfig          = "dosini",
-    gitcommit             = "prose",
+    gitcommit             = "gitcommit",
+    gitrebase             = "gitcommit",
     text                  = "prose",
     help                  = "help",
 }
