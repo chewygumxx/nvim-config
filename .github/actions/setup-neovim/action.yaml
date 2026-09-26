@@ -1,0 +1,71 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/.github/actions/setup-neovim/action.yaml
+#
+#
+
+name: Setup Neovim
+description: Install a pinned Neovim release and put it on PATH.
+
+#
+# The one place this repository names a Neovim version. It used to be named
+# twice, once in `test.yaml` and once in `lint-config.yaml`, each with its
+# own "bump by hand" comment: two pins that have to agree and nothing that
+# makes them.
+#
+# Pinned manually rather than resolved, to avoid an unauthenticated
+# releases-API lookup on every run. Bump the default below when a newer
+# release is needed. https://github.com/neovim/neovim/releases
+#
+
+inputs:
+    version:
+        description: >-
+            Release to install, without a leading "v", or "nightly" for the
+            canary build. Defaults to this action's own pin.
+        required: false
+        default: "0.12.5"
+
+runs:
+    using: composite
+
+    steps:
+        - name: Resolve the release tag
+          id: release
+          shell: bash
+          run: |
+              if [ "${{ inputs.version }}" = "nightly" ]; then
+                  echo 'tag=nightly' >> "$GITHUB_OUTPUT"
+              else
+                  echo 'tag=v${{ inputs.version }}' >> "$GITHUB_OUTPUT"
+              fi
+
+        # Never cached for nightly: that tag moves daily, so a cache hit
+        # would pin the canary to whichever build it first downloaded, which
+        # is the opposite of what a canary is for.
+        - name: Cache Neovim
+          id: cache
+          if: inputs.version != 'nightly'
+          uses: actions/cache@v6
+          with:
+              path: ${{ runner.temp }}/nvim
+              key: nvim-${{ inputs.version }}
+
+        - name: Install Neovim
+          if: steps.cache.outputs.cache-hit != 'true'
+          shell: bash
+          run: |
+              mkdir -p "$RUNNER_TEMP/nvim"
+              curl -sL "https://github.com/neovim/neovim/releases/download/${{ steps.release.outputs.tag }}/nvim-linux-x86_64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/nvim" --strip-components=1
+
+        - name: Add Neovim to PATH
+          shell: bash
+          run: echo "$RUNNER_TEMP/nvim/bin" >> "$GITHUB_PATH"
+
+        - name: Report the version installed
+          shell: bash
+          run: nvim --version | head -n 1

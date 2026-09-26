@@ -29,33 +29,14 @@ jobs:
         # hung Neovim would otherwise sit here for the 6h default.
         timeout-minutes: 10
 
-        # Pinned manually to avoid an unauthenticated releases-API lookup on
-        # every run; bump by hand when a newer Neovim release is needed.
-        # https://github.com/neovim/neovim/releases
-        env:
-            NVIM_VERSION: "0.12.5"
-            # https://github.com/nvim-mini/mini.test/tags
-            MINI_TEST_VERSION: "v0.18.0"
-
         steps:
             - name: Checkout
               uses: actions/checkout@v7
 
-            - name: Cache Neovim
-              id: cache-nvim
-              uses: actions/cache@v6
-              with:
-                  path: ${{ runner.temp }}/nvim
-                  key: nvim-${{ env.NVIM_VERSION }}
-
-            - name: Install Neovim
-              if: steps.cache-nvim.outputs.cache-hit != 'true'
-              run: |
-                  mkdir -p "$RUNNER_TEMP/nvim"
-                  curl -sL "https://github.com/neovim/neovim/releases/download/v${NVIM_VERSION}/nvim-linux-x86_64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/nvim" --strip-components=1
-
-            - name: Add Neovim to PATH
-              run: echo "$RUNNER_TEMP/nvim/bin" >> "$GITHUB_PATH"
+            # The Neovim version lives in the action, which the LuaCATS job
+            # uses too
+            - name: Setup Neovim
+              uses: ./.github/actions/setup-neovim
 
             # Pinned to a tag rather than tracking `main`: unpinned, an
             # upstream commit breaks pull requests that changed nothing
@@ -64,6 +45,9 @@ jobs:
             # `stdpath("data")` moves with `XDG_DATA_HOME`;
             # `.husky/pre-commit` looks it up the same way.
             - name: Install mini.test
+              env:
+                  # https://github.com/nvim-mini/mini.test/tags
+                  MINI_TEST_VERSION: "v0.18.0"
               run: |
                   data_dir=$(nvim --headless --clean \
                       -c 'lua io.stdout:write(vim.fn.stdpath("data"))' \
