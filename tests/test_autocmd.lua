@@ -23,6 +23,11 @@ local eq = require("mini.test") --[[@as mini.test]]
 
 --- The augroup each delegated module registers into, named so that a
 --- module dropped from `M.setup` fails here rather than in a session.
+---
+--- Also what `after_each` clears, so a module missing from this list keeps
+--- reacting to events for every test file that runs after this one.
+--- "creates no augroup it does not delegate to" holds the two to the same
+--- set.
 ---@type table<string, string>
 local delegated = {
     ["util.header (pending)"] = "cgxx.header_mark_pending",
@@ -79,6 +84,49 @@ describe("autocmd.setup", function()
             local ok, autocmds = pcall(registered, group)
             eq({ module, ok and #autocmds > 0 }, { module, true })
         end
+    end)
+
+    it("creates no augroup it does not delegate to", function()
+        -- Watched at the call rather than read back out of
+        -- `nvim_get_autocmds`, which cannot say who created a group that
+        -- an earlier test file also asked for.
+        --
+        -- Only `M.setup()` is watched, not the module load: "cgxx
+        -- .file_entry" is created once, when `autocmd.lua` is first
+        -- required, so whether that write is observable here depends on
+        -- which test file required the module first. The case above covers
+        -- that group instead.
+        local real = vim.api.nvim_create_augroup
+
+        ---@type string[]
+        local seen = {}
+
+        -- Two parameters, matching the real arity: a narrower stub would
+        -- retype the field for the whole workspace
+        ---@param name  string
+        ---@param _opts vim.api.keyset.create_augroup?
+        ---@return integer id
+        ---@diagnostic disable-next-line: duplicate-set-field
+        vim.api.nvim_create_augroup = function(name, _opts)
+            table.insert(seen, name)
+            -- Still created, since every `nvim_create_autocmd` call that
+            -- follows needs a real group id to register into
+            return real(name, { clear = true })
+        end
+
+        local ok, err               = pcall(require("autocmd").setup)
+        vim.api.nvim_create_augroup = real
+        assert(ok, err)
+
+        ---@type string[]
+        local expected = {}
+        for _, group in pairs(delegated) do
+            table.insert(expected, group)
+        end
+
+        table.sort(seen)
+        table.sort(expected)
+        eq(seen, expected)
     end)
 
     it("maps q to quit in an unmodifiable buffer", function()

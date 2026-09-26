@@ -25,6 +25,12 @@ local eq        = require("mini.test") --[[@as mini.test]]
 --- Every group this module defines, with the attributes it sets. Absent
 --- keys are exactly as meaningful as present ones: "bg = none" is how a
 --- group is made transparent, and it reads back as no `bg` at all.
+---
+--- This list is also what `before_each` captures and `after_each` puts
+--- back, so a group defined here and missing from it would keep this
+--- config's definition for every test file that runs after this one.
+--- "defines no group it does not document" is what keeps the two the same
+--- set.
 ---@type table<string, vim.api.keyset.highlight>
 local groups = {
     Normal                    = { fg = 0xcad6ff },
@@ -39,6 +45,42 @@ local groups = {
     ["@markup.underline"]     = { underline = true },
     ["@markup.strikethrough"] = { strikethrough = true },
 }
+
+--- Every group name `highlight.setup()` defines, observed at the call.
+---
+--- Read from the writes rather than by diffing `nvim_get_hl` afterwards:
+--- most of these groups exist before `setup()` runs (a colorscheme has
+--- already defined `Normal`), so presence proves nothing, and a definition
+--- identical to what was already there would not show up in a diff at all.
+---
+--- Nothing is applied while the stub is installed, so this cannot leave
+--- behind the undocumented group it exists to find.
+---@return string[] names Sorted, one per write
+local written = function()
+    local real = vim.api.nvim_set_hl
+    ---@type string[]
+    local seen = {}
+
+    -- Three parameters, matching the real arity: a narrower stub would
+    -- retype the field for the whole workspace
+    ---@param _ns  integer
+    ---@param name string
+    ---@param _val vim.api.keyset.highlight
+    ---@return nil
+    ---@diagnostic disable-next-line: duplicate-set-field
+    vim.api.nvim_set_hl = function(_ns, name, _val)
+        table.insert(seen, name)
+    end
+
+    -- Restored before the assert, so a raising `setup` cannot leave the
+    -- API stubbed for every case after this one
+    local ok, err       = pcall(highlight.setup)
+    vim.api.nvim_set_hl = real
+    assert(ok, err)
+
+    table.sort(seen)
+    return seen
+end
 
 describe("highlight.setup", function()
     ---@type table<string, vim.api.keyset.get_hl_info>
@@ -89,6 +131,17 @@ describe("highlight.setup", function()
             eq({ name, got.bg }, { name, nil })
             eq({ name, got.ctermbg }, { name, nil })
         end
+    end)
+
+    it("defines no group it does not document", function()
+        ---@type string[]
+        local documented = {}
+        for name in pairs(groups) do
+            table.insert(documented, name)
+        end
+        table.sort(documented)
+
+        eq(written(), documented)
     end)
 
     it("overwrites what a colorscheme left behind", function()
