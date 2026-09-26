@@ -1,0 +1,159 @@
+# vim:set expandtab shiftwidth=4 filetype=toml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/mise.toml
+#
+#
+
+#
+# https://mise.jdx.dev/configuration.html
+#
+# The development toolchain for this repository, in one place.
+#
+# Two separate problems this solves. The gates (`luafmt`, `selene`, `tombi`,
+# `lua-language-server`, Neovim itself) were each pinned twice: once in
+# `.github/workflows/lint-config.yaml`'s `env:` and once in whatever the
+# contributor happened to have on `PATH`, with `.husky/pre-commit` silently
+# skipping any tool it could not find. A hook that no-ops on a missing tool
+# is not a gate, so the versions below are the ones CI asserts against and
+# the ones a local checkout gets.
+#
+# The editor toolchain (LSPs, linters, formatters, debug adapters) is here
+# for a second reason: `lua/plugin.lua` condemns the whole mason trio under
+# Termux, which has no toolchain for it. Everything mason would install is
+# therefore listed here too, so the one platform that cannot use mason has
+# a supported way to get the same binaries.
+#
+# Backends are named explicitly rather than relying on the registry alias,
+# so the resolution is visible here and cannot change underneath the pin.
+#
+
+min_version = "2026.9.0"
+
+#
+# The same repository ships `luafmt`, `emmylua_check` and `emmylua_doc_cli`
+# as three independent per-platform assets, and a `[tools]` key has to be
+# unique, so each gets an alias pointing back at the one backend.
+#
+# `matching` is what keeps this portable: unlike `asset_pattern` it narrows
+# the candidate set rather than replacing autodetection, so the correct
+# OS/arch asset is still chosen on Linux, macOS and aarch64 alike. It has
+# to be set on the `[tools]` entry below and not in these alias blocks; set
+# here it is ignored silently and every alias installs the same asset.
+#
+[tool_alias.luafmt]
+backend = "github:EmmyLuaLs/emmylua-analyzer-rust"
+
+[tool_alias.emmylua_check]
+backend = "github:EmmyLuaLs/emmylua-analyzer-rust"
+
+[tool_alias.emmylua_doc_cli]
+backend = "github:EmmyLuaLs/emmylua-analyzer-rust"
+
+[tool_alias.shuck]
+backend = "github:ewhauser/shuck"
+
+[tools]
+#
+# Runtimes
+#
+# `npm` is pinned separately from the Node it ships with: `npm patch` is
+# needed for `patchedDependencies` in `package.json`, and the npm bundled
+# with Node 24 predates it.
+#
+node      = "24"
+"npm:npm" = "12"
+
+#
+# Neovim. This is the pin `.github/actions/setup-neovim` reads, so it is
+# named here and nowhere else. https://github.com/neovim/neovim/releases
+#
+"github:neovim/neovim" = "0.12.5"
+
+#
+# Lua: the four gates. `luafmt` formats, `selene` lints,
+# `lua-language-server` is the repo-wide typecheck that `.husky/pre-commit`
+# and the `LuaCATS` CI job both run, and `emmylua_check` is the second
+# opinion `lua/spec/nvim-lint.lua` wires up as a linter.
+#
+# `emmylua_doc_cli` is not a gate: it renders the LuaCATS annotations this
+# repository already maintains into browsable documentation.
+#
+"aqua:LuaLS/lua-language-server" = "3.19.1"
+"github:Kampfkarren/selene"      = "0.31.0"
+luafmt                           = { version = "0.25.1", matching = "luafmt" }
+emmylua_check                    = { version = "0.25.1", matching = "emmylua_check" }
+emmylua_doc_cli                  = { version = "0.25.1", matching = "emmylua_doc_cli" }
+
+#
+# TOML: formatter, linter and language server in one binary, and the third
+# gate CI runs. https://github.com/tombi-toml/tombi/releases
+#
+"aqua:tombi-toml/tombi" = "1.5.5"
+
+#
+# Structured data. `prettier` is deliberately absent: it is a real
+# `devDependency` in `package.json` and `npm ci` is what CI installs it
+# with, so duplicating it here would create the second pin this file
+# exists to remove.
+#
+"npm:vscode-langservers-extracted" = "4.10.0"  # jsonls
+"npm:yaml-language-server"         = "1.24.0"  # yamlls
+"npm:jsonlint"                     = "1.6.3"
+"pypi:yamllint"                    = "1.38.0"
+
+#
+# Markdown. Three language servers because they do different jobs and
+# `lsp/` configures all three: `remark_ls` lints against the
+# `remarkConfig` in `package.json`, `marksman` handles cross-file links
+# and `markdown_oxide` handles the note-taking queries.
+#
+"npm:remark-language-server"        = "3.0.0"
+"github:artempyanykh/marksman"      = "2026-02-08"
+"github:Feel-ix-343/markdown-oxide" = "0.25.12"
+"npm:markdownlint-cli2"             = "0.23.3"
+
+#
+# Shell. `bashls` owns bash and sh; `shuck` is scoped to zsh in
+# `lsp/shuck.lua`, and serves as that filetype's linter and formatter too.
+#
+"npm:bash-language-server" = "5.8.1"
+"aqua:koalaman/shellcheck" = "0.11.0"
+"aqua:mvdan/sh"            = "3.14.1"  # shfmt
+shuck                      = "0.2.3"
+
+#
+# Python. `ruff` is both the linter and the formatter
+# `lua/spec/conform.nvim.lua` names.
+#
+"aqua:astral-sh/ruff" = "0.16.9"
+"npm:pyright"         = "1.1.414"
+
+#
+# SQL. The dialect is pinned to sqlite by the `nvim-lint` and `conform`
+# specs, not here.
+#
+"github:sqls-server/sqls" = "0.2.48"
+"pipx:sqlfluff"           = "4.3.0"
+
+#
+# TypeScript/JavaScript.
+#
+"npm:@vtsls/language-server" = "0.3.0"
+"npm:eslint"                 = "10.11.0"
+
+#
+# Debug adapters, for `lua/spec/nvim-dap.lua`. Lua needs no binary: the
+# adapter is `one-small-step-for-vimkind`, which runs inside Neovim.
+#
+"pipx:debugpy"            = "1.8.22"
+"github:vadimcn/codelldb" = "1.12.3"
+
+#
+# Symbol database. Not used by any plugin spec here; it is the fallback
+# index for the filetypes no language server above covers.
+#
+"github:universal-ctags/ctags" = "6.2.1"
