@@ -75,9 +75,27 @@ M.opts.bigfile = {
 -- that can return several items; `fzf-lua` stays this config's finder.
 -- `ui_select` is off for the same reason: taking over `vim.ui.select`
 -- globally is a side effect nothing here asked for.
-M.opts.picker    = {
+M.opts.picker = {
     enabled   = true,
     ui_select = false,
+}
+--
+-- Quick-access scratch buffers that survive a restart.
+--
+-- `filekey` is the whole feature: the file a keymap opens is hashed over
+-- the name, the filetype, `v:count1`, the working directory and the git
+-- branch, so one binding yields a different buffer per project and per
+-- branch, and `3<leader>.` is a third one. Nothing here has to name a file.
+--
+-- `root` is stated rather than left implicit because it is the one decision
+-- worth being explicit about in this repository: a scratch file is machine
+-- state and belongs under `stdpath("data")`, unlike `lazy-lock.json`, which
+-- is deliberately tracked inside `stdpath("config")`.
+--
+M.opts.scratch   = {
+    root      = vim.fs.joinpath(vim.fn.stdpath("data"), "scratch"),
+    autowrite = true,
+    filekey   = { cwd = true, branch = true, count = true },
 }
 M.opts.dashboard = {
     -- Dashboard Position, nil for center
@@ -284,6 +302,30 @@ M.opts.explorer  = {
                 ["[e"]        = "explorer_error_prev",
             },
         },
+    },
+}
+
+--
+-- `lazy = false` above, so these are documentation as much as bindings:
+-- `which-key` reads a spec's `keys` for its labels, and a `<leader>.` with
+-- no description would show as an unlabelled key.
+--
+M.keys = {
+    {
+        "<leader>.",
+        function()
+            require("snacks").scratch()
+        end,
+        desc = "Scratch buffer (count selects which)",
+    },
+    {
+        "<leader>S",
+        function()
+            require("snacks")
+                .scratch
+                .select()
+        end,
+        desc = "Select a scratch buffer",
     },
 }
 
