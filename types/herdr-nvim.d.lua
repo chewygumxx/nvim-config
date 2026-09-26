@@ -18,4 +18,9 @@
 
 ---@meta
 
+--- `keymaps` is the only field this repository sets, and the only one it
+--- can: the plugin hardcodes the `<leader>a` prefix in its own table with
+--- no option to move it, so `false` (define none) plus explicit `keys` in
+--- the spec is how those mappings end up anywhere else.
 ---@class cgxx.spec.herdr.Config
+---@field keymaps? boolean | "force" Whether the plugin defines its own mappings
