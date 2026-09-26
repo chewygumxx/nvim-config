@@ -22,7 +22,6 @@ local M = {
         "OXY2DEV/markview.nvim",
         "folke/lazydev.nvim",
         "folke/noice.nvim",
-        "folke/which-key.nvim",
         "jakewvincent/mkdnflow.nvim",
         "kndndrj/nvim-dbee",
         "mikavilpas/yazi.nvim",
