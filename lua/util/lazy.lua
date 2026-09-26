@@ -27,14 +27,27 @@ local browser = vim.env.BROWSER
 ---@class LazyConfig
 M.defaults = {
     --- Repository URL or GitHub slug
-    "chewygumxx/lazy.nvim" or nil,
+    "folke/lazy.nvim" or nil,
 
     -- Resolved URL: left unset so `M.setup()` derives it from `git.url_format`
     -- unless a caller passes one explicitly.
     url = nil,
 
-    -- Repository branch
-    branch = "chewygumxx" or nil,
+    --
+    -- Repository branch.
+    --
+    -- Bootstrap-only, and deliberately so. `M.install()` is the sole reader
+    -- of this field: lazy.nvim's own options carry no `branch`, and once
+    -- installed it manages itself through a spec it hardcodes as
+    -- `{ "folke/lazy.nvim" }` with no branch of its own, whereupon
+    -- `Git.get_branch` falls back to `origin/HEAD`. So this names the branch
+    -- a machine without lazy.nvim clones, and the first `:Lazy update`
+    -- afterwards returns that copy to the remote's default branch and
+    -- records it in `lazy-lock.json`. Holding it on `stable` for good would
+    -- take a real `lua/spec/lazy.nvim.lua` declaring the branch, which is a
+    -- larger change than the bootstrap wants to make on its own.
+    --
+    branch = "stable" or nil,
 
     -- Name of lazy.nvim, sets directory names
     name = "lazy" or nil,

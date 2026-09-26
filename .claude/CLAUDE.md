@@ -170,13 +170,20 @@ lazy.nvim via `M.install()` if missing, then calls
 `require("util.lazy").setup(lazyconf)` with the one machine-specific override it
 needs (SSH vs. HTTPS clone URLs via `git.url_format`).
 
-Worth knowing before trusting `M.defaults`: it names `chewygumxx/lazy.nvim` on
-branch `chewygumxx`, while the copy actually installed has `folke/lazy.nvim` as
-its origin and sits on `main`. The bootstrap spec and the installed reality
-disagree, and which one is intended has not been settled, so
-`.github/actions/install-lazy` clones upstream, where the locked commit provably
-exists. `dev.patterns` currently matches no spec at all, since no
-`lua/spec/*.lua` names a `chewygumxx/`-owned plugin.
+`M.defaults` names `folke/lazy.nvim` on branch `stable`, and both fields are
+read by `M.install()` alone. They are bootstrap-only by construction:
+lazy.nvim's own options table has no `branch` key, and an installed copy manages
+itself through a spec it hardcodes as `{ "folke/lazy.nvim" }` with no branch, so
+`Git.get_branch` falls back to `origin/HEAD` and the first `:Lazy update` on any
+machine moves that copy to the remote default and writes _that_ into
+`lazy-lock.json`. `stable` therefore describes what a machine without lazy.nvim
+clones and nothing after. Pinning it for good would take a real
+`lua/spec/lazy.nvim.lua` declaring the branch, which would also mean dropping
+the `lazy.nvim` entry from `tests/test_lockfile.lua`'s `unspecced` registry;
+that was considered and deliberately not done. `.github/actions/install-lazy`
+sidesteps the whole question by fetching the locked commit by sha.
+`dev.patterns` currently matches no spec at all, since no `lua/spec/*.lua` names
+a `chewygumxx/`-owned plugin.
 
 `lazy-lock.json` is **tracked**. `M.defaults.lockfile` is lazy.nvim's own
 default, ie. inside `stdpath("config")`, which is a checkout of this repository

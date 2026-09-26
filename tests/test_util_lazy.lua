@@ -265,12 +265,12 @@ describe("util.lazy.setup", function()
         -- What `lua/plugin.lua` overrides, and the only reason it has to
         -- touch this module at all
         passed = applied({ git = { url_format = "git@github.com:%s.git" } })
-        eq(passed.url, "git@github.com:chewygumxx/lazy.nvim.git")
+        eq(passed.url, "git@github.com:folke/lazy.nvim.git")
     end)
 
     it("defaults the clone URL to HTTPS", function()
         passed = applied({})
-        eq(passed.url, "https://github.com/chewygumxx/lazy.nvim.git")
+        eq(passed.url, "https://github.com/folke/lazy.nvim.git")
     end)
 
     it("merges caller options into the defaults rather than over", function()

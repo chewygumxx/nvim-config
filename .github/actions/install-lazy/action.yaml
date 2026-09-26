@@ -19,13 +19,12 @@ description: Clone the lazy.nvim commit lazy-lock.json pins.
 # checked against is the one a machine running this config would have,
 # rather than whatever landed upstream this morning.
 #
-# Cloned from `folke/lazy.nvim`, deliberately, even though
-# `lua/util/lazy.lua`'s `M.defaults` names `chewygumxx/lazy.nvim` on branch
-# `chewygumxx`. The installed copy this lock was written from has
-# `folke/lazy.nvim` as its origin and sits on `main`, so upstream is where
-# the locked commit is known to exist. That disagreement between the
-# bootstrap spec and the installed reality is worth resolving, but not by
-# guessing here.
+# Cloned from `folke/lazy.nvim`, which `lua/util/lazy.lua`'s `M.defaults`
+# now names too. A commit is fetched here rather than the `stable` branch
+# that bootstrap asks for, so the two cannot disagree: lazy.nvim only reads
+# that branch when cloning itself onto a machine that has none, and manages
+# itself from `origin/HEAD` afterwards, which is what the locked commit
+# records.
 #
 # Requires Neovim on PATH already, for `stdpath("data")`: use
 # `./.github/actions/setup-neovim` first.
