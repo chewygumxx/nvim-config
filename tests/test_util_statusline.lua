@@ -418,9 +418,23 @@ describe("util.statusline.value", function()
     end
 
     it("splices over the default's filename item", function()
-        has(vim.o.statusline, "util.statusline'.segment")
+        has(vim.o.statusline, "util.statusline'.slug")
+        has(vim.o.statusline, "util.statusline'.branch")
+        has(vim.o.statusline, "util.statusline'.path")
         has(vim.o.statusline, "util.statusline'.fallback")
         eq(vim.o.statusline:find("%<%f", 1, true), nil)
+    end)
+
+    it("keeps every value in an unparsed item", function()
+        -- The whole reason the colour sits in the format string: only the
+        -- three highlight items and the `%f` fallback may be re-parsed, and
+        -- the fallback re-parses one constant. A `%{%` wrapped around any
+        -- of the three value calls would mangle a "%" in a branch or a
+        -- filename, which is what the case below measures.
+        for _, part in ipairs({ "slug", "branch", "path" }) do
+            local item = "%{v:lua.require'util.statusline'." .. part .. "()}"
+            has(vim.o.statusline, item)
+        end
     end)
 
     it("preserves the rest of the default statusline", function()
@@ -467,6 +481,81 @@ describe("util.statusline.value", function()
     it("renders the segment", function()
         shown()
         has(render(), "~example-owner/example-repo.git:stl-test:/file.lua")
+    end)
+
+    it("colours the slug, branch and path as three groups", function()
+        shown()
+
+        -- Defined here rather than relied on: `lua/highlight.lua` owns
+        -- these three, and `test_highlight.lua` restores every group it
+        -- touched, so by the time this file runs they are undefined again.
+        -- `nvim_eval_statusline` reports an undefined group as the
+        -- statusline's own, which would make this case pass or fail on the
+        -- order the suite happened to run in.
+        ---@type table<string, vim.api.keyset.get_hl_info>
+        local restore = {}
+        for _, group in ipairs({
+            "CgxxStatuslineSlug",
+            "CgxxStatuslineBranch",
+            "CgxxStatuslinePath",
+        }) do
+            restore[group] = vim.api.nvim_get_hl(0, { name = group })
+            vim.api.nvim_set_hl(0, group, { fg = "#8394f6" })
+        end
+
+        -- Asserted from what Neovim actually highlighted rather than from
+        -- the format string: `highlights` reports each run's byte offset
+        -- and group, so this fails if an item is mis-ordered, if a group
+        -- covers the wrong bytes, or if the `%*` reset is dropped and the
+        -- path's colour bleeds into the rest of the line
+        local eval = vim.api.nvim_eval_statusline(vim.o.statusline, {
+            winid      = 0,
+            maxwidth   = 200,
+            highlights = true,
+        })
+
+        for group, definition in pairs(restore) do
+            -- The same round trip `test_highlight.lua` documents: what
+            -- `nvim_get_hl` answers is the shape `nvim_set_hl` takes, but
+            -- the two are declared as distinct types
+            ---@diagnostic disable-next-line: param-type-mismatch
+            vim.api.nvim_set_hl(0, group, definition)
+        end
+
+        ---@type table<string, string>
+        local text = {}
+        for index, run in ipairs(eval.highlights) do
+            local stop      = eval.highlights[index + 1]
+            text[run.group] = eval.str:sub(
+                run.start + 1,
+                stop and stop.start or #eval.str
+            )
+        end
+
+        eq(text["CgxxStatuslineSlug"], "~example-owner/example-repo.git:")
+        eq(text["CgxxStatuslineBranch"], "stl-test")
+        eq(text["CgxxStatuslinePath"], ":/file.lua")
+
+        -- `%*` closes the three, so everything past the notation is back to
+        -- the statusline's own group. Without it the path's colour would run
+        -- to the end of the line, and in an inactive window that would be
+        -- the active window's colour on `StatusLineNC`'s background
+        eq(eval.highlights[#eval.highlights].group, "StatusLine")
+    end)
+
+    it("leaves a file outside a repository to the path group", function()
+        -- There is no slug and no branch to colour, and the value is a
+        -- plain path that may hold a ":" of its own, so it is not split
+        local dir = vim.fn.tempname()
+        vim.fn.mkdir(dir, "p")
+        dirs[#dirs + 1] = dir
+        local file      = dir .. "/wei:rd.lua"
+        vim.fn.writefile({ "" }, file)
+
+        local bufnr = resolved(file)
+        eq(statusline.slug(bufnr), "")
+        eq(statusline.branch(bufnr), "")
+        eq(statusline.path(bufnr), vim.fn.fnamemodify(file, ":~"))
     end)
 
     it("renders a % in a filename literally", function()

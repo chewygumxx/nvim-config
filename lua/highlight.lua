@@ -34,6 +34,20 @@ local hlgroup_defs = {
     -- Paired-Boundary Character
     ["MatchParen"] = { standout = true },
 
+    --
+    -- The three parts of `util.statusline`'s repository notation, ie.
+    -- `~chewygumxx/nvim-config.git:main:/lua/highlight.lua`. The branch is
+    -- the part that changes under you, so it is the one emphasised.
+    --
+    -- Foreground only, deliberately: each is drawn over whichever group the
+    -- window's statusline already had, `StatusLine` or `StatusLineNC`, and
+    -- naming a background here would make an inactive window's statusline
+    -- carry the active one's.
+    --
+    ["CgxxStatuslineSlug"]   = { fg = "#8394f6" },
+    ["CgxxStatuslineBranch"] = { fg = "#7fb5ff", bold = true },
+    ["CgxxStatuslinePath"]   = { fg = "#cad6ff" },
+
     -- Define @markup Underline, Bold and Strikethrough
     ["@markup.strong"]        = { bold = true },
     ["@markup.underline"]     = { underline = true },

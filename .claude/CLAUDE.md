@@ -362,6 +362,28 @@ render path calls git: `M.segment` is a cache read, a miss schedules one async
 its `redrawstatus!` on the value actually changing, since redrawing
 unconditionally turns any buffer appearing mid-redraw into a livelock.
 
+The notation is coloured a part at a time, by `CgxxStatuslineSlug`,
+`CgxxStatuslineBranch` and `CgxxStatuslinePath` from `lua/highlight.lua`, and
+that is why `M.items` holds three `%{}` items rather than one. A `%#Group#` only
+takes effect where the statusline is parsed for items, so colouring from inside
+a value would mean the `%{%...%}` form and the mangling above; instead the
+highlight items sit in the format string _between_ the three calls and every
+value stays unparsed. Each separator travels with the part before it rather than
+being written into the format string, since a separator there would render
+beside the `%f` fallback too. The cache stays a single string that `split`
+slices left to right on `:`, which is sound because git forbids `:` in a ref
+name and a slug cannot hold one, so the first two colons are structural; a value
+that is not the notation at all (the `:~` filename used for a file outside any
+repository, which may hold a colon anywhere) is left whole as the path. Caching
+a table instead would break `store`'s livelock guard, since a table read back
+from `vim.b` never compares equal to the one written. The items close with `%*`
+and not `%#StatusLine#`, so an inactive window's statusline returns to
+`StatusLineNC`; the highlight groups set a foreground only, for the same reason.
+`tests/test_util_statusline.lua` asserts the runs from `nvim_eval_statusline`'s
+`highlights`, and defines the three groups itself because `test_highlight.lua`
+restores them to undefined before it runs, and `nvim_eval_statusline` reports an
+undefined group as the statusline's own.
+
 Filling is lazy on cache miss rather than on `BufEnter`, so a buffer displayed
 by any route at all fills itself in, which leaves `M.autocmd()` responsible only
 for invalidation: `BufFilePost`/`BufWritePost` per buffer,

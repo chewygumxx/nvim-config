@@ -23,6 +23,12 @@
 --
 -- Three decisions here are load-bearing.
 --
+-- Each part of that notation is coloured separately, by
+-- `CgxxStatuslineSlug`, `CgxxStatuslineBranch` and `CgxxStatuslinePath`
+-- (defined in `lua/highlight.lua`), which is why `M.items` holds three
+-- items rather than one. The colour lives in the format string and never in
+-- what a callback returns, for the reason immediately below.
+--
 -- The segment is a plain `%{}`, never the nested `%{%...%}` form. Only the
 -- latter re-parses its result for statusline items, which silently mangles
 -- any "%" in a filename or branch name: a buffer named `we%ird%%.lua`
@@ -86,6 +92,43 @@ local no_branch = "detached"
 --- verbatim whenever no git segment applies.
 ---@type string
 local filename_item = "%f"
+
+--- Splits a cached segment into the three parts the statusline colours
+--- separately. Each keeps the separator that follows it, so nothing has to
+--- be emitted between the items: a separator sitting in the format string
+--- would render even when there is no segment, ie. beside the `%f`
+--- fallback.
+---
+--- Left to right on ":" is unambiguous for what `compose` builds, despite
+--- looking as though it should not be. git forbids ":" in a ref name and a
+--- slug cannot hold one either, so the first two colons are structural and
+--- every later one belongs to the filename. A value that is not that
+--- notation at all, ie. the `:~` filename `resolve` falls back to for a
+--- file outside any repository, is left whole as the path: it may
+--- legitimately begin with anything, so splitting it would be guesswork.
+---@param value string
+---@return string slug   Repository and its separator, or ""
+---@return string branch Branch name, or ""
+---@return string path   `:/`-prefixed repository path, or the whole value
+local split = function(value)
+    local first = value:find(":", 1, true)
+    if not first then
+        return "", "", value
+    end
+
+    local head = value:sub(1, first - 1)
+    if head ~= no_slug and not head:match("^~.+%.git$") then
+        return "", "", value
+    end
+
+    local second = value:find(":", first + 1, true)
+    if not second then
+        return "", "", value
+    end
+
+    return value:sub(1, first),
+        value:sub(first + 1, second - 1), value:sub(second)
+end
 
 --- Composes the segment for name from its repository's info.
 ---@param info cgxx.git.info
@@ -222,6 +265,35 @@ M.segment = function(bufnr)
     return ""
 end
 
+--- 'statusline' `%{}` callback: the repository part of bufnr's segment,
+--- separator included, or "" when there is none. Pairs with `M.branch` and
+--- `M.path`, which are the same read of the same cache.
+---@param bufnr? integer Default: current buffer
+---@return string slug
+M.slug = function(bufnr)
+    local slug = split(M.segment(bufnr))
+    return slug
+end
+
+--- 'statusline' `%{}` callback: the branch part of bufnr's segment, or ""
+--- when there is none.
+---@param bufnr? integer Default: current buffer
+---@return string branch
+M.branch = function(bufnr)
+    local _, branch = split(M.segment(bufnr))
+    return branch
+end
+
+--- 'statusline' `%{}` callback: the path part of bufnr's segment, or ""
+--- when there is none. Carries the whole value for a file outside any
+--- repository, which has neither of the other two parts.
+---@param bufnr? integer Default: current buffer
+---@return string path
+M.path = function(bufnr)
+    local _, _, path = split(M.segment(bufnr))
+    return path
+end
+
 --- 'statusline' `%{%...%}` callback: the literal `%f` item whenever
 --- `M.segment` has nothing to show, so Neovim renders the filename itself.
 ---@param bufnr? integer Default: current buffer
@@ -305,8 +377,23 @@ M.autocmd = function()
 end
 
 --- The statusline items this module contributes, in place of `%f`.
+---
+--- Three `%{}` items rather than one, because colour cannot come from the
+--- data. A `%#Group#` only takes effect where the statusline is parsed for
+--- items, and the values here are deliberately never re-parsed (see the
+--- header), so the highlight items sit in this format string *between* the
+--- three calls and every value stays unparsed. Each is a cache read, and
+--- the first of them schedules the resolve the other two then find.
+---
+--- `%*` and not `%#StatusLine#` to close: the reset has to restore
+--- whichever group this window's statusline already had, which is
+--- `StatusLineNC` in every window that is not the current one.
 ---@type string
-M.items = "%<%{v:lua.require'util.statusline'.segment()}"
+M.items = "%<"
+    .. "%#CgxxStatuslineSlug#%{v:lua.require'util.statusline'.slug()}"
+    .. "%#CgxxStatuslineBranch#%{v:lua.require'util.statusline'.branch()}"
+    .. "%#CgxxStatuslinePath#%{v:lua.require'util.statusline'.path()}"
+    .. "%*"
     .. "%{%v:lua.require'util.statusline'.fallback()%}"
 
 --- 'statusline' with this module's items spliced in over the leading
