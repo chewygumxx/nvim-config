@@ -43,10 +43,36 @@ M.opts = {
         end,
 
         -- Predicate function indicating if test case should be executed.
-        -- Upstream default is `function(case) return true end`; case is
-        -- referenced here only to satisfy selene's unused-arg check.
+        --
+        -- Runs only the cases whose description matches
+        -- `$MINITEST_PATTERN`, as a Lua pattern, when that is set to
+        -- anything non-empty:
+        --
+        --   MINITEST_PATTERN=wip nvim --headless \
+        --       -u scripts/minimal_init.lua -l scripts/minitest.lua
+        --
+        -- Upstream's default is `function(case) return true end`, and this
+        -- was that with `not not case` bolted on to satisfy selene's
+        -- unused-argument check, ie. a no-op carrying a workaround.
+        -- Interactively there are `:MiniTestRunFile` and
+        -- `:MiniTestRunAtCursor`; headlessly there was no way to run fewer
+        -- than all of them, which is exactly the loop a failing pre-commit
+        -- run puts you in.
+        ---@param case MiniTest.Case
+        ---@return boolean run
         filter_cases = function(case)
-            return not not case
+            -- Bound to a typed local: `vim.env` indexes to `any`, which
+            -- the annotation-coverage gate counts as untyped
+            ---@type table<string, string?>
+            local environ = vim.env
+            local pattern = environ.MINITEST_PATTERN
+            if not pattern or pattern == "" then
+                return true
+            end
+            -- Matched against the whole description, file name included,
+            -- so a pattern can name a module ("wip"), a group
+            -- ("util.wip.autocmd") or one case
+            return table.concat(case.desc, " "):find(pattern) ~= nil
         end,
     },
 

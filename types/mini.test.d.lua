@@ -18,10 +18,17 @@
 
 ---@meta
 
+--- A collected test case, as `collect.filter_cases` is handed one. `desc`
+--- is the array of descriptions it was built from, outermost first: the
+--- file, then each enclosing `describe`, then the `it`.
+---@class MiniTest.Case
+---@field desc     string[]
+---@field [string] any
+
 ---@class (exact) MiniTest.CollectOpts
 ---@field emulate_busted? boolean
 ---@field find_files?     fun(): string[]
----@field filter_cases?   fun(case: table): boolean
+---@field filter_cases?   fun(case: MiniTest.Case): boolean
 
 ---@class (exact) MiniTest.ExecuteOpts
 ---@field reporter?      table
