@@ -14,63 +14,22 @@ local eq         = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
---- Runs git in dir and returns its trimmed stdout.
----
---- A fixture command that fails is a broken test rather than a result to
---- assert on, so this raises instead of folding the failure into "": a
---- swallowed setup failure only resurfaces later, as a puzzling assertion
---- about something else entirely.
----@param dir string Repository to run in
----@param ... string git arguments
----@return string stdout
-local git = function(dir, ...)
-    local args = { ... }
-    local cmd  = { "git", "-C", dir }
-    vim.list_extend(cmd, args)
+---@type cgxx.test.helpers
+local helpers = dofile("tests/helpers.lua")
+local git     = helpers.git
 
-    local result = vim.system(cmd, { text = true }):wait()
-    if result.code ~= 0 then
-        error(
-            string.format(
-                "fixture `git %s` failed (%d): %s",
-                table.concat(args, " "),
-                result.code,
-                result.stderr or ""
-            )
-        )
-    end
-    return ((result.stdout or ""):gsub("%s+$", ""))
-end
-
---- Builds a repository fixture holding one file.
+--- Builds this file's repository fixture, on the branch its expected
+--- segments name.
 ---@param opt? { remote?: boolean, subdir?: string, name?: string }
 ---@return string dir, string file
 local fixture = function(opt)
-    opt       = opt or {}
-    local dir = vim.fn.tempname()
-    vim.fn.mkdir(dir, "p")
-    git(dir, "init", "--quiet", "--initial-branch=stl-test")
-    -- An identity has to be set per fixture rather than inherited: a CI
-    -- runner has no global `user.name`/`user.email`, and without one
-    -- `git commit` fails outright, so a fixture that goes on to detach
-    -- HEAD would silently stay on its branch instead
-    git(dir, "config", "user.email", "test@example.invalid")
-    git(dir, "config", "user.name", "Test")
-    if opt.remote ~= false then
-        git(
-            dir,
-            "remote",
-            "add",
-            "origin",
-            "git@github.com:example-owner/example-repo.git"
-        )
-    end
-
-    local parent = opt.subdir and (dir .. "/" .. opt.subdir) or dir
-    vim.fn.mkdir(parent, "p")
-    local file = parent .. "/" .. (opt.name or "file.lua")
-    vim.fn.writefile({ "" }, file)
-    return dir, file
+    opt = opt or {}
+    return helpers.repo({
+        branch = "stl-test",
+        remote = opt.remote,
+        subdir = opt.subdir,
+        name   = opt.name,
+    })
 end
 
 --- Blocks until bufnr's segment has been resolved and cached.

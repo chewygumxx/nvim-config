@@ -14,61 +14,16 @@ local eq  = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
---- Runs git in dir and returns its trimmed stdout.
----
---- A fixture command that fails is a broken test rather than a result to
---- assert on, so this raises instead of folding the failure into "". A
---- swallowed setup failure does not stay quiet, it resurfaces later as a
---- puzzling assertion about something else entirely: a `git commit` with
---- no identity configured is what once left `checkout --detach` with
---- nothing to detach from, failing three cases in CI only.
----@param dir string Repository to run in
----@param ... string git arguments
----@return string stdout
-local git_in = function(dir, ...)
-    local args = { ... }
-    local cmd  = { "git", "-C", dir }
-    vim.list_extend(cmd, args)
-
-    local result = vim.system(cmd, { text = true }):wait()
-    if result.code ~= 0 then
-        error(
-            string.format(
-                "fixture `git %s` failed (%d): %s",
-                table.concat(args, " "),
-                result.code,
-                result.stderr or ""
-            )
-        )
-    end
-    return ((result.stdout or ""):gsub("%s+$", ""))
-end
+---@type cgxx.test.helpers
+local helpers = dofile("tests/helpers.lua")
+local git_in  = helpers.git
 
 describe("util.git", function()
     ---@type string, string
     local dir, file
 
     before_each(function()
-        dir = vim.fn.tempname()
-        vim.fn.mkdir(dir, "p")
-        -- `--initial-branch` pins the ref name: without it the fixture
-        -- would inherit whatever `init.defaultBranch` is configured to
-        git_in(dir, "init", "--quiet", "--initial-branch=git-test")
-        -- An identity has to be set per fixture rather than inherited:
-        -- a CI runner has no global `user.name`/`user.email`, and without
-        -- one `git commit` fails outright, leaving later setup steps
-        -- (`checkout --detach`) with nothing to act on
-        git_in(dir, "config", "user.email", "test@example.invalid")
-        git_in(dir, "config", "user.name", "Test")
-        git_in(
-            dir,
-            "remote",
-            "add",
-            "origin",
-            "git@github.com:example-owner/example-repo.git"
-        )
-        file = dir .. "/file.lua"
-        vim.fn.writefile({ "" }, file)
+        dir, file = helpers.repo({ branch = "git-test" })
     end)
 
     after_each(function()

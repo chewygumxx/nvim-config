@@ -22,27 +22,8 @@ local eq     = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
---- Runs git in dir, raising if it fails.
----@param dir string Repository to run in
----@param ... string git arguments
----@return nil
-local git = function(dir, ...)
-    local args = { ... }
-    local cmd  = { "git", "-C", dir }
-    vim.list_extend(cmd, args)
-
-    local result = vim.system(cmd, { text = true }):wait()
-    if result.code ~= 0 then
-        error(
-            string.format(
-                "fixture `git %s` failed (%d): %s",
-                table.concat(args, " "),
-                result.code,
-                result.stderr or ""
-            )
-        )
-    end
-end
+---@type cgxx.test.helpers
+local helpers = dofile("tests/helpers.lua")
 
 describe("util.header.insert", function()
     ---@type string, string
@@ -52,20 +33,12 @@ describe("util.header.insert", function()
     local bufs
 
     before_each(function()
-        dir = vim.fn.tempname()
-        vim.fn.mkdir(dir .. "/sub", "p")
-        git(dir, "init", "--quiet", "--initial-branch=hdr-test")
-        git(
-            dir,
-            "remote",
-            "add",
-            "origin",
-            "git@github.com:example-owner/example-repo.git"
-        )
-
-        file = dir .. "/sub/file.lua"
-        vim.fn.writefile({ "local x = 1" }, file)
-        bufs = {}
+        dir, file = helpers.repo({
+            branch   = "hdr-test",
+            subdir   = "sub",
+            contents = { "local x = 1" },
+        })
+        bufs      = {}
     end)
 
     after_each(function()
@@ -174,7 +147,7 @@ describe("util.header.insert", function()
     end)
 
     it("names both repositories of a fork", function()
-        git(
+        helpers.git(
             dir,
             "remote",
             "add",
@@ -229,16 +202,7 @@ describe("util.header.setup", function()
     local dir
 
     before_each(function()
-        dir = vim.fn.tempname()
-        vim.fn.mkdir(dir, "p")
-        git(dir, "init", "--quiet", "--initial-branch=hdr-test")
-        git(
-            dir,
-            "remote",
-            "add",
-            "origin",
-            "git@github.com:example-owner/example-repo.git"
-        )
+        dir = helpers.repo({ branch = "hdr-test" })
         header.setup()
     end)
 

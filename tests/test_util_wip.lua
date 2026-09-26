@@ -14,55 +14,10 @@ local eq  = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
---- Runs git in dir and returns its trimmed stdout.
----
---- A fixture command that fails is a broken test rather than a result to
---- assert on, so this raises instead of folding the failure into "": a
---- swallowed setup failure only resurfaces later, as a puzzling assertion
---- about something else entirely.
----@param dir string Repository to run in
----@param ... string git arguments
----@return string stdout
-local git = function(dir, ...)
-    local args = { ... }
-    local cmd  = { "git", "-C", dir }
-    vim.list_extend(cmd, args)
-
-    local result = vim.system(cmd, { text = true }):wait()
-    if result.code ~= 0 then
-        error(
-            string.format(
-                "fixture `git %s` failed (%d): %s",
-                table.concat(args, " "),
-                result.code,
-                result.stderr or ""
-            )
-        )
-    end
-    return ((result.stdout or ""):gsub("%s+$", ""))
-end
-
---- The commit ref points at, "" when it does not exist.
----
---- The one query that deliberately tolerates a non-zero exit:
---- `rev-parse --verify --quiet` fails for a ref that was never created,
---- and "no snapshot was taken" is an answer these tests assert on rather
---- than a broken fixture.
----@param dir string Repository to run in
----@param ref string Ref to resolve
----@return string commit
-local tip = function(dir, ref)
-    local result = vim.system({
-        "git",
-        "-C",
-        dir,
-        "rev-parse",
-        "--verify",
-        "--quiet",
-        ref,
-    }, { text = true }):wait()
-    return ((result.stdout or ""):gsub("%s+$", ""))
-end
+---@type cgxx.test.helpers
+local helpers = dofile("tests/helpers.lua")
+local git     = helpers.git
+local tip     = helpers.tip
 
 --- Replaces `vim.notify` with one that drops anything below ERROR, so
 --- the module's progress messages stay out of MiniTest's own output
@@ -81,8 +36,8 @@ local quieten = function()
 end
 
 describe("util.wip.snapshot", function()
-    -- `--initial-branch` pins the ref name: without it the fixture would
-    -- inherit whatever `init.defaultBranch` happens to be configured to.
+    -- The fixture pins this branch, so the ref name under test is known
+    -- rather than inherited from `init.defaultBranch`
     local branch = "wip-test"
     local ref    = "refs/wip/" .. branch
 
@@ -136,17 +91,14 @@ describe("util.wip.snapshot", function()
     end
 
     before_each(function()
-        notify = quieten()
-        dir    = vim.fn.tempname()
-        vim.fn.mkdir(dir, "p")
-        git(dir, "init", "--quiet", "--initial-branch=" .. branch)
-        git(dir, "config", "user.email", "test@example.invalid")
-        git(dir, "config", "user.name", "Test")
-
-        file = dir .. "/tracked.lua"
-        vim.fn.writefile({ "committed" }, file)
-        git(dir, "add", "tracked.lua")
-        git(dir, "-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "i")
+        notify    = quieten()
+        dir, file = helpers.repo({
+            branch   = branch,
+            remote   = false,
+            name     = "tracked.lua",
+            contents = { "committed" },
+            commit   = "i",
+        })
 
         buf = open(file)
     end)
