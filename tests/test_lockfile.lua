@@ -56,7 +56,10 @@ local unspecced = {
 --- pin does. Naming it here is how that stays a deliberate, visible gap
 --- rather than the lock quietly falling behind the directory.
 ---@type table<string, string>
-local unpinned = {}
+local unpinned = {
+    ["hardtime.nvim"] = "added as a spec in the commit before the sync that "
+        .. "pins it; remove this entry with that lockfile change",
+}
 
 --- Loads path as a plain Lua chunk and returns what it evaluates to.
 ---

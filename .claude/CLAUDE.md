@@ -256,6 +256,19 @@ fallback that loads.
 `{ import = "spec" }` entry plus one elision list). Nothing requires it any
 more.
 
+`lua/spec/hardtime.nvim.lua` is worth reading before changing, for one
+non-obvious reason that generalises to any plugin merging its options with
+`vim.tbl_deep_extend("force", ...)`: an entry cannot be switched off through
+`opts` by emptying or shortening it, because that merge recurses whenever both
+sides are tables and arrays merge by index, so `{}` or `{ "n" }` leaves the
+default's `{ "n", "i" }` intact. `false` is what replaces the value, and
+hardtime's handler loop then maps nothing at all
+(`if mode then vim.keymap.set(...)`). That is how the arrow keys stay usable,
+which is not a preference: `lua/spec/blink.cmp.lua` maps `<Up>`/`<Down>` to
+`select_prev`/`select_next`, so hardtime's default insert-mode arrow blocking
+would take completion-menu navigation with it. `types/hardtime.nvim.d.lua` types
+the option table accordingly, ie. `table<string, string[] | false>`.
+
 ### LSP (`lsp/`, `lua/spec/nvim-lspconfig.lua`, `lua/util/lsp.lua`)
 
 This config uses Neovim's **native** `vim.lsp.config`/`vim.lsp.enable` mechanism
