@@ -22,38 +22,35 @@ permissions:
 
 jobs:
     mini-test:
-        name: mini.test
+        name: mini.test (${{ matrix.label }})
         runs-on: ubuntu-latest
 
         # Several test helpers wait up to 10s for an async result, and a
         # hung Neovim would otherwise sit here for the 6h default.
         timeout-minutes: 10
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v7
+        # The nightly leg is the canary: this config targets the native
+        # `vim.lsp.config` mechanism and other 0.11+ API, so "upstream
+        # changed under us" is worth hearing about before it reaches a
+        # release, rather than as the apparent fault of whichever pull
+        # request happens to run next. It is allowed to fail for that
+        # reason, and `fail-fast` is off so a red canary never cancels the
+        # leg that counts.
+        #
+        # An empty `version` means the pin inside `setup-neovim`, so this
+        # matrix names no Neovim version of its own.
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - label: pinned
+                      version: ""
+                      required: true
+                    - label: nightly
+                      version: nightly
+                      required: false
 
-            # The Neovim version lives in the action, which the LuaCATS job
-            # uses too
-            - name: Setup Neovim
-              uses: ./.github/actions/setup-neovim
-
-            - name: Install mini.test
-              uses: ./.github/actions/install-mini-test
-
-            - name: Run tests
-              run: nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
-
-    # The canary: the same suite against Neovim nightly, allowed to fail.
-    # This config targets the native `vim.lsp.config` mechanism and other
-    # 0.11+ API, so "upstream changed under us" is a thing worth hearing
-    # about before it reaches a release, and not by having it reported as
-    # the fault of whichever pull request happens to run next.
-    mini-test-nightly:
-        name: mini.test (nightly)
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        continue-on-error: true
+        continue-on-error: ${{ !matrix.required }}
 
         steps:
             - name: Checkout
@@ -62,7 +59,7 @@ jobs:
             - name: Setup Neovim
               uses: ./.github/actions/setup-neovim
               with:
-                  version: nightly
+                  version: ${{ matrix.version }}
 
             - name: Install mini.test
               uses: ./.github/actions/install-mini-test

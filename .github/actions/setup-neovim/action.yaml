@@ -26,34 +26,45 @@ inputs:
     version:
         description: >-
             Release to install, without a leading "v", or "nightly" for the
-            canary build. Defaults to this action's own pin.
+            canary build. Empty means the pin below, which is what lets a
+            matrix leg ask for "whatever this repository pins" without
+            naming the version a second time: a matrix always passes its
+            input, and an empty string passed to an input overrides that
+            input's default rather than falling back to it.
         required: false
-        default: "0.12.5"
+        default: ""
 
 runs:
     using: composite
 
     steps:
-        - name: Resolve the release tag
+        - name: Resolve the release
           id: release
           shell: bash
           run: |
-              if [ "${{ inputs.version }}" = "nightly" ]; then
+              version='${{ inputs.version }}'
+              # The pin. Bump it here and nowhere else.
+              if [ -z "$version" ]; then
+                  version='0.12.5'
+              fi
+
+              if [ "$version" = "nightly" ]; then
                   echo 'tag=nightly' >> "$GITHUB_OUTPUT"
               else
-                  echo 'tag=v${{ inputs.version }}' >> "$GITHUB_OUTPUT"
+                  echo "tag=v$version" >> "$GITHUB_OUTPUT"
               fi
+              echo "version=$version" >> "$GITHUB_OUTPUT"
 
         # Never cached for nightly: that tag moves daily, so a cache hit
         # would pin the canary to whichever build it first downloaded, which
         # is the opposite of what a canary is for.
         - name: Cache Neovim
           id: cache
-          if: inputs.version != 'nightly'
+          if: steps.release.outputs.version != 'nightly'
           uses: actions/cache@v6
           with:
               path: ${{ runner.temp }}/nvim
-              key: nvim-${{ inputs.version }}
+              key: nvim-${{ steps.release.outputs.version }}
 
         - name: Install Neovim
           if: steps.cache.outputs.cache-hit != 'true'
