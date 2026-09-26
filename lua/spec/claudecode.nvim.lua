@@ -35,8 +35,10 @@ local M = {
         "ClaudeCodeCloseAllDiffs",
     },
 
+    -- No `{ "<leader>a", nil }` group placeholder: `lua/spec/which-key.nvim.lua`
+    -- labels the prefix now, and an entry with no right-hand side is a
+    -- lazy-load trigger on `<leader>a` itself, which is not wanted
     keys = {
-        { "<leader>a", nil, desc = "AI/Claude Code" },
         { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
         { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
         { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
@@ -79,8 +81,26 @@ local M = {
         { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
     },
 
+    --
+    -- Three decisions; everything else is upstream's default on purpose.
+    --
+    -- The provider is named rather than left as "auto" because `snacks.nvim`
+    -- is a declared dependency above and loads eagerly, so the discovery
+    -- "auto" performs can only ever reach the same answer, more slowly and
+    -- less visibly.
+    --
+    -- `focus_after_send` departs from the default: a selection sent from a
+    -- buffer is almost always followed by reading the reply, and with an
+    -- in-Neovim provider the focus can actually move. The plugin warns at
+    -- setup when a provider cannot honour this, which is the check that
+    -- makes the two settings a pair rather than two independent lines.
+    --
     ---@type PartialClaudeCodeConfig
-    opts = {},
+    opts = {
+        terminal         = { provider = "snacks" },
+        focus_after_send = true,
+        diff_opts        = { layout = "vertical" },
+    },
 }
 
 return M

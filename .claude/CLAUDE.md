@@ -258,6 +258,21 @@ Colourscheme selection is inlined the same way: `lua/spec/starry.lua`'s
 still present but elided, so it is a spec kept for reference rather than a
 fallback that loads.
 
+Leader prefixes are worth knowing before adding a keymap, because two plugins
+once claimed the same one. `<leader>a` is `lua/spec/claudecode.nvim.lua`'s and
+`<leader>H` is `lua/spec/herdr-nvim.lua`'s; herdr used to be on `<leader>a` too
+and lost five keys (`ac`, `ar`, `aa`, `as`, `af`) to claudecode without saying
+so, since its `apply_keymaps` refuses to clobber a key another mapping holds and
+claudecode's arrive first as lazy.nvim's load stubs. herdr hardcodes its prefix,
+so the move is `opts.keymaps = false` plus its whole set re-declared in the
+spec's `keys`, bracket motions (`]n`/`[n`, `]r`/`[r`) included, since that
+switch withholds everything rather than only the leader keys. A mapping a later
+herdr release adds will therefore not appear until it is added there, and
+`:checkhealth herdr-nvim` is where to notice. `lua/spec/which-key.nvim.lua`
+labels every prefix and is no longer elided, which is what makes a collision of
+that kind visible rather than silent; it deliberately labels no prefix owned by
+`lua/spec/mkdnflow.lua`, whose `cond = false` means those keys do not exist.
+
 `lua/util/spec.lua` predates all of this and held the same idea (a
 `{ import = "spec" }` entry plus one elision list). Nothing requires it any
 more.
