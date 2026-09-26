@@ -236,29 +236,47 @@ describe("lsp", function()
     ---@type string[]
     local configs = vim.fn.globpath("lsp", "*.lua", true, true)
 
+    --- The only modules a server configuration may fail to find here.
+    ---
+    --- Named rather than accepted in the general case: "module '...' not
+    --- found" is also what a *typo* in a `require` produces, so a pattern
+    --- matching any missing module would pass a configuration that can
+    --- never work in a session either. These two exist only once lazy.nvim
+    --- has installed the plugin, which this suite deliberately has not.
+    ---@type table<string, boolean>
+    local installable = {
+        ["schemastore"] = true,
+    }
+
     it("finds the server configurations", function()
         eq(#configs > 0, true)
     end)
 
-    it("evaluates every server configuration to a table", function()
-        for _, path in ipairs(configs) do
+    for _, path in ipairs(configs) do
+        local file = vim.fn.fnamemodify(path, ":t")
+
+        it("evaluates " .. file .. " to a table", function()
             ---@type boolean, any
             local ok, config = pcall(evaluated, path)
 
-            -- A couple of these pull settings out of a plugin
-            -- (`schemastore`), which only exists once lazy.nvim has
-            -- installed it. That one failure is expected here; anything
-            -- else, ie. a syntax error or a bad API call, is not.
             if ok then
                 eq({ path, type(config) }, { path, "table" })
-            else
-                -- Bound first: `luafmt` splits a `tostring(x):match()`
-                -- chain across lines, which Lua then reads as a call
-                -- followed by a new statement
-                local err     = tostring(config)
-                local missing = err:match("module '[^']+' not found")
-                eq({ path, missing ~= nil }, { path, true })
+                return
             end
-        end
-    end)
+
+            -- Bound first: `luafmt` splits a `tostring(x):match()`
+            -- chain across lines, which Lua then reads as a call
+            -- followed by a new statement
+            local err     = tostring(config)
+            local missing = err:match("module '([^']+)' not found")
+
+            -- The module it could not find is asserted by name, so the
+            -- failure message says which one rather than just "something
+            -- was missing"
+            eq(
+                { path, missing, installable[missing or ""] or false },
+                { path, missing, true }
+            )
+        end)
+    end
 end)
