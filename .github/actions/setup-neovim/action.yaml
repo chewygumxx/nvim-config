@@ -12,25 +12,28 @@ name: Setup Neovim
 description: Install a pinned Neovim release and put it on PATH.
 
 #
-# The one place this repository names a Neovim version. It used to be named
-# twice, once in `test.yaml` and once in `lint-config.yaml`, each with its
-# own "bump by hand" comment: two pins that have to agree and nothing that
-# makes them.
+# Installs the Neovim this repository pins, without naming the version.
+# It used to be named twice, once in `test.yaml` and once in
+# `lint-config.yaml`, each with its own "bump by hand" comment: two pins
+# that have to agree and nothing that made them. This action collapsed
+# those into one, and `mise.toml` now collapses that one into the same
+# place a local checkout reads it from, so CI and a contributor's `PATH`
+# cannot disagree either.
 #
-# Pinned manually rather than resolved, to avoid an unauthenticated
-# releases-API lookup on every run. Bump the default below when a newer
-# release is needed. https://github.com/neovim/neovim/releases
+# Still pinned rather than resolved, to avoid an unauthenticated
+# releases-API lookup on every run.
+# https://github.com/neovim/neovim/releases
 #
 
 inputs:
     version:
         description: >-
             Release to install, without a leading "v", or "nightly" for the
-            canary build. Empty means the pin below, which is what lets a
-            matrix leg ask for "whatever this repository pins" without
-            naming the version a second time: a matrix always passes its
-            input, and an empty string passed to an input overrides that
-            input's default rather than falling back to it.
+            canary build. Empty means the pin in `mise.toml`, which is what
+            lets a matrix leg ask for "whatever this repository pins"
+            without naming the version a second time: a matrix always
+            passes its input, and an empty string passed to an input
+            overrides that input's default rather than falling back to it.
         required: false
         default: ""
 
@@ -43,9 +46,14 @@ runs:
           shell: bash
           run: |
               version='${{ inputs.version }}'
-              # The pin. Bump it here and nowhere else.
+              # The pin lives in `mise.toml`. Bump it there and nowhere
+              # else. Read through `$GITHUB_ACTION_PATH` rather than a
+              # relative path, since a composite step's cwd is the caller's
+              # workspace and not this action's directory.
               if [ -z "$version" ]; then
-                  version='0.12.5'
+                  version=$(python3 \
+                      "$GITHUB_ACTION_PATH/../../scripts/tool_version.py" \
+                      'github:neovim/neovim')
               fi
 
               if [ "$version" = "nightly" ]; then
