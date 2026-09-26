@@ -42,11 +42,28 @@
 ---@class mini.test.Expect
 ---@field equality fun(left: any, right: any, opts?: table)
 
+--
+-- The managed child process (`:h MiniTest.new_child_neovim()`), which
+-- tests/test_init.lua drives. Only the methods it calls are declared: the
+-- real object also proxies the whole `vim.api`/`vim.fn`/`vim.o` surface
+-- into the child, which the `[string]` catch-all below already covers for
+-- the module and is not worth restating field by field here.
+--
+
+---@class mini.test.Child
+---@field start    fun(args?: string[], opts?: table)
+---@field restart  fun(args?: string[], opts?: table)
+---@field stop     fun()
+---@field lua      fun(str: string, args?: table): any
+---@field lua_get  fun(str: string, args?: table): any
+---@field [string] any
+
 ---@class mini.test
----@field expect          mini.test.Expect
----@field setup           fun(config?: MiniTest.Config)
----@field run             fun(opts?: table)
----@field run_file        fun(file?: string, opts?: table)
----@field run_at_location fun(location?: table, opts?: table)
----@field stop            fun(opts?: table)
----@field [string]        fun(...: any)
+---@field expect           mini.test.Expect
+---@field setup            fun(config?: MiniTest.Config)
+---@field run              fun(opts?: table)
+---@field run_file         fun(file?: string, opts?: table)
+---@field run_at_location  fun(location?: table, opts?: table)
+---@field stop             fun(opts?: table)
+---@field new_child_neovim fun(): mini.test.Child
+---@field [string]         fun(...: any)
