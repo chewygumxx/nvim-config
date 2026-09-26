@@ -43,3 +43,29 @@ jobs:
 
             - name: Run tests
               run: nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
+
+    # The canary: the same suite against Neovim nightly, allowed to fail.
+    # This config targets the native `vim.lsp.config` mechanism and other
+    # 0.11+ API, so "upstream changed under us" is a thing worth hearing
+    # about before it reaches a release, and not by having it reported as
+    # the fault of whichever pull request happens to run next.
+    mini-test-nightly:
+        name: mini.test (nightly)
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        continue-on-error: true
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            - name: Setup Neovim
+              uses: ./.github/actions/setup-neovim
+              with:
+                  version: nightly
+
+            - name: Install mini.test
+              uses: ./.github/actions/install-mini-test
+
+            - name: Run tests
+              run: nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
