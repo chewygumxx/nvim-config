@@ -17,9 +17,8 @@
 
 local M = {
     elide = {
-        "L3M0NAD3/LuaSnip",
+        "L3MON4D3/LuaSnip",
         "MeanderingProgrammer/render-markdown.nvim",
-        "MunifTanjim/nvim-nio",
         "OXY2DEV/markview.nvim",
         "folke/lazydev.nvim",
         "folke/noice.nvim",
@@ -40,7 +39,7 @@ local M = {
 
 if vim.env.TERMUX_VERSION ~= nil then
     vim.list_extend(M.condemn, {
-        "mason-org/mason-lspconfig.nvim.lua",
+        "mason-org/mason-lspconfig.nvim",
         "jay-babu/mason-nvim-dap.nvim",
         "WhoIsSethDaniel/mason-tool-installer.nvim",
     })

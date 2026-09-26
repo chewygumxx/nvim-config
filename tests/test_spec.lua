@@ -88,24 +88,140 @@ describe("spec", function()
     end)
 end)
 
-describe("util.spec", function()
-    it("imports the spec directory", function()
-        eq(require("util.spec")[1], { import = "spec" })
+describe("plugin.import", function()
+    ---@type table<string, any>
+    local loaded = package.loaded
+
+    ---@type table<string, string?>
+    local environ = vim.env
+
+    --- `lua/plugin.lua` as loaded with termux set or unset.
+    ---
+    --- A fresh require is the only way to ask: the Termux additions to
+    --- `M.condemn` are made once, when the module is first loaded.
+    ---@param termux string? Value for TERMUX_VERSION, nil to unset
+    ---@return { import: fun(): table<string | integer, any>[] } plugin
+    local reloaded = function(termux)
+        local saved            = environ.TERMUX_VERSION
+        environ.TERMUX_VERSION = termux
+
+        loaded["plugin"] = nil
+        local plugin     = require("plugin")
+
+        environ.TERMUX_VERSION = saved
+        loaded["plugin"]       = nil
+        return plugin
+    end
+
+    --- The override specs the named group of `M.import()` expands to.
+    ---
+    --- Expanded here rather than returning the group itself: the list
+    --- `M.import()` answers with holds both the plain
+    --- `{ import = "spec" }` entry and the two named groups, so its
+    --- element type is the looser of the two and `entry.import` comes
+    --- back untyped.
+    ---@param name   "elide" | "condemn"
+    ---@param termux string?             Value for TERMUX_VERSION, nil to unset
+    ---@return table<string | integer, any>[] specs
+    local overrides = function(name, termux)
+        for _, entry in ipairs(reloaded(termux).import()) do
+            if entry.name == name then
+                ---@type fun(): table<string | integer, any>[]
+                local expand = entry.import
+                return expand()
+            end
+        end
+        error("no import group named " .. name)
+    end
+
+    local plugin = require("plugin")
+
+    it("imports the spec directory first", function()
+        -- Ordering is not load order (lazy.nvim merges these overrides
+        -- into each plugin's real spec either way), but the directory is
+        -- what the two override groups are overriding
+        eq(plugin.import()[1], { import = "spec" })
     end)
 
-    it("elides each plugin it names with cond = false", function()
-        -- The elision list is a function so that lazy.nvim expands it at
-        -- import time; calling it here is what checks it produces specs
-        -- lazy.nvim will accept rather than, say, a list of strings.
-        ---@type { name: string, import: fun(): table[] }
-        local elision = require("util.spec")[2]
-        eq(elision.name, "elision")
+    it("elides with cond and condemns with enabled", function()
+        -- The distinction is deliberate: `cond = false` leaves a plugin
+        -- installed but never loaded, `enabled = false` takes it out
+        -- altogether. Calling each group's `import` is what checks it
+        -- produces specs lazy.nvim will accept rather than bare strings.
+        for name, field in pairs({ elide = "cond", condemn = "enabled" }) do
+            local specs = overrides(name, nil)
+            eq({ name, #specs > 0 }, { name, true })
 
-        local specs = elision.import()
-        eq(#specs > 0, true)
-        for _, spec in ipairs(specs) do
-            eq({ spec[1], spec.cond }, { spec[1], false })
-            eq(type(spec[1]), "string")
+            for _, spec in ipairs(specs) do
+                eq({ name, type(spec[1]) }, { name, "string" })
+                eq({ name, spec[1], spec[field] }, { name, spec[1], false })
+            end
+        end
+    end)
+
+    it("names a plugin this config actually has a spec for", function()
+        -- The regression test for a slug that went stale in the move of
+        -- these lists out of `lua/util/spec.lua`: the Termux entry for
+        -- mason-lspconfig carried its *filename*
+        -- ("mason-org/mason-lspconfig.nvim.lua"), matched no spec, and so
+        -- silently stopped disabling anything on the one platform the
+        -- entry exists for.
+        ---@type table<string, boolean>
+        local known = {}
+
+        --- Records slug under its "owner/repo" tail, so that a spec
+        --- declaring itself by `url` (`lua/spec/mkdnflow.lua`) counts as
+        --- the same plugin an override names by slug.
+        ---@param slug any Ignored unless it is a string
+        ---@return nil
+        local record = function(slug)
+            if type(slug) ~= "string" then
+                return
+            end
+            ---@type string
+            local text = slug
+            local tail = text:gsub("%.git$", "")
+                :match("([^/]+/[^/]+)$")
+            if tail then
+                known[tail] = true
+            end
+        end
+
+        ---@type string[]
+        local paths = vim.fn.globpath("lua/spec", "*.lua", true, true)
+        for _, path in ipairs(paths) do
+            local spec = evaluated(path)
+            record(spec[1])
+            record(spec.url)
+
+            -- Dependencies count too: a plugin this config never writes
+            -- a file for still exists, as another spec's dependency,
+            -- and an override may legitimately target one
+            ---@type any[]?
+            local dependencies = spec.dependencies
+            for _, dependency in ipairs(dependencies or {}) do
+                record(dependency)
+                if type(dependency) == "table" then
+                    record(dependency[1])
+                end
+            end
+        end
+
+        -- Both environments, since the entries that go stale most
+        -- quietly are the ones only one platform ever builds
+        for _, termux in ipairs({ "", "0.118.0" }) do
+            local under = termux == "" and "ordinary" or "termux"
+            for _, name in ipairs({ "elide", "condemn" }) do
+                local specs = overrides(name, termux ~= "" and termux or nil)
+                for _, spec in ipairs(specs) do
+                    ---@type string
+                    local slug = spec[1]
+                    eq(
+                        { under, name, slug, known[slug] or false },
+                        { under, name, slug, true }
+                    )
+                end
+            end
         end
     end)
 end)
