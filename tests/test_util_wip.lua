@@ -90,6 +90,46 @@ describe("util.wip.snapshot", function()
         return vim.api.nvim_get_current_buf()
     end
 
+    --- Runs act and returns the message it caused `vim.notify` to be given.
+    ---
+    --- This is the fence that the cases below used to approximate with
+    --- `vim.wait(2000, function() return false end)`, ie. a sleep. An
+    --- absence cannot be waited for, but `M.snapshot`'s `report` argument
+    --- makes it announce whichever outcome it reached, the two that write
+    --- nothing included, so "nothing happened" can be established by
+    --- waiting for a positive answer rather than by guessing how long
+    --- nothing takes. Three of those sleeps were 2000 ms each, against a
+    --- whole suite that runs in twelve seconds.
+    ---@param act fun(): nil
+    ---@return string message
+    local announced = function(act)
+        ---@type string?
+        local said  = nil
+        local outer = vim.notify
+
+        ---@param msg    string
+        ---@param _level integer?
+        ---@param _opts  table?
+        ---@return nil
+        ---@diagnostic disable-next-line: duplicate-set-field
+        vim.notify = function(msg, _level, _opts)
+            said = msg
+        end
+
+        local ok, err = pcall(act)
+        local arrived = vim.wait(10000, function()
+            return said ~= nil
+        end, 20
+        )
+
+        -- Restored before either assert, so a raising `act` cannot leave
+        -- the capture installed for every case after this one
+        vim.notify = outer
+        assert(ok, err)
+        assert(arrived and said, "no WIP notification arrived")
+        return said
+    end
+
     before_each(function()
         notify    = quieten()
         dir, file = helpers.repo({
@@ -153,13 +193,17 @@ describe("util.wip.snapshot", function()
         wip.snapshot(buf)
         local first = advanced("")
 
-        -- A no-op cannot be detected by waiting for an absence, so the
-        -- bounded wait only guards against a premature read; the commit
-        -- count below is what actually proves nothing was written.
-        wip.snapshot(buf)
-        vim.wait(2000, function()
-            return false
-        end)
+        -- Taken with `report` on and waited for by its own answer: "no
+        -- change since last snapshot" is the module saying it got as far
+        -- as comparing trees and declined to commit, which is the claim
+        -- this case makes. The commit count below still proves nothing was
+        -- written.
+        eq(
+            announced(function()
+                wip.snapshot(buf, true)
+            end),
+            "WIP: no change since last snapshot"
+        )
         eq(tip(dir, ref), first)
 
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "second" })
@@ -229,10 +273,14 @@ describe("util.wip.snapshot", function()
         vim.fn.writefile({ "scratch" }, untracked)
         local scratch = open(untracked)
 
-        wip.snapshot(scratch)
-        vim.wait(2000, function()
-            return false
-        end)
+        -- Reported rather than slept through: ineligibility is decided
+        -- before any async work starts, so the answer is already there
+        eq(
+            announced(function()
+                wip.snapshot(scratch, true)
+            end),
+            "WIP: buffer is not a tracked file"
+        )
 
         eq(vim.b[scratch].cgxx_wip_location, false)
         eq(tip(dir, ref), "")
@@ -244,10 +292,12 @@ describe("util.wip.snapshot", function()
         vim.fn.writefile({ "loose" }, outside)
         local loose = open(outside)
 
-        wip.snapshot(loose)
-        vim.wait(2000, function()
-            return false
-        end)
+        eq(
+            announced(function()
+                wip.snapshot(loose, true)
+            end),
+            "WIP: buffer is not a tracked file"
+        )
 
         eq(vim.b[loose].cgxx_wip_location, false)
         vim.api.nvim_buf_delete(loose, { force = true })
