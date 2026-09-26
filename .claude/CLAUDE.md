@@ -201,9 +201,15 @@ also means the lock cannot be used to tell an elided plugin from a condemned
 one. `.prettierignore` excludes the file because lazy.nvim writes one line per
 plugin and prettier expands each across four, so whichever ran last would be
 undone by the other; the generator wins, being the one that runs without being
-asked. Note the lock currently pins `mini.test` to a `main` commit while
-`lua/spec/mini.test.lua` names `tag = "v0.18.0"`, so local runs and CI use
-different framework commits until a `:Lazy sync` reconciles them.
+asked. The lock's `mini.test` entry agrees with the `tag = "v0.18.0"` that
+`lua/spec/mini.test.lua` names, so local runs and CI use one framework commit;
+note that agreement is recorded as a `branch`/`commit` pair rather than a tag,
+since lazy.nvim's writer resolves a tag to the commit it points at (`35c67cb`,
+ie. `v0.18.0^{commit}`, not the annotated tag object `git rev-parse v0.18.0`
+prints). Regenerating the lock from this checkout rather than the deployed one
+takes `NVIM_APPNAME=nvim-config XDG_CONFIG_HOME=$HOME/dev`, since
+`stdpath("config")` is where `M.defaults.lockfile` writes and `~/.config/nvim`
+is a separate checkout.
 
 Plugin specs load through lazy.nvim's own `{ import = "spec" }` mechanism,
 walking `lua/spec/*.lua` directly; there is no repo-specific spec resolver. Each
