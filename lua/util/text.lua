@@ -14,6 +14,23 @@
 
 local M = {}
 
+--- Renders text as a YAML flow scalar, double-quoting it only when a
+--- plain scalar would be ambiguous or invalid.
+---
+--- Lives here rather than beside either caller: `util.header.frontmatter`
+--- and `util.nex` both write `title:` and tag keys, and a second copy of
+--- this would be a second opinion on what YAML needs quoting.
+---@param text string
+---@return string scalar
+M.yaml_scalar = function(text)
+    if text ~= "" and text:match("^[%w][%w _.()/-]*$") and not text:match(" $") then
+        return text
+    end
+    local escaped = text:gsub("\\", "\\\\")
+    escaped       = escaped:gsub('"', '\\"')
+    return '"' .. escaped .. '"'
+end
+
 ---@class util.WrapCommentOpt
 ---@field buffer?        integer Source of the fallback `commentstring` (default: 0)
 ---@field commentstring? string  printf-style wrapper (default: buffer's own)

@@ -106,27 +106,47 @@ describe("util.header.insert", function()
         local bufnr = opened(md, "markdown")
         header.insert(md, bufnr)
 
+        -- The modeline, SPDX line and box sit inside the `__cgxx: |` block
+        -- scalar, indented two spaces, so the file opens with a valid YAML
+        -- document at its head and a modeline Vim still reads
         eq(lines_of(bufnr), {
             "---",
-            "# vim:set expandtab shiftwidth=2 filetype=markdown:",
-            "# SPDX-License-Identifier: GPL-3.0-only",
+            "__cgxx: |",
+            "  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:",
+            "  # SPDX-License-Identifier: GPL-3.0-only",
             "",
-            "#",
-            "#",
-            "# ~example-owner/example-repo.git",
-            "# ::: :/note.md",
-            "#",
-            "#",
+            "  #",
+            "  #",
+            "  # ~example-owner/example-repo.git",
+            "  # ::: :/note.md",
+            "  #",
+            "  #",
             "",
             "ctime: " .. os.date("%Y-%m-%d"),
             "title: XXTITLE",
-            "tags:  [  ]",
+            'description: ""',
+            "tags: []",
             "---",
             "",
             "# XXTITLE",
             "",
             "body",
         })
+    end)
+
+    it("leaves a compound markdown filetype to its own renderer", function()
+        -- `markdown.nex-note` is `util.nex`'s to render and
+        -- `markdown.claude` carries no repository frontmatter, so the
+        -- frontmatter path is gated on equality rather than a prefix
+        local md = dir .. "/note.md"
+        vim.fn.writefile({ "body" }, md)
+        local bufnr = opened(md, "markdown.nex-note")
+        header.insert(md, bufnr)
+
+        eq(
+            lines_of(bufnr)[1],
+            "<!-- vim:set expandtab shiftwidth=4" .. " filetype=markdown.nex-note: -->"
+        )
     end)
 
     it("falls back to a plain path outside any repository", function()
@@ -194,6 +214,127 @@ describe("util.header.insert", function()
         header.insert(file, bufnr)
 
         eq(lines_of(bufnr), { "local x = 1" })
+    end)
+end)
+
+describe("util.header.frontmatter", function()
+    -- Reached through `M.insert` for an ordinary Markdown file and through
+    -- `util.nex.render` for a note, so the cases below cover the arguments
+    -- only one of those two supplies.
+
+    it("omits the SPDX line when given no identifier", function()
+        -- What a note does: `util.nex` passes no `spdx`, notes not being
+        -- licensed source, and the blank line after the modeline stays
+        eq(
+            header.frontmatter({ title = "T", slug = "o/r", path = ":/a.md" }),
+            {
+                "---",
+                "__cgxx: |",
+                "  # vim:set expandtab shiftwidth=2 filetype=markdown:",
+                "",
+                "  #",
+                "  #",
+                "  # ~o/r.git",
+                "  # ::: :/a.md",
+                "  #",
+                "  #",
+                "",
+                "ctime: " .. os.date("%Y-%m-%d"),
+                "title: T",
+                'description: ""',
+                "tags: []",
+                "---",
+            }
+        )
+    end)
+
+    it("names both repositories of a fork", function()
+        eq(
+            header.frontmatter({
+                title     = "T",
+                slug      = "upstream/repo",
+                fork_slug = "chewygumxx/repo",
+                path      = ":/a.md",
+            })[7],
+            "  # ~upstream/repo.git"
+        )
+        eq(
+            header.frontmatter({
+                title     = "T",
+                slug      = "upstream/repo",
+                fork_slug = "chewygumxx/repo",
+                path      = ":/a.md",
+            })[8],
+            "  # └─> ~chewygumxx/repo.git"
+        )
+    end)
+
+    it("boxes a bare path when no repository names it", function()
+        -- No slug means no `:::` prefix either: that notation is
+        -- repository-relative and would be a claim the path cannot support
+        local lines = header.frontmatter({
+            title = "T",
+            path  = "~/loose/a.md",
+        })
+        eq(lines[7], "  # ~/loose/a.md")
+    end)
+
+    it("wraps a folded description at 80 columns including indent", function()
+        local lines = header.frontmatter({
+            title       = "T",
+            description = string.rep("word ", 40),
+        })
+        -- The folded scalar's body is every indented line after the key,
+        -- and stops at the next one: `tags:` follows it at column one
+        ---@type string[]
+        local wrapped = {}
+        ---@type boolean
+        local inside = false
+        for _, line in ipairs(lines) do
+            if inside and line:sub(1, 2) ~= "  " then
+                inside = false
+            end
+            if inside then
+                wrapped[#wrapped + 1] = line
+            end
+            if line == "description: >-" then
+                inside = true
+            end
+        end
+
+        eq(#wrapped > 1, true)
+        for _, line in ipairs(wrapped) do
+            eq({ line, #line <= 80, line:sub(1, 2) }, { line, true, "  " })
+        end
+    end)
+
+    it(
+        "renders tags as a block sequence, quoting where YAML needs it",
+        function()
+            local lines = header.frontmatter({
+                title = "T",
+                tags  = { "config", "a: colon" },
+            })
+
+            eq({ lines[#lines - 3], lines[#lines - 2], lines[#lines - 1] }, {
+                "tags:",
+                "  - config",
+                '  - "a: colon"',
+            })
+        end
+    )
+
+    it("leaves no trailing whitespace on any rendered line", function()
+        local lines = header.frontmatter({
+            title = "T",
+            slug  = "o/r",
+            path  = ":/a.md",
+            spdx  = "GPL-3.0-only",
+        })
+
+        for _, line in ipairs(lines) do
+            eq({ line, line:find("%s$") }, { line, nil })
+        end
     end)
 end)
 

@@ -17,6 +17,28 @@ local M = {}
 local util_modeline = require("util.modeline")
 local util_shebang  = require("util.shebang")
 local util_git      = require("util.git")
+local util_text     = require("util.text")
+
+--- Indent carried by every line inside the `__cgxx:` block scalar. Two
+--- spaces because that is what YAML needs to keep them in the block, and
+--- because `.editorconfig` gives Markdown the same.
+---@type string
+local block_indent = "  "
+
+--- Width the folded `description:` scalar wraps at, indent included.
+---@type integer
+local description_width = 80
+
+--- Fold level a generated Markdown file opens at, per its modeline. Three,
+--- so a document folded on its headings shows down to `###`.
+---@type integer
+local markdown_foldlevel = 3
+
+--- Stand-in written into both `title:` and the heading, for the author to
+--- replace. Deliberately a `XX`-prefixed token, matching the user commands,
+--- so it is greppable and cannot be mistaken for a real title.
+---@type string
+local title_placeholder = "XXTITLE"
 
 --- Strips trailing whitespace from every line, in place.
 ---@param lines string[]
@@ -26,6 +48,129 @@ local trim_lines = function(lines)
         lines[i] = lines[i]:gsub("[ \t]+$", "")
     end
     return lines
+end
+
+---@class util.FrontmatterOpt
+---@field title        string   Heading, and the `title:` key
+---@field slug?        string   Repository, boxed as `~slug.git`
+---@field fork_slug?   string   Fork of slug, boxed beneath it
+---@field path?        string   Repo-relative path, boxed after `::: `
+---@field spdx?        string   SPDX identifier; the line is omitted without one
+---@field filetype?    string   Modeline `filetype` (default: "markdown")
+---@field shiftwidth?  integer  Modeline `shiftwidth` (default: 2)
+---@field foldlevel?   integer  Modeline `foldlevel`; omitted without one
+---@field description? string   Body of the folded `description:` scalar
+---@field tags?        string[] `tags:` block sequence, in the order given
+---@field ctime?       string   YYYY-MM-DD (default: today)
+
+--- Renders a Markdown file's YAML frontmatter, opening `---` to closing
+--- `---` inclusive.
+---
+--- The modeline and the boxed repository notation live inside a `__cgxx: |`
+--- literal block scalar rather than above the frontmatter, so that a file
+--- opens with both a valid YAML document at its head and a modeline Vim
+--- still reads. Inside that block the comment syntax is the frontmatter's
+--- own (`# %s`) and not the buffer's, which is why nothing here consults
+--- 'commentstring'.
+---
+--- Shared with `util.nex`, which renders the same shape for a note: this is
+--- the one description of the format, so a change here reaches both.
+---@param opt util.FrontmatterOpt
+---@return string[] lines
+M.frontmatter = function(opt)
+    local title         = opt.title
+    local ctime         = opt.ctime or tostring(os.date("%Y-%m-%d"))
+    local description   = opt.description or ""
+    local tags          = opt.tags or {}
+    local commentstring = "# %s"
+
+    local modeline = util_modeline.base({
+        et            = true,
+        sw            = opt.shiftwidth or 2,
+        ft            = opt.filetype or "markdown",
+        append        = opt.foldlevel
+            and " foldlevel=" .. tostring(opt.foldlevel)
+            or nil,
+        commentstring = commentstring,
+    })
+
+    ---@type string[]
+    local lines = {
+        "---",
+        "__cgxx: |",
+        block_indent .. modeline,
+    }
+
+    if opt.spdx then
+        -- Hoisted rather than inlined into the call: `luafmt --verify`
+        -- reports the two-argument form here as non-idempotent, laying it
+        -- out differently on each pass
+        local identifier  = "SPDX-License-Identifier: " .. opt.spdx
+        lines[#lines + 1] = block_indent
+            .. string.format(commentstring, identifier)
+    end
+
+    vim.list_extend(lines, {
+        "",
+        block_indent .. string.format(commentstring, ""),
+        block_indent .. string.format(commentstring, ""),
+    })
+
+    if opt.slug then
+        lines[#lines + 1] = block_indent
+            .. string.format(commentstring, "~" .. opt.slug .. ".git")
+        if opt.fork_slug then
+            lines[#lines + 1] = block_indent
+                .. string.format(
+                    commentstring,
+                    "└─> ~" .. opt.fork_slug .. ".git"
+                )
+        end
+    end
+
+    if opt.path then
+        lines[#lines + 1] = block_indent
+            .. string.format(
+                commentstring,
+                opt.slug and "::: " .. opt.path or opt.path
+            )
+    end
+
+    vim.list_extend(lines, {
+        block_indent .. string.format(commentstring, ""),
+        block_indent .. string.format(commentstring, ""),
+        "",
+        "ctime: " .. ctime,
+        "title: " .. util_text.yaml_scalar(title),
+    })
+
+    -- A folded ">-" scalar cannot hold an empty body: YAML would read the
+    -- next key as its content. Fall back to an empty flow scalar.
+    if description == "" then
+        lines[#lines + 1] = 'description: ""'
+    else
+        lines[#lines + 1] = "description: >-"
+        vim.list_extend(
+            lines,
+            util_text.wrap_comment(description, description_width, {
+                commentstring = block_indent .. "%s",
+            })
+        )
+    end
+
+    if #tags == 0 then
+        lines[#lines + 1] = "tags: []"
+    else
+        lines[#lines + 1] = "tags:"
+        for _, tag in ipairs(tags) do
+            lines[#lines + 1] = block_indent .. "- "
+                .. util_text.yaml_scalar(tag)
+        end
+    end
+
+    lines[#lines + 1] = "---"
+
+    return trim_lines(lines)
 end
 
 ---@class util.HeaderInsertOpt
@@ -51,29 +196,6 @@ M.insert = function(file, buf, opt)
         return
     end
 
-    -- Modeline
-    ---@type string[]
-    local lines = {}
-    if vim.bo[buf].filetype == "markdown" then
-        -- Markdown Frontmatter Start
-        commentstring     = "# %s"
-        lines[#lines + 1] = "---"
-        lines[#lines + 1] = util_modeline.base({
-            et = true,
-            sw = 2,
-            ft = "markdown",
-            commentstring = commentstring,
-        })
-    else
-        lines[#lines + 1] = util_shebang.get(file, buf)
-        lines[#lines + 1] = util_modeline.base({
-            et = true,
-            sw = 4,
-            ft = vim.bo[buf].filetype,
-            commentstring = commentstring,
-        })
-    end
-
     -- (Slug and) Path
     ---@type string?
     local slug
@@ -90,8 +212,46 @@ M.insert = function(file, buf, opt)
     end
 
     -- License
-    local spdx        = upstream_slug and util_git.license(upstream_slug)
+    local spdx = upstream_slug and util_git.license(upstream_slug)
         or "GPL-3.0-only"
+
+    --
+    -- Markdown is a different document, not a differently commented one:
+    -- the modeline, the SPDX line and the box all move inside a `__cgxx: |`
+    -- block scalar, so `M.frontmatter` renders the whole thing rather than
+    -- this function interleaving it with the plain-comment case.
+    --
+    -- Compound filetypes are deliberately excluded by the equality check:
+    -- a `markdown.nex-note` buffer is `util.nex`'s to render, and a
+    -- `markdown.claude` one carries no repository frontmatter at all.
+    --
+    if vim.bo[buf].filetype == "markdown" then
+        local lines = M.frontmatter({
+            -- The upstream is named first and the fork beneath it, so the
+            -- fork's own slug is what moves to `fork_slug`
+            slug      = upstream_slug or slug,
+            fork_slug = upstream_slug and slug or nil,
+            path      = path,
+            spdx      = spdx,
+            foldlevel = markdown_foldlevel,
+            title     = title_placeholder,
+        })
+        vim.list_extend(lines, { "", "# " .. title_placeholder, "" })
+        vim.api.nvim_buf_set_lines(buf, 0, 0, false, lines)
+        return
+    end
+
+    -- Modeline
+    ---@type string[]
+    local lines       = {}
+    lines[#lines + 1] = util_shebang.get(file, buf)
+    lines[#lines + 1] = util_modeline.base({
+        et = true,
+        sw = 4,
+        ft = vim.bo[buf].filetype,
+        commentstring = commentstring,
+    })
+
     lines[#lines + 1] = string.format(
         commentstring,
         "SPDX-License-Identifier: " .. spdx
@@ -123,17 +283,6 @@ M.insert = function(file, buf, opt)
         end
         lines[#lines + 1] = string.format(commentstring, "")
         lines[#lines + 1] = string.format(commentstring, "")
-    end
-
-    -- Markdown Frontmatter End
-    if vim.bo[buf].filetype == "markdown" then
-        lines[#lines + 1] = ""
-        lines[#lines + 1] = "ctime: " .. os.date("%Y-%m-%d")
-        lines[#lines + 1] = "title: XXTITLE"
-        lines[#lines + 1] = "tags:  [  ]"
-        lines[#lines + 1] = "---"
-        lines[#lines + 1] = ""
-        lines[#lines + 1] = "# XXTITLE"
     end
 
     lines[#lines + 1] = ""

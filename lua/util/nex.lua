@@ -25,8 +25,8 @@
 
 local M = {}
 
-local util_modeline = require("util.modeline")
-local util_text     = require("util.text")
+local util_header = require("util.header")
+local util_text   = require("util.text")
 
 --- Repository the notes live in.
 ---@type string
@@ -93,15 +93,14 @@ end
 
 --- Renders text as a YAML flow scalar, double-quoting it only when a
 --- plain scalar would be ambiguous or invalid.
+---
+--- Kept as part of this module's surface, since a caller assembling a note
+--- has no reason to know where the quoting rule lives; the rule itself is
+--- `util.text`'s, shared with `util.header.frontmatter`.
 ---@param text string
 ---@return string scalar
 M.yaml_scalar = function(text)
-    if text ~= "" and text:match("^[%w][%w _.()/-]*$") and not text:match(" $") then
-        return text
-    end
-    local escaped = text:gsub("\\", "\\\\")
-    escaped       = escaped:gsub('"', '\\"')
-    return '"' .. escaped .. '"'
+    return util_text.yaml_scalar(text)
 end
 
 ---@class (exact) cgxx.nex.Note
@@ -141,63 +140,26 @@ end
 M.render = function(note)
     note = defaulted(note)
 
-    -- Indented into the `__cgxx:` block scalar, so its comment syntax is
-    -- Markdown frontmatter's ("# %s") rather than this buffer's own.
-    local indent   = "  "
-    local modeline = util_modeline.base({
-        et            = true,
-        sw            = 2,
-        ft            = M.filetype,
-        append        = " foldlevel=" .. tostring(M.foldlevel),
-        commentstring = "# %s",
+    -- `util.header.frontmatter` is the one description of this shape, and
+    -- what `XXInsertHeader` writes into an ordinary Markdown file. A note
+    -- differs from that only in what it fills in: its own compound
+    -- filetype, the `nex` repository rather than the file's own, and no
+    -- SPDX line, notes not being licensed source.
+    local lines = util_header.frontmatter({
+        slug        = M.slug,
+        path        = ":/" .. M.subdir .. "/" .. M.filename(note),
+        filetype    = M.filetype,
+        foldlevel   = M.foldlevel,
+        ctime       = note.ctime,
+        title       = note.title,
+        description = note.description,
+        tags        = note.tags,
     })
-
-    ---@type string[]
-    local lines = {
-        "---",
-        "__cgxx: |",
-        indent .. modeline,
-        "",
-        indent .. "#",
-        indent .. "#",
-        indent .. "# ~" .. M.slug .. ".git",
-        indent .. "# ::: :/" .. M.subdir .. "/" .. M.filename(note),
-        indent .. "#",
-        indent .. "#",
-        "",
-        "ctime: " .. note.ctime,
-        "title: " .. M.yaml_scalar(note.title),
-    }
-
-    -- A folded ">-" scalar cannot hold an empty body: YAML would read the
-    -- next key as its content. Fall back to an empty flow scalar.
-    if note.description == "" then
-        lines[#lines + 1] = 'description: ""'
-    else
-        lines[#lines + 1] = "description: >-"
-        for _, line in ipairs(
-            util_text.wrap_comment(note.description, 80, {
-                commentstring = indent .. "%s",
-            })
-        ) do
-            lines[#lines + 1] = line
-        end
-    end
-
-    if #note.tags == 0 then
-        lines[#lines + 1] = "tags: []"
-    else
-        lines[#lines + 1] = "tags:"
-        for _, tag in ipairs(note.tags) do
-            lines[#lines + 1] = indent .. "- " .. M.yaml_scalar(tag)
-        end
-    end
 
     -- Two trailing blanks, not one: the cursor lands on the last of them,
     -- so the first thing typed is separated from the heading by a blank
     -- line rather than butting straight up against it.
     vim.list_extend(lines, {
-        "---",
         "",
         "# " .. note.title,
         "",

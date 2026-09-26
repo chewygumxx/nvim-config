@@ -564,6 +564,19 @@ explicit `refs/wip/*` refspec.
   file of the same type rather than inventing one; CI fixes minor drift, and
   `XXInsertHeader` (backed by `lua/util/header.lua`) can generate one from
   scratch.
+- **Markdown headers** are the same three parts wearing YAML: a `__cgxx: |`
+  literal block scalar inside the frontmatter holds the modeline
+  (`shiftwidth=2`, `foldlevel=3`), the SPDX line and the box, each indented two
+  spaces and commented `#`, followed by `ctime:`, `title:`, `description:` and
+  `tags:` keys and then the `#` heading. `util.header.frontmatter` renders the
+  whole document head and is the only description of that shape:
+  `util.header.insert` calls it for a plain Markdown buffer and
+  `util.nex.render` calls it for a note, which differs only in filling in its
+  own compound filetype, the `nex` repository and no SPDX line. The branch is
+  gated on `filetype == "markdown"` exactly, so `markdown.claude` and
+  `markdown.nex-note` do not take it. `util.text.yaml_scalar` is where the
+  quoting rule lives, shared for the same reason; `util.nex.yaml_scalar` remains
+  as a delegate because callers assembling a note have no reason to know that.
 - **Indentation**: `.editorconfig` sets 4 spaces by default, 2 spaces for
   `*.md`; LF endings, trailing whitespace trimmed, final newline inserted. Lua
   specifically also goes through `luafmt`'s own `max_line_width = 80`.
