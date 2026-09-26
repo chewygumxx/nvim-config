@@ -11,6 +11,16 @@ except where it may be unfeasable to do so eg. URL.
 [lazy.nvim](https://lazy.folke.io). It is not part of the dotfiles repo; it has
 its own git history, its own commitlint/CI setup, and no chezmoi involvement.
 
+Three tracked documents, with different jobs. `README.md` orients someone
+arriving at the repository: requirements, `mise install`, the directory layout,
+the gate commands in a table, and the handful of features worth knowing about.
+**This** file is the long-form reference: why each decision is the way it is,
+and what a given change is likely to break. Anything that is a fact about the
+code belongs in the README or a doc comment; anything that is a reason belongs
+here. `plan.md` is the working plan for the current tranche of work, tracked at
+the request of the session that wrote it, and goes stale by design once its
+phases land.
+
 ## Commands
 
 There is no build step. Linting/formatting/typechecking:
@@ -29,7 +39,10 @@ There is no build step. Linting/formatting/typechecking:
   `emmylua_check`, `emmylua_doc_cli`) come from one release of
   `EmmyLuaLs/emmylua-analyzer-rust`, which needs a `[tool_alias]` block each
   plus `matching` on the `[tools]` entry; putting `matching` in the alias block
-  instead is ignored **silently** and every alias installs the same asset.
+  instead is ignored **silently** and every alias installs the same asset. Of
+  those three, nothing currently runs `emmylua_doc_cli`: it is pinned for the
+  LuaCATS-to-Markdown generator that does not exist yet, so an absent
+  `scripts/gendoc.lua` is a gap rather than a deletion.
 - **Lua**: format with `luafmt` (EmmyLua formatter, config in `.luafmt.toml`),
   lint with `selene` (config in `selene.toml`,
   `std = "lua51+vim+luajit +busted"`, backed by
@@ -74,7 +87,7 @@ There is no build step. Linting/formatting/typechecking:
   that saw no hints at all is fatal rather than an empty result.
 - **Tests**:
   `nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua`. The
-  suite is [mini.test](https://github.com/echasnovski/mini.test), driven through
+  suite is [mini.test](https://github.com/nvim-mini/mini.test), driven through
   its busted-style `describe`/`it`/`before_each`/`after_each` wrappers with
   `MiniTest.expect.equality` as the assertion. `scripts/minimal_init.lua`
   deliberately does not source `init.lua` (its own header explains why) and
@@ -145,11 +158,14 @@ stopped being worth the complexity.
 
 `init.lua` then loads top-level modules in a deliberate order, documented
 inline: `option`, `keymap`, `filetype` (after option/keymap, so its
-`FileType`-triggered overrides win), `autocmd`, `usercmd`, `util.lazy` (after
+`FileType`-triggered overrides win), `autocmd`, `usercmd`, `plugin` (after
 keymap/filetype/autocmd, since lazy-loaded plugin specs key off
 `vim.g.mapleader`, filetype autocmds, and augroups defined earlier), then
-`highlight` last (after `util.lazy`, so it overwrites whatever the
-colorscheme/treesitter plugins set).
+`highlight` last, so it overwrites whatever the colorscheme and treesitter
+plugins set. Note the sixth call is `require("plugin").setup()` and not
+`util.lazy` directly: `lua/plugin.lua` is what decides the spec list and hands
+it to `util.lazy.setup`, so the comments inside `init.lua` naming `util.lazy`
+describe the dependency rather than the call.
 
 There is no `cgxx` settings-as-plugin indirection layer and no
 `lua/plugin_manager.lua`; earlier revisions of this file described one, but it
@@ -272,6 +288,28 @@ herdr release adds will therefore not appear until it is added there, and
 labels every prefix and is no longer elided, which is what makes a collision of
 that kind visible rather than silent; it deliberately labels no prefix owned by
 `lua/spec/mkdnflow.lua`, whose `cond = false` means those keys do not exist.
+
+`lua/spec/snacks.nvim.lua` is `lazy = false` at `priority = 1000` because other
+specs reference it, and it enables three of snacks' modules and nothing else.
+`picker` exists only for `util.nex`'s tag multi-select, which needs a picker
+that can return several items, with `ui_select = false` so it does not take over
+`vim.ui.select` globally; `fzf-lua` remains the finder. `scratch` backs
+`<leader>.` and `<leader>S`, and its `filekey` is the whole feature: the file a
+keymap opens is hashed over name, filetype, `v:count1`, cwd and git branch, so
+one binding yields a different buffer per project and per branch and
+`3<leader>.` is a third one. Its `root` is stated explicitly rather than left
+implicit, since a scratch file is machine state under `stdpath("data")`, which
+is the opposite call from `lazy-lock.json` living inside `stdpath("config")`.
+
+`lua/spec/claudecode.nvim.lua` sets three options and leaves the rest
+upstream's. `terminal.provider = "snacks"` is named rather than left as
+`"auto"`, since snacks is a declared dependency that loads eagerly and the
+discovery can only reach the same answer more slowly. `focus_after_send = true`
+departs from the default deliberately, and pairs with the provider: the plugin
+warns at setup when a provider cannot move focus, which is why the two belong
+together. It carries no `{ "<leader>a", nil }` group placeholder any more,
+because which-key labels the prefix now and an entry with no right-hand side is
+a lazy-load trigger on `<leader>a` itself.
 
 `lua/util/spec.lua` predates all of this and held the same idea (a
 `{ import = "spec" }` entry plus one elision list). Nothing requires it any
