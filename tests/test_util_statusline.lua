@@ -304,6 +304,23 @@ describe("util.statusline in flight", function()
         return { prefix = "", branch = "stl-test", slug = nil }
     end
 
+    it("invalidates every loaded buffer on a global change", function()
+        -- `M.refresh_all` is for a change of git state that belongs to
+        -- the checkout rather than to one buffer, ie. someone running
+        -- `git checkout` in another terminal
+        local one = opened(vim.fn.tempname() .. "/one.lua")
+        local two = opened(vim.fn.tempname() .. "/two.lua")
+
+        started(one).resolve(answer())
+        started(two).resolve(answer())
+        eq(vim.b[one].cgxx_statusline, "<local>:stl-test:/one.lua")
+        eq(vim.b[two].cgxx_statusline, "<local>:stl-test:/two.lua")
+
+        statusline.refresh_all()
+        eq(vim.b[one].cgxx_statusline, nil)
+        eq(vim.b[two].cgxx_statusline, nil)
+    end)
+
     it("drops an answer invalidated by a refresh", function()
         local bufnr = opened(vim.fn.tempname() .. "/file.lua")
         local call  = started(bufnr)
@@ -353,6 +370,34 @@ describe("util.statusline in flight", function()
         first.resolve(answer())
 
         eq(vim.b[bufnr].cgxx_statusline, "<local>:stl-test:/new.lua")
+    end)
+
+    it("invalidates a renamed buffer from its own autocmd", function()
+        -- The registration `M.refresh` is called by hand above; without
+        -- it a rename leaves the old segment cached until something else
+        -- happens to invalidate it
+        statusline.autocmd()
+        local bufnr = opened(vim.fn.tempname() .. "/old.lua")
+        started(bufnr).resolve(answer())
+        eq(vim.b[bufnr].cgxx_statusline, "<local>:stl-test:/old.lua")
+
+        vim.api.nvim_buf_set_name(bufnr, vim.fn.tempname() .. "/new.lua")
+        eq(vim.b[bufnr].cgxx_statusline, nil)
+
+        vim.api.nvim_create_augroup("cgxx.statusline", { clear = true })
+    end)
+
+    it("invalidates every buffer when focus returns", function()
+        -- How the branch usually goes stale: a checkout in another
+        -- terminal while this session was in the background
+        statusline.autocmd()
+        local bufnr = opened(vim.fn.tempname() .. "/file.lua")
+        started(bufnr).resolve(answer())
+
+        vim.api.nvim_exec_autocmds("FocusGained", {})
+        eq(vim.b[bufnr].cgxx_statusline, nil)
+
+        vim.api.nvim_create_augroup("cgxx.statusline", { clear = true })
     end)
 end)
 
