@@ -20,6 +20,14 @@
 -- against it; `init.lua` requires `keymap` before `util.lazy` for exactly
 -- that reason.
 --
+-- The list below is therefore both the expectation and the restore list,
+-- so an undocumented mapping is also an unrestored one. That is not
+-- theoretical: "gF" is set for `{ "n", "x" }` but was listed for "n"
+-- alone, so the visual-mode override survived every later test file in
+-- the suite. "registers nothing it does not document" is what stops that
+-- recurring, by asserting the list is the whole set rather than a subset
+-- of it.
+--
 
 local keymap = require("keymap")
 local eq     = require("mini.test") --[[@as mini.test]]
@@ -75,6 +83,11 @@ local mappings = {
         desc = "Create or open new file according to path under cursor",
     },
     {
+        mode = "x",
+        lhs  = "gF",
+        desc = "Create or open new file according to path under cursor",
+    },
+    {
         mode = "n",
         lhs  = "x",
         desc = "Blackhole Register: Single character deletion",
@@ -84,24 +97,40 @@ local mappings = {
         lhs  = "p",
         desc = "Blackhole Register: Pasted over selection",
     },
+    -- Registered by `keymap.gx` rather than `keymap` itself, and listed
+    -- here anyway: `M.setup()` is what calls it, so it is one of the
+    -- mappings this module is answerable for, and listing it is what makes
+    -- `after_each` put "gx" back without a special case of its own
+    {
+        mode = "n",
+        lhs  = "gx",
+        desc = "Open URL or owner/repo under cursor",
+    },
 }
 
 describe("keymap.setup", function()
     before_each(function()
         keymap.setup()
         -- `keymap.gx` defers its own mapping into `vim.schedule`, to read
-        -- back whatever "gx" was bound to first
-        vim.wait(1000, function()
-            return vim.fn.maparg("gx", "n", false, true).desc ~= nil
+        -- back whatever "gx" was bound to first. Waited for by *this*
+        -- config's description rather than by any description at all:
+        -- Neovim's own default "gx" carries one too, so the looser
+        -- predicate is already true the moment `after_each` has deleted
+        -- the override, and the wait then returns without ever pumping the
+        -- pending callback. It would arrive later, inside whatever the
+        -- next case waits on.
+        local arrived = vim.wait(1000, function()
+            return vim.fn.maparg("gx", "n", false, true).desc
+                == require("keymap.gx").desc
         end, 5
         )
+        assert(arrived, "keymap.gx never took over gx")
     end)
 
     after_each(function()
         for _, map in ipairs(mappings) do
             pcall(vim.keymap.del, map.mode, map.lhs)
         end
-        pcall(vim.keymap.del, "n", "gx")
     end)
 
     it("sets the leader before anything can be mapped against it", function()
@@ -115,6 +144,70 @@ describe("keymap.setup", function()
             local got = vim.fn.maparg(map.lhs, map.mode, false, true)
             eq({ map.mode, map.lhs, got.desc }, { map.mode, map.lhs, map.desc })
         end
+    end)
+
+    --- Every "<mode> <lhs>" `keymap.setup()` asks `vim.keymap.set` for.
+    ---
+    --- Recorded from the calls rather than read back out of
+    --- `nvim_get_keymap`, for two reasons. That answers in Neovim's own
+    --- mode algebra, where one `{ "n", "x" }` mapping is listed under "x"
+    --- and "v" and a "v" one under "v", "x" and "s", so a diff of it
+    --- cannot be compared against the list above without reimplementing
+    --- the expansion. And it cannot tell a mapping this config added from
+    --- one of Neovim's that it overwrote: "gx" is mapped by default, so
+    --- taking it over adds no entry at all.
+    ---@return string[] requests Sorted, one per mode per call
+    local requested = function()
+        local real = vim.keymap.set
+        ---@type string[]
+        local seen = {}
+
+        -- Written with the full parameter list, unused tail included,
+        -- because a stub that takes fewer narrows LuaLS's idea of
+        -- `vim.keymap.set` for the whole workspace: every real four
+        -- argument call site then reports `redundant-parameter`
+        ---@param mode  string | string[]
+        ---@param lhs   string
+        ---@param _rhs  string | function
+        ---@param _opts vim.keymap.set.Opts?
+        ---@return nil
+        ---@diagnostic disable-next-line: duplicate-set-field
+        vim.keymap.set = function(mode, lhs, _rhs, _opts)
+            ---@type string[]
+            local modes = type(mode) == "table" and mode or { mode }
+            for _, one in ipairs(modes) do
+                table.insert(seen, one .. " " .. lhs)
+            end
+        end
+
+        keymap.setup()
+        -- `keymap.gx` defers into `vim.schedule`, so its call lands after
+        -- `setup()` has returned and has to be waited for with the stub
+        -- still installed
+        local arrived = vim.wait(1000, function()
+            return vim.tbl_contains(seen, "n gx")
+        end, 5
+        )
+
+        vim.keymap.set = real
+        assert(arrived, "keymap.gx never asked for its mapping")
+
+        table.sort(seen)
+        return seen
+    end
+
+    it("registers nothing it does not document", function()
+        -- Set equality, not membership: the list above doubles as
+        -- `after_each`'s restore list, so a mapping missing from it is one
+        -- this file leaks into every test file that runs after it
+        ---@type string[]
+        local documented = {}
+        for _, map in ipairs(mappings) do
+            table.insert(documented, map.mode .. " " .. map.lhs)
+        end
+        table.sort(documented)
+
+        eq(requested(), documented)
     end)
 
     it("takes gx over, keeping the previous mapping as a fallback", function()
