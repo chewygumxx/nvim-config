@@ -17,9 +17,10 @@
 
 local M = {}
 
-local joinpath  = vim.fs.joinpath
-local data_dir  = vim.fn.stdpath("data")
-local state_dir = vim.fn.stdpath("state")
+local joinpath   = vim.fs.joinpath
+local config_dir = vim.fn.stdpath("config")
+local data_dir   = vim.fn.stdpath("data")
+local state_dir  = vim.fn.stdpath("state")
 ---@type string?
 local browser = vim.env.BROWSER
 
@@ -50,8 +51,27 @@ M.defaults = {
     -- State information file
     state = joinpath(state_dir, "lazy", "state.json") or nil,
 
-    -- Post-update lockfile
-    lockfile = joinpath(state_dir, "lazy", "lock.json") or nil,
+    --
+    -- Post-update lockfile.
+    --
+    -- lazy.nvim's own default, ie. inside `stdpath("config")`, which is a
+    -- checkout of this repository on every machine it is deployed to. It
+    -- used to sit beside `state.json` under `stdpath("state")`, which
+    -- classified the lock as machine state; it is tracked instead now, so
+    -- that `:Lazy restore` gives every machine the same commits and so CI
+    -- has an honest cache key for a plugin install.
+    --
+    -- One file serves Arch, Termux and Herdr despite their differing
+    -- plugin sets. lazy.nvim's writer keeps the entries of plugins it is
+    -- not currently managing, ie. anything in `Config.spec.disabled` or
+    -- `Config.spec.ignore_installed`, so the mason trio `lua/plugin.lua`
+    -- condemns under Termux keeps its pin when a Termux sync writes the
+    -- file rather than being pruned and re-added on the next Arch sync.
+    -- That same retention is why entries exist for everything `M.elide`
+    -- and `M.condemn` name: their presence records a pin to return to, not
+    -- that the plugin is in use.
+    --
+    lockfile = joinpath(config_dir, "lazy-lock.json") or nil,
 
     -- Load project-local `.lazy.lua` LazySpec[] file`
     local_spec = true or nil,
