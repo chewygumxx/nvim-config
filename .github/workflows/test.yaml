@@ -25,11 +25,17 @@ jobs:
         name: mini.test
         runs-on: ubuntu-latest
 
+        # Several test helpers wait up to 10s for an async result, and a
+        # hung Neovim would otherwise sit here for the 6h default.
+        timeout-minutes: 10
+
         # Pinned manually to avoid an unauthenticated releases-API lookup on
         # every run; bump by hand when a newer Neovim release is needed.
         # https://github.com/neovim/neovim/releases
         env:
             NVIM_VERSION: "0.12.5"
+            # https://github.com/nvim-mini/mini.test/tags
+            MINI_TEST_VERSION: "v0.18.0"
 
         steps:
             - name: Checkout
@@ -51,12 +57,20 @@ jobs:
             - name: Add Neovim to PATH
               run: echo "$RUNNER_TEMP/nvim/bin" >> "$GITHUB_PATH"
 
-            # `main` branch, unpinned: matches the lack of a `version` pin
-            # for `nvim-mini/mini.test` in `lua/spec/mini.test.lua`.
+            # Pinned to a tag rather than tracking `main`: unpinned, an
+            # upstream commit breaks pull requests that changed nothing
+            # here, and the failure looks like the change's fault. The
+            # install path is asked of Neovim rather than assumed, since
+            # `stdpath("data")` moves with `XDG_DATA_HOME`;
+            # `.husky/pre-commit` looks it up the same way.
             - name: Install mini.test
               run: |
-                  git clone --depth 1 https://github.com/nvim-mini/mini.test \
-                      "$HOME/.local/share/nvim/lazy/mini.test"
+                  data_dir=$(nvim --headless --clean \
+                      -c 'lua io.stdout:write(vim.fn.stdpath("data"))' \
+                      -c 'qa!' 2>/dev/null)
+                  git clone --depth 1 --branch "$MINI_TEST_VERSION" \
+                      https://github.com/nvim-mini/mini.test \
+                      "$data_dir/lazy/mini.test"
 
             - name: Run tests
               run: nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
