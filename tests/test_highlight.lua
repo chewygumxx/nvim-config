@@ -106,15 +106,39 @@ describe("highlight.setup", function()
     end)
 
     it("defines every group it documents", function()
+        -- Every mismatched attribute is collected and asserted once rather
+        -- than compared one at a time: `eq` raises, so a colour change
+        -- that moved several groups used to be reported one group per run
+        ---@type string[]
+        local wrong = {}
+
         for name, want in pairs(groups) do
             local got = vim.api.nvim_get_hl(0, { name = name })
-            eq({ name, got.fg }, { name, want.fg })
-            eq({ name, got.bg }, { name, want.bg })
-            eq({ name, got.bold }, { name, want.bold })
-            eq({ name, got.underline }, { name, want.underline })
-            eq({ name, got.strikethrough }, { name, want.strikethrough })
-            eq({ name, got.standout }, { name, want.standout })
+            for _, attr in ipairs({
+                "fg",
+                "bg",
+                "bold",
+                "underline",
+                "strikethrough",
+                "standout",
+            }) do
+                if got[attr] ~= want[attr] then
+                    table.insert(
+                        wrong,
+                        string.format(
+                            "%s.%s is %s, want %s",
+                            name,
+                            attr,
+                            vim.inspect(got[attr]),
+                            vim.inspect(want[attr])
+                        )
+                    )
+                end
+            end
         end
+
+        table.sort(wrong)
+        eq(wrong, {})
     end)
 
     it("leaves the transparent groups without a background", function()

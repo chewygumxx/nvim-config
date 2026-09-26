@@ -107,14 +107,34 @@ local restore = function(saved)
     end
 end
 
---- Asserts that every option in want holds its expected value, naming the
---- option in the comparison so a failure says which one it was.
+--- Asserts that every option in want holds its expected value.
+---
+--- Every mismatch is collected and asserted once, rather than compared
+--- option by option: `eq` raises, so the first wrong option used to be the
+--- only one a run could report, and a change that moved several of them
+--- took as many runs to understand.
 ---@param want table<string, string | boolean | integer>
 ---@return nil
 local applied = function(want)
+    ---@type string[]
+    local wrong = {}
     for name, value in pairs(want) do
-        eq({ name, get(name) }, { name, value })
+        local got = get(name)
+        if got ~= value then
+            table.insert(
+                wrong,
+                string.format(
+                    "%s is %s, want %s",
+                    name,
+                    vim.inspect(got),
+                    vim.inspect(value)
+                )
+            )
+        end
     end
+
+    table.sort(wrong)
+    eq(wrong, {})
 end
 
 --- The sorted names of every option in the given tables.

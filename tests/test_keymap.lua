@@ -140,10 +140,30 @@ describe("keymap.setup", function()
     end)
 
     it("registers every mapping it documents", function()
+        -- Every mismatch is collected and asserted once rather than
+        -- compared mapping by mapping: `eq` raises, so a change that moved
+        -- several descriptions used to take one run per mapping to find
+        ---@type string[]
+        local wrong = {}
+
         for _, map in ipairs(mappings) do
             local got = vim.fn.maparg(map.lhs, map.mode, false, true)
-            eq({ map.mode, map.lhs, got.desc }, { map.mode, map.lhs, map.desc })
+            if got.desc ~= map.desc then
+                table.insert(
+                    wrong,
+                    string.format(
+                        "%s %s is %s, want %s",
+                        map.mode,
+                        map.lhs,
+                        vim.inspect(got.desc),
+                        vim.inspect(map.desc)
+                    )
+                )
+            end
         end
+
+        table.sort(wrong)
+        eq(wrong, {})
     end)
 
     --- Every "<mode> <lhs>" `keymap.setup()` asks `vim.keymap.set` for.
