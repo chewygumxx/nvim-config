@@ -90,7 +90,10 @@ lintfmt_json_yaml() {
 # -----
 
 test_luals() {
-    [ -z "$lua_files" ] && return
+    # Asks for the staged files itself rather than reading the variable
+    # `lintfmt_lua` leaves behind: reorder the two calls below, or run
+    # either in a subshell, and this gate would silently no-op.
+    [ -z "$(get_files '*.lua')" ] && return
 
     cmd_exist nvim lua-language-server || return 0
 
@@ -111,7 +114,12 @@ test_luals() {
 }
 
 test_minitest() {
-    [ -z "$(get_files 'lua/' 'tests/')" ] && return
+    # Everything the suite actually runs against, not just the modules
+    # under test: the bootstrap and runner decide what is collected and
+    # what it resolves against, `init.lua` and `lsp/` are covered by
+    # tests/test_spec.lua, and `queries/` by tests/test_util_treesitter.lua.
+    [ -z "$(get_files 'lua/' 'tests/' 'scripts/' 'lsp/' 'queries/' 'init.lua')" ] \
+        && return
 
     cmd_exist nvim || return 0
 
