@@ -28,6 +28,43 @@
 ---@class cgxx.test.helpers
 local M = {}
 
+--- `MiniTest.expect.equality` with a label attached.
+---
+--- `expect.equality` takes no message, so every case that asserts the same
+--- thing about many items has to smuggle the item's name into the
+--- comparison, ie. `eq({ name, got }, { name, want })`. It reads oddly, it
+--- doubles every literal, and a failure describes a two-element table
+--- rather than the thing that was wrong.
+---
+--- `MiniTest.new_expectation` is what the framework offers instead: the
+--- predicate decides, and `fail_context` writes the message. Existing
+--- padded call sites are not wrong, and are worth migrating when they are
+--- next touched rather than in a sweep of their own.
+---@type fun(label: string, left: any, right: any)
+M.labelled_equality = require("mini.test") --[[@as mini.test]]
+    .new_expectation(
+        "labelled equality",
+        ---@param _label string
+        ---@param left   any
+        ---@param right  any
+        ---@return boolean equal
+        function(_label, left, right)
+            return vim.deep_equal(left, right)
+        end,
+        ---@param label string
+        ---@param left  any
+        ---@param right any
+        ---@return string context
+        function(label, left, right)
+            return string.format(
+                "%s\nLeft:  %s\nRight: %s",
+                label,
+                vim.inspect(left),
+                vim.inspect(right)
+            )
+        end
+    )
+
 --- Runs git in dir and returns its trimmed stdout.
 ---
 --- A fixture command that fails is a broken test rather than a result to

@@ -21,6 +21,10 @@ local eq = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
+---@type cgxx.test.helpers
+local helpers = dofile("tests/helpers.lua")
+local eq_at   = helpers.labelled_equality
+
 --- The augroup each delegated module registers into, named so that a
 --- module dropped from `M.setup` fails here rather than in a session.
 ---
@@ -82,7 +86,11 @@ describe("autocmd.setup", function()
     it("registers an autocmd for every module it delegates to", function()
         for module, group in pairs(delegated) do
             local ok, autocmds = pcall(registered, group)
-            eq({ module, ok and #autocmds > 0 }, { module, true })
+            eq_at(
+                module .. " registered into " .. group,
+                ok and #autocmds > 0,
+                true
+            )
         end
     end)
 
