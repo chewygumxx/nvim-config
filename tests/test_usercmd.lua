@@ -90,14 +90,46 @@ describe("usercmd.setup", function()
         end
     end)
 
+    --- The description `nvim_get_commands` reports for one command.
+    ---
+    --- Asked of `desc` first and `definition` second, because the two
+    --- releases this suite runs against disagree about where a Lua-backed
+    --- command's description lives. 0.12 reports it as `definition` and
+    --- leaves `desc` unset; 0.13-dev leaves `definition` empty and added a
+    --- `desc` field for it. The command is described either way, so this
+    --- asks both rather than pinning the release that happens to be current
+    --- (the nightly canary is what found it).
+    ---@param info vim.api.keyset.command_info
+    ---@return string described
+    local description = function(info)
+        -- Indexed through a loose local: `desc` is not declared on 0.12's
+        -- `command_info`, so naming it directly is an `undefined-field`
+        -- there, which is what the repo-wide LuaLS check would report
+        ---@type table<string, any>
+        local fields = info
+
+        ---@type string?
+        local desc = fields.desc
+        if desc and desc ~= "" then
+            return desc
+        end
+        return info.definition
+    end
+
     it("describes every command", function()
         -- The descriptions are what `:Telescope commands` and which-key
         -- show, so an empty one is a command nobody can discover
+        ---@type string[]
+        local undescribed = {}
         for name in pairs(expected) do
             local info = assert(commands[name], name .. " is not registered")
-            eq({ name, type(info.definition) }, { name, "string" })
-            eq({ name, #info.definition > 0 }, { name, true })
+            if #description(info) == 0 then
+                table.insert(undescribed, name)
+            end
         end
+
+        table.sort(undescribed)
+        eq(undescribed, {})
     end)
 
     it("abbreviates the pager-awkward Vim commands", function()
