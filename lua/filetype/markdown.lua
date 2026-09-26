@@ -48,7 +48,8 @@ for hlgroup, defmap in pairs(hlgroup_defs) do
     M.hlgroup_defs[hlgroup .. ".markdown_inline"] = defmap
 end
 
---- Attaches the buffer-local table keymaps from `util.markdown_table`.
+--- Attaches the buffer-local keymaps from `util.markdown_table` and
+--- `util.markdown_list`.
 ---
 --- `lua/filetype/init.lua` dispatches exactly one module per filetype, so
 --- the compound Markdown filetypes cannot inherit this by being Markdown:
@@ -58,6 +59,7 @@ end
 ---@return nil
 M.setup = function(opts)
     require("util.markdown_table").keymap(opts.buf)
+    require("util.markdown_list").keymap(opts.buf)
 end
 
 return M
