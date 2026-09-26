@@ -21,6 +21,11 @@
 -- `config`/`init`/`opts` functions are deliberately not called; they run
 -- against a loaded plugin, which is not something this suite has.
 --
+-- The per-file assertions are generated as one case each rather than
+-- written as a loop inside one case. A loop stops at its first failing
+-- item, so a directory with two broken specs reported one of them per run,
+-- and forty-odd files collapsed into a single dot in the reporter.
+--
 
 local eq = require("mini.test") --[[@as mini.test]]
     .expect
@@ -45,26 +50,27 @@ describe("spec", function()
     local specs = vim.fn.globpath("lua/spec", "*.lua", true, true)
 
     it("finds the plugin specs", function()
-        -- Both loops below are vacuously true over an empty list, so the
-        -- glob itself has to be asserted before they mean anything
+        -- The generated cases below cannot fail over an empty list, since
+        -- an empty list generates none of them, so the glob itself has to
+        -- be asserted before they mean anything
         eq(#specs > 0, true)
     end)
 
-    it("evaluates every spec to a table", function()
-        for _, path in ipairs(specs) do
+    for _, path in ipairs(specs) do
+        local file = vim.fn.fnamemodify(path, ":t")
+
+        it("evaluates " .. file .. " to a table", function()
             ---@type boolean, any
             local ok, spec = pcall(evaluated, path)
             eq({ path, ok, type(spec) }, { path, true, "table" })
-        end
-    end)
+        end)
 
-    it("names the plugin its filename claims", function()
-        -- The repo convention: one file per plugin, named after the
-        -- plugin's own repository. Matched loosely because the tails
-        -- legitimately differ (`kdl.lua` -> `imsnif/kdl.vim`,
-        -- `starry.lua` -> `ray-x/starry.nvim`) and because a few specs
-        -- identify themselves with `url` rather than a short name.
-        for _, path in ipairs(specs) do
+        it("names the plugin " .. file .. " claims", function()
+            -- The repo convention: one file per plugin, named after the
+            -- plugin's own repository. Matched loosely because the tails
+            -- legitimately differ (`kdl.lua` -> `imsnif/kdl.vim`,
+            -- `starry.lua` -> `ray-x/starry.nvim`) and because a few specs
+            -- identify themselves with `url` rather than a short name.
             local spec = evaluated(path)
             local name = vim.fn.fnamemodify(path, ":t:r")
                 :lower()
@@ -84,8 +90,8 @@ describe("spec", function()
             end
 
             eq({ path, id:find(name, 1, true) ~= nil }, { path, true })
-        end
-    end)
+        end)
+    end
 end)
 
 describe("plugin.import", function()
