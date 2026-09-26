@@ -252,6 +252,33 @@ describe("lsp", function()
         eq(#configs > 0, true)
     end)
 
+    it("configures exactly the servers mason installs", function()
+        -- Two lists that have to agree and nothing made them: a server in
+        -- `ensure_installed` with no `lsp/<name>.lua` is installed and
+        -- never configured, and a configuration with no entry there is
+        -- enabled only where the binary happens to exist already, since
+        -- `automatic_enable` enables what mason-lspconfig knows about. The
+        -- same class of bug as the stale `condemn` slug above, and just as
+        -- quiet.
+        local spec = evaluated("lua/spec/mason-lspconfig.nvim.lua")
+
+        ---@type table<string, any>
+        local opts = spec.opts
+
+        ---@type string[]
+        local installed = opts.ensure_installed
+
+        ---@type string[]
+        local declared = {}
+        for _, path in ipairs(configs) do
+            table.insert(declared, vim.fn.fnamemodify(path, ":t:r"))
+        end
+
+        table.sort(installed)
+        table.sort(declared)
+        eq(installed, declared)
+    end)
+
     for _, path in ipairs(configs) do
         local file = vim.fn.fnamemodify(path, ":t")
 
