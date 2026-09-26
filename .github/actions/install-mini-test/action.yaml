@@ -1,0 +1,52 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/.github/actions/install-mini-test/action.yaml
+#
+#
+
+name: Install mini.test
+description: Clone the mini.test tag this config pins, where Neovim expects it.
+
+#
+# The tag is read out of `lua/spec/mini.test.lua` rather than named here.
+# That spec is what installs mini.test on a real machine, so a version named
+# in this workflow as well is a second pin that has to agree with the first:
+# unpinned locally against pinned in CI, `.husky/pre-commit` and CI can run
+# the suite under different versions of the framework and disagree about the
+# result.
+#
+# The install path is asked of Neovim rather than assumed, since
+# `stdpath("data")` moves with `XDG_DATA_HOME`; `.husky/pre-commit` looks it
+# up the same way. Requires Neovim on PATH, ie. `setup-neovim` first.
+#
+
+runs:
+    using: composite
+
+    steps:
+        - name: Resolve the pinned tag
+          id: pin
+          shell: bash
+          run: |
+              tag=$(nvim --headless --clean \
+                  -c 'lua io.stdout:write(dofile("lua/spec/mini.test.lua").tag or "")' \
+                  -c 'qa!' 2>/dev/null)
+              if [ -z "$tag" ]; then
+                  echo '::error::lua/spec/mini.test.lua names no tag to install'
+                  exit 1
+              fi
+              echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+        - name: Clone mini.test
+          shell: bash
+          run: |
+              data_dir=$(nvim --headless --clean \
+                  -c 'lua io.stdout:write(vim.fn.stdpath("data"))' \
+                  -c 'qa!' 2>/dev/null)
+              git clone --depth 1 --branch '${{ steps.pin.outputs.tag }}' \
+                  https://github.com/nvim-mini/mini.test \
+                  "$data_dir/lazy/mini.test"

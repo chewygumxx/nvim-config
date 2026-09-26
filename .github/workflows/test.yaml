@@ -38,23 +38,8 @@ jobs:
             - name: Setup Neovim
               uses: ./.github/actions/setup-neovim
 
-            # Pinned to a tag rather than tracking `main`: unpinned, an
-            # upstream commit breaks pull requests that changed nothing
-            # here, and the failure looks like the change's fault. The
-            # install path is asked of Neovim rather than assumed, since
-            # `stdpath("data")` moves with `XDG_DATA_HOME`;
-            # `.husky/pre-commit` looks it up the same way.
             - name: Install mini.test
-              env:
-                  # https://github.com/nvim-mini/mini.test/tags
-                  MINI_TEST_VERSION: "v0.18.0"
-              run: |
-                  data_dir=$(nvim --headless --clean \
-                      -c 'lua io.stdout:write(vim.fn.stdpath("data"))' \
-                      -c 'qa!' 2>/dev/null)
-                  git clone --depth 1 --branch "$MINI_TEST_VERSION" \
-                      https://github.com/nvim-mini/mini.test \
-                      "$data_dir/lazy/mini.test"
+              uses: ./.github/actions/install-mini-test
 
             - name: Run tests
               run: nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua

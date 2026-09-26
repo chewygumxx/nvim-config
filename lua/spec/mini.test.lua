@@ -15,6 +15,14 @@
 local M = {
     "nvim-mini/mini.test",
     lazy = true, -- See M.cmd
+
+    -- Pinned, and pinned *here*, because this is the one copy of mini.test
+    -- both entry points share. `.github/workflows/test.yaml` reads this tag
+    -- out of this file rather than naming its own: unpinned locally and
+    -- pinned in CI, the pre-commit gate and CI could disagree about the
+    -- test framework itself, which this machine already did (v0.18.0-5
+    -- against CI's v0.18.0). https://github.com/nvim-mini/mini.test/tags
+    tag = "v0.18.0",
 }
 
 -- The configuration itself lives in `lua/util/minitest.lua`, not in an
