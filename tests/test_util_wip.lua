@@ -447,3 +447,152 @@ describe("util.wip.command", function()
         eq(notified[1]:match("not a tracked file") ~= nil, true)
     end)
 end)
+
+describe("util.wip.autocmd", function()
+    -- The wiring `test_autocmd.lua` can only assert the existence of: that
+    -- file proves the "cgxx.wip" augroup is non-empty, not that a keystroke
+    -- leads to a snapshot. Everything below drives the real events.
+    local branch = "wip-acmd-test"
+    local ref    = "refs/wip/" .. branch
+
+    ---@type string, string, integer
+    local dir, file, buf
+
+    ---@type fun(msg: string, level?: integer, opts?: table)
+    local notify
+
+    ---@type integer
+    local debounce
+
+    before_each(function()
+        notify    = quieten()
+        dir, file = helpers.repo({
+            branch   = branch,
+            remote   = false,
+            name     = "tracked.lua",
+            contents = { "committed" },
+            commit   = "i",
+        })
+
+        -- Shortened from 2000 ms, which is a sensible interval for a human
+        -- typing and an absurd one for a test to sit through. The interval
+        -- is a module field precisely so it can be reached; nothing else
+        -- had ever done so, which is why the debounced path was untested
+        debounce     = wip.debounce
+        wip.debounce = 20
+
+        vim.cmd.edit(vim.fn.fnameescape(file))
+        buf = vim.api.nvim_get_current_buf()
+        wip.autocmd()
+    end)
+
+    after_each(function()
+        -- Cleared rather than deleted, for the reason `test_autocmd.lua`
+        -- gives: emptying the group is what stops these autocmds firing
+        -- during every later test file
+        vim.api.nvim_create_augroup("cgxx.wip", { clear = true })
+        wip.debounce = debounce
+        vim.notify   = notify
+        vim.api.nvim_buf_delete(buf, { force = true })
+        vim.fn.delete(dir, "rf")
+    end)
+
+    --- Waits for ref to come into existence, returning its tip.
+    ---@return string tip
+    local snapshotted = function()
+        ---@type string
+        local at = ""
+        assert(
+            vim.wait(10000, function()
+                at = helpers.tip(dir, ref)
+                return at ~= ""
+            end, 20
+            ),
+            ref .. " was never written"
+        )
+        return at
+    end
+
+    --- The number of commits reachable from ref, fixture commit included.
+    ---@return string count
+    local commits = function()
+        return helpers.git(dir, "rev-list", "--count", ref)
+    end
+
+    it("snapshots a change once the typing stops", function()
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "typed" })
+        vim.api.nvim_exec_autocmds("TextChanged", { buffer = buf })
+
+        eq(snapshotted() ~= "", true)
+        eq(commits(), "2")
+    end)
+
+    it("coalesces a burst of changes into one snapshot", function()
+        -- The whole point of the debounce: each event rearms the timer, so
+        -- a burst costs one snapshot rather than one per keystroke
+        for i = 1, 5 do
+            vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "typed " .. i })
+            vim.api.nvim_exec_autocmds("TextChangedI", { buffer = buf })
+        end
+
+        eq(snapshotted() ~= "", true)
+        eq(commits(), "2")
+    end)
+
+    it("snapshots immediately when the buffer is written", function()
+        -- Not through `nvim_exec_autocmds`: a real `:write` is what a
+        -- session does, and it fires `BufWritePost` itself
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "saved" })
+        vim.api.nvim_buf_call(buf, function()
+            vim.cmd("silent write")
+        end)
+
+        eq(snapshotted() ~= "", true)
+    end)
+
+    it("snapshots when focus is lost", function()
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "unfocused" })
+        vim.api.nvim_exec_autocmds("FocusLost", { buffer = buf })
+
+        eq(snapshotted() ~= "", true)
+    end)
+
+    it("leaves a disabled buffer alone", function()
+        -- Proven by a fence rather than by waiting out an absence: the
+        -- second event is eligible and must produce a snapshot, and the
+        -- commit count then says the first produced none. `FocusLost` is
+        -- used for both because it snapshots synchronously, so the two
+        -- cannot be coalesced by the debounce the way `TextChanged` would
+        vim.b[buf].cgxx_wip = false
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "ignored" })
+        vim.api.nvim_exec_autocmds("FocusLost", { buffer = buf })
+
+        vim.b[buf].cgxx_wip = true
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "recorded" })
+        vim.api.nvim_exec_autocmds("FocusLost", { buffer = buf })
+
+        eq(snapshotted() ~= "", true)
+        eq(commits(), "2")
+    end)
+
+    it("starts snapshotting a newly tracked file", function()
+        -- `cgxx_wip_location` is cached per buffer, ineligible answers
+        -- included, so a file that was untracked when it was first opened
+        -- would stay ineligible for the life of the buffer. Clearing that
+        -- cache on `BufWritePost` is what lets `git add` take effect
+        local fresh = dir .. "/fresh.lua"
+        vim.fn.writefile({ "new" }, fresh)
+        vim.cmd.edit(vim.fn.fnameescape(fresh))
+        local newbuf = vim.api.nvim_get_current_buf()
+
+        wip.snapshot(newbuf)
+        eq(vim.b[newbuf].cgxx_wip_location, false)
+
+        helpers.git(dir, "add", "fresh.lua")
+        vim.api.nvim_exec_autocmds("BufWritePost", { buffer = newbuf })
+
+        eq(snapshotted() ~= "", true)
+        eq(vim.b[newbuf].cgxx_wip_location ~= false, true)
+        vim.api.nvim_buf_delete(newbuf, { force = true })
+    end)
+end)
