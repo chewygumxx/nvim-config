@@ -75,7 +75,7 @@ scripts/                 Headless entry points: test runner, typecheck sweeps
 docs/                    Generated LuaCATS reference; never edited by hand
 doc/                     Generated :help and its tags; never edited by hand
 spell/                   Compiled spell file
-.claude/                 Agent tooling: hooks, skills, commands, long-form reference
+.claude/                 Agent tooling: hooks, skills, rules, long-form reference
 ```
 
 `init.lua` loads those modules in a deliberate order, documented inline there:
