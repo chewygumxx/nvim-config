@@ -9,7 +9,7 @@
 #
 
 name: Install mini.test
-description: Clone the mini.test tag this config pins, where Neovim expects it.
+description: Fetch the commit the mini.test tag this config pins resolves to.
 
 #
 # The tag is read out of `lua/spec/mini.test.lua` rather than named here.
@@ -18,6 +18,26 @@ description: Clone the mini.test tag this config pins, where Neovim expects it.
 # unpinned locally against pinned in CI, `.husky/pre-commit` and CI can run
 # the suite under different versions of the framework and disagree about the
 # result.
+#
+# The tag is resolved to a commit and that commit is fetched by sha, the way
+# `install-lazy` does, rather than `git clone --depth 1 --branch <tag>`.
+# `v0.18.0` is an *annotated* tag, so `refs/tags/v0.18.0` names a tag object
+# (`6f129de`) and not the commit (`35c67cb`) it points at, and a shallow
+# clone of that ref makes git report `warning: refs/tags/v0.18.0 ... is not
+# a commit!` on every run. Nothing was broken by it, the checkout was the
+# right commit and the working tree is byte-identical either way, but the
+# warning read like a real failure in a job whose whole purpose is to make
+# failures visible.
+#
+# Resolving first also closes a gap: `^{}` dereferences an annotated tag,
+# and a tag that does not exist upstream at all now fails here with a
+# message naming it, rather than reaching git as a bad `--branch`.
+# Lightweight tags have no `^{}` entry, hence the fallback.
+#
+# Nothing reads the installed copy's git metadata, which is why dropping
+# the tag ref costs nothing: the only consumer is the runtimepath entry
+# `scripts/minimal_init.lua` adds. Checked by running the suite against a
+# copy with no tags at all.
 #
 # The install path is asked of Neovim rather than assumed, since
 # `stdpath("data")` moves with `XDG_DATA_HOME`; `.husky/pre-commit` looks it
@@ -32,6 +52,9 @@ runs:
           id: pin
           shell: bash
           run: |
+              url=https://github.com/nvim-mini/mini.test
+              echo "url=$url" >> "$GITHUB_OUTPUT"
+
               tag=$(nvim --headless --clean \
                   -c 'lua io.stdout:write(dofile("lua/spec/mini.test.lua").tag or "")' \
                   -c 'qa!' 2>/dev/null)
@@ -41,12 +64,37 @@ runs:
               fi
               echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-        - name: Clone mini.test
-          shell: bash
-          run: |
+              # `^{}` dereferences an annotated tag to the commit it points
+              # at; a lightweight tag has no such entry, so fall back to the
+              # ref itself
+              commit=$(git ls-remote "$url" "refs/tags/$tag^{}" | cut -f1)
+              if [ -z "$commit" ]; then
+                  commit=$(git ls-remote "$url" "refs/tags/$tag" | cut -f1)
+              fi
+              if [ -z "$commit" ]; then
+                  echo "::error::$url has no tag $tag"
+                  exit 1
+              fi
+              echo "commit=$commit" >> "$GITHUB_OUTPUT"
+
               data_dir=$(nvim --headless --clean \
                   -c 'lua io.stdout:write(vim.fn.stdpath("data"))' \
                   -c 'qa!' 2>/dev/null)
-              git clone --depth 1 --branch '${{ steps.pin.outputs.tag }}' \
-                  https://github.com/nvim-mini/mini.test \
-                  "$data_dir/lazy/mini.test"
+              echo "dir=$data_dir/lazy/mini.test" >> "$GITHUB_OUTPUT"
+
+        - name: Clone mini.test
+          shell: bash
+          run: |
+              dir='${{ steps.pin.outputs.dir }}'
+              mkdir -p "$dir"
+              git -C "$dir" init -q
+              git -C "$dir" remote add origin '${{ steps.pin.outputs.url }}'
+              git -C "$dir" fetch -q --depth 1 origin \
+                  '${{ steps.pin.outputs.commit }}'
+              git -C "$dir" checkout -q FETCH_HEAD
+
+        - name: Report the commit installed
+          shell: bash
+          run: |
+              echo 'tag ${{ steps.pin.outputs.tag }}'
+              git -C '${{ steps.pin.outputs.dir }}' log --oneline -1

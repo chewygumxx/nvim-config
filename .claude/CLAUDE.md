@@ -682,14 +682,24 @@ explicit `refs/wip/*` refspec.
 - `.github/actions/`: three composite actions the workflows share.
   `setup-neovim` installs, caches and PATHs the release `mise.toml` pins,
   reading it through `tool_version.py`; pass `version: nightly` for the canary,
-  which is deliberately never cached. `install-mini-test` clones the tag
-  `lua/spec/mini.test.lua` names, asking Neovim for `stdpath("data")` rather
-  than assuming it. `install-lazy` clones the lazy.nvim commit `lazy-lock.json`
-  pins, fetching that sha directly rather than cloning a branch, and caches it
-  on the commit. `.github/workflows/test.yaml` runs the suite from one matrix,
-  once on the pin and once on nightly with `continue-on-error`, so an upstream
-  change is heard about before it reaches a release and is not reported as the
-  fault of whichever pull request ran next.
+  which is deliberately never cached. `install-mini-test` reads the tag
+  `lua/spec/mini.test.lua` names, resolves it to a commit with
+  `git ls-remote <url> "refs/tags/<tag>^{}"` and fetches that sha, asking Neovim
+  for `stdpath("data")` rather than assuming it. It resolves rather than cloning
+  the ref because these tags are annotated, so `refs/tags/v0.18.0` names a tag
+  object (`6f129de`) and not the commit (`35c67cb`) it points at, and
+  `git clone --depth 1 --branch` of such a ref makes git print
+  `warning: ... is not a commit!` on every run: harmless, since the checkout and
+  working tree were correct either way, but indistinguishable at a glance from a
+  real failure. Resolving first also makes a tag absent upstream fail with a
+  message naming it. Nothing reads the installed copy's git metadata, so the
+  absent tag ref costs nothing, which was checked by running the suite against a
+  copy carrying no tags. `install-lazy` clones the lazy.nvim commit
+  `lazy-lock.json` pins, fetching that sha directly rather than cloning a
+  branch, and caches it on the commit. `.github/workflows/test.yaml` runs the
+  suite from one matrix, once on the pin and once on nightly with
+  `continue-on-error`, so an upstream change is heard about before it reaches a
+  release and is not reported as the fault of whichever pull request ran next.
 
 ## Conventions
 
