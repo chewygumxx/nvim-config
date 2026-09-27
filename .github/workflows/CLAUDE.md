@@ -21,5 +21,5 @@ tags:
 
 # CLAUDE.md
 
-Ensure any that any workflow within this repository that utilises Node.js employ
+Ensure that any workflow within this repository that utilises Node.js employ
 version 24 or later.
