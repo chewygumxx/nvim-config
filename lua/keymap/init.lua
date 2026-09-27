@@ -130,6 +130,40 @@ M.reload_foldmethod = function(lhs, desc)
     )
 end
 
+--- Maps down/up to scroll `count` lines rather than half a window.
+---
+--- The count is carried on the keys rather than set as an option, because
+--- 'scroll' is window local and Neovim recomputes it to half the window
+--- height on every resize; `lua/option/view.lua` says the same from the
+--- other side. A count given to CTRL-D or CTRL-U sets 'scroll' to it, so
+--- re-issuing it on each press is what makes the distance stick.
+---
+--- Mode is normal and visual only, never insert: `lua/spec/mkdnflow.lua`
+--- binds insert-mode "<C-d>" to `MkdnDedentListItem`.
+---
+--- `expr` rather than a plain right-hand side, because Vim prefixes a
+--- typed count onto the result: "5<C-d>" would turn "10<C-d>" into
+--- "105<C-d>". Returning the count only when `vim.v.count` is zero leaves
+--- an explicit one working.
+---@param count? integer Default: 5
+---@param down?  string  Default: "<C-d>"
+---@param up?    string  Default: "<C-u>"
+---@return nil
+M.scroll_distance = function(count, down, up)
+    count = count or 5
+    down  = down or "<C-d>"
+    up    = up or "<C-u>"
+
+    vim.keymap.set({ "n", "x" }, down, function()
+        return vim.v.count > 0 and "<C-d>" or count .. "<C-d>"
+    end, { expr = true, desc = "Scroll down " .. count .. " lines" }
+    )
+    vim.keymap.set({ "n", "x" }, up, function()
+        return vim.v.count > 0 and "<C-u>" or count .. "<C-u>"
+    end, { expr = true, desc = "Scroll up " .. count .. " lines" }
+    )
+end
+
 --- Maps indent/dedent in visual mode to reselect afterward (">gv"/"<gv"),
 --- instead of exiting visual mode.
 ---@param indent? string Default: ">"
@@ -189,6 +223,9 @@ M.setup = function()
     M.format_buffer("<leader>tw")
     M.inspect("<leader>in")
     M.reload_foldmethod("<leader>rf")
+
+    -- Replaces a native keymap, but the distance is a choice like the above
+    M.scroll_distance(5)
 
     -- Without arguments, replace native keymaps
     M.visual_indent_persist()

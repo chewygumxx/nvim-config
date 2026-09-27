@@ -57,6 +57,13 @@ local mappings = {
         desc = ":Inspect highlight groups under cursor",
     },
     { mode = "n", lhs = "<leader>rf", desc = "Reload foldmethod" },
+    -- Both modes per key, since `keymap.scroll_distance` maps
+    -- `{ "n", "x" }`. The "5" is interpolated from its `count` argument, so
+    -- a different one passed in `M.setup()` has to be reflected here
+    { mode = "n", lhs = "<C-d>", desc = "Scroll down 5 lines" },
+    { mode = "x", lhs = "<C-d>", desc = "Scroll down 5 lines" },
+    { mode = "n", lhs = "<C-u>", desc = "Scroll up 5 lines" },
+    { mode = "x", lhs = "<C-u>", desc = "Scroll up 5 lines" },
     {
         mode = "x",
         lhs  = ">",
