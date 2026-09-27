@@ -40,6 +40,11 @@ planting a file in each and running them; neither said anything. It rules out a
 the do-not-edit warning is rendered _into_ the help text and enforced by
 `.claude/hooks/block-generated.sh` rather than left beside the output.
 
+It is also stated in `.claude/rules/doc.md` and `.claude/rules/docs.md`, which
+sit outside both trees and so survive the generator. Each is scoped by a `paths`
+glob and loads on a read of a file in its own tree, which is the half the hook
+cannot reach: the hook refuses a write and says nothing until one is attempted.
+
 `doc/` is the more dangerous of the two through Claude Code, not the less. The
 `.md` reflow hook does not touch it, since it holds `.txt`, so a hand edit there
 survives the write and is destroyed by the next generator run instead of being

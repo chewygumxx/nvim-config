@@ -18,6 +18,13 @@
 # which is why this hook exists and why neither directory can carry a
 # `CLAUDE.md` of its own.
 #
+# The warning itself lives in `.claude/rules/doc.md` and
+# `.claude/rules/docs.md`, outside the trees and scoped by `paths`. That
+# is the advisory half and this is the mechanical one, and the division
+# is not arbitrary: a rule loads when Claude reads a matching file, so it
+# says nothing at all before a Write to a path never read. That case is
+# what this hook is for, so neither covers the other.
+#
 # The block is exit 2 with stderr rather than a `permissionDecision` of
 # `deny`, because the two route identically and this way the reason is
 # one `printf` rather than assembled JSON.

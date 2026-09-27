@@ -65,14 +65,22 @@ for prose and would corrupt `docs/`, while `doc/` is exempt by holding `.txt`,
 making a hand-edit there survive the write and die at the next generator run.
 Regenerate both; never type into either.
 
+The note itself lives outside the tree it describes, which is the one placement
+the generators cannot reach: `.claude/rules/doc.md` and `.claude/rules/docs.md`,
+each scoped by a `paths` glob so it loads only when a file in its own tree is
+read. It does not retire `.claude/hooks/block-generated.sh`, because a rule
+fires on a **read** of a matching file while the hook catches a write to a path
+never read.
+
 `.claude/` holds more than this file. `skills/` carries the per-subsystem
 references that load only when that subsystem is touched, which is why this file
 is a fraction of the length it once was. `commands/` holds `/gate-battery`,
 `/regen` and `/fresh`, `agents/gate-runner.md` runs the gate battery without its
-output reaching the caller, and `hooks/` makes five of the rules here mechanical
-rather than advisory. **Source `hooks/lib/tools.sh` before running any gate by
-hand**, since mise is not activated in a Claude Code shell and half the gate
-binaries otherwise resolve to something other than the pin.
+output reaching the caller, `rules/` holds the two path-scoped warnings above,
+and `hooks/` makes five of the rules here mechanical rather than advisory.
+**Source `hooks/lib/tools.sh` before running any gate by hand**, since mise is
+not activated in a Claude Code shell and half the gate binaries otherwise
+resolve to something other than the pin.
 
 The **`claude-assets` skill** holds the rest, and is what to read before adding
 or changing anything under `.claude/`: how each kind of asset loads, the one

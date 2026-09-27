@@ -15,8 +15,9 @@ title: Claude Code assets
 name: claude-assets
 description: >-
   Add or change anything under .claude/, ie. a skill, a slash command, a
-  subagent, a hook or settings.json. Use when a skill does not load, when a
-  slash command is unreachable, when a subagent is not selectable, when choosing
+  subagent, a path-scoped rule, a hook or settings.json. Use when a skill does
+  not load, when a slash command is unreachable, when a subagent is not
+  selectable, when a rule loads in every session or in none, when choosing
   between a hook and a permissions rule, or when tests/test_claude_assets.lua
   fails.
 tags:
@@ -26,17 +27,18 @@ tags:
 
 # Claude Code assets
 
-`.claude/` holds four kinds of asset beside `CLAUDE.md`, and they load on
+`.claude/` holds five kinds of asset beside `CLAUDE.md`, and they load on
 different terms. `skills/` carries the per-subsystem references that load only
 when that subsystem is touched, which is the whole reason `CLAUDE.md` is a
 fraction of the length it once was: the reasons did not go away, they stopped
 being loaded into every session regardless of relevance. `commands/` holds
 `/gate-battery`, `/regen` and `/fresh`. `agents/gate-runner.md` runs the gate
-battery without its output reaching the caller. `hooks/` is what makes five
-rules mechanical rather than advisory: refusing a write into a generated tree,
-refusing a commit while a gate binary is absent, refusing a whole-file read of
-the wordlists and the compiled spell file, linting Lua at write time, and
-reporting that the generated help has gone stale.
+battery without its output reaching the caller. `rules/` holds the two warnings
+over the generated trees, loaded by path rather than by prompt. `hooks/` is what
+makes five rules mechanical rather than advisory: refusing a write into a
+generated tree, refusing a commit while a gate binary is absent, refusing a
+whole-file read of the wordlists and the compiled spell file, linting Lua at
+write time, and reporting that the generated help has gone stale.
 
 **A newly added agent is not selectable as a `subagent_type` until the session
 restarts**, so the session that writes one cannot use it. A skill is not like
@@ -63,6 +65,42 @@ independent groups, so a shadowed command passed every case. Agents are a
 separate namespace, chosen by `subagent_type` rather than by slash, so
 `gate-runner` can sit beside both without shadowing either.
 
+## A rule is scoped by `paths` and nothing else
+
+`rules/` is the one asset kind that loads off a file path rather than off a
+prompt or a name. Every `.md` file under it is discovered recursively, so
+`.claude/rules/doc.md` is found and the same name without its extension is not
+found at all.
+
+**`paths` is the only field Claude Code reads from a rule, and every other field
+is ignored without an error.** That is what makes the singular `path:` the trap
+worth knowing: it does not fail, it produces a rule with no `paths` at all, and
+a rule with no `paths` loads at launch with the same priority as
+`.claude/CLAUDE.md`. The typo therefore presents as the feature working, while
+quietly doing the opposite of the intent. `tests/test_claude_assets.lua` asserts
+against it in both directions, since a rule that lost its `paths` in an edit
+looks identical from outside. If the YAML between the markers does not parse at
+all, the frontmatter is ignored and the rule loads unscoped by the same route;
+`claude --debug` is where that parse error is reported.
+
+The other half worth knowing is when a scoped rule fires: **on a read of a
+matching file, not on every tool use.** That is what bounds a rule against a
+hook rather than making one redundant. `.claude/rules/doc.md` and
+`.claude/rules/docs.md` say why the generated trees are never hand-edited, and
+`.claude/hooks/block-generated.sh` still refuses the write, because a Write to a
+path nothing read first reaches the hook and never reaches the rule.
+
+Both directions were established by probe rather than reasoned about, since only
+the forward one is easy to see and an unscoped rule presents as a working one. A
+`claude -p` session told to read `doc/tags` and quote whatever it had been told
+about `doc/` returned `.claude/rules/doc.md` verbatim and without its
+frontmatter; the same question asked of a session that read nothing returned
+only this repository's `CLAUDE.md` prose, with no wording from either rule in
+it.
+
+Claude Code strips the whole frontmatter before loading a rule into context, so
+the repository's document head costs nothing there.
+
 ## Frontmatter
 
 A skill's `description` is the only thing deciding whether it loads, so write it
@@ -79,9 +117,11 @@ colon-space into it, which is the quietest possible failure.
 
 A skill declares `name:` matching its directory and an agent declares `name:`
 matching its filename stem, because that is what each loader keys on. A command
-declares no name at all: its filename is the slash command. Every asset also
-carries the repository's Markdown document head, ie. the `__cgxx:` block,
-`ctime`, `title` and `tags`.
+declares no name at all: its filename is the slash command. A rule declares
+neither, and no `description` either, which is why the description cases skip
+`rules/` rather than having been forgotten there. Every asset also carries the
+repository's Markdown document head, ie. the `__cgxx:` block, `ctime`, `title`
+and `tags`.
 
 ## Prefer a hook to a `permissions.deny` rule
 
@@ -111,6 +151,7 @@ toolchain beside the gates, so it begins installing 22 tools before it answers.
 
 `tests/test_claude_assets.lua` checks that every rooted path the prose names
 still exists, the frontmatter rules above, the command-versus-skill namespace,
+that every rule scopes itself with `paths` and none with the singular `path`,
 that every skill is pointed at from `.claude/CLAUDE.md` by the phrase
 `` `<name>` skill `` and that no such phrase names a skill that is gone. It
 cannot check that any of the prose is _true_. Its `not_a_path` registry excludes
