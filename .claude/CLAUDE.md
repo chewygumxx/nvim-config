@@ -78,60 +78,20 @@ exempt from the hook, holding `.txt` rather than `.md`, which makes hand-editing
 it _easier_ rather than safer: the edit survives the write and is destroyed by
 the next generator run.
 
-`.claude/` holds more than this file. `skills/` carries six per-subsystem
+`.claude/` holds more than this file. `skills/` carries the per-subsystem
 references that load only when that subsystem is touched, which is why this file
-is roughly half the length it once was: the reasons did not go away, they
-stopped being loaded into every session regardless of relevance. `commands/`
-holds `/gate-battery`, `/regen` and `/fresh`; `agents/gate-runner.md` runs the
-gate battery without its output reaching the caller, though note a newly added
-agent is not selectable as a `subagent_type` until the session restarts, so the
-one that creates it cannot use it; and `hooks/` makes five of the rules here
-mechanical rather than advisory, refusing a write into a generated tree,
-refusing a commit while a gate binary is absent, refusing a whole-file read of
-the wordlists and the compiled spell file, linting Lua at write time, and
-reporting that the generated help has gone stale.
+is a fraction of the length it once was. `commands/` holds `/gate-battery`,
+`/regen` and `/fresh`, `agents/gate-runner.md` runs the gate battery without its
+output reaching the caller, and `hooks/` makes five of the rules here mechanical
+rather than advisory. **Source `hooks/lib/tools.sh` before running any gate by
+hand**, since mise is not activated in a Claude Code shell and half the gate
+binaries otherwise resolve to something other than the pin.
 
-A command and a skill share one name namespace, which is why the first of those
-is `/gate-battery` and not the `/gates` it would otherwise read as. Claude Code
-lists a command by its filename stem beside a skill by its directory name, so a
-collision leaves exactly one of the pair reachable and says nothing at all about
-the other. `/gates` lost to the `gates` skill from the day it was written, and
-sat unreachable and unread for as long as this file went on describing it as the
-way to run the battery. That was established by probe rather than reasoned
-about: only one `gates` entry ever reached a session listing and it carried the
-skill's description, invoking the name returned the skill's body, and renaming
-the command made both appear at once within the same session.
-`tests/test_claude_assets.lua` now asserts the two sets of names are disjoint,
-which nothing did before: it had always checked skills, commands and agents as
-three independent groups, so a shadowed command passed every case. Agents are a
-separate namespace, chosen by `subagent_type` rather than by slash, so
-`gate-runner` can sit beside both without shadowing either.
-
-That fifth one is a hook rather than a `permissions.deny` rule for a reason
-worth knowing before reaching for `deny` again. A `Read(...)` rule is not scoped
-to the Read tool: Claude Code recognises file-naming commands inside Bash and
-applies the rule to those too, so `Read(/words.txt)` also denies
-`head -3 words.txt`, `wc -l words.txt` and `ls -la words.txt`, and blocks Edit
-and Write on the path besides. That was established by adding the rule and
-running each command rather than reasoned about. A `PreToolUse` hook blocks just
-as hard, since exit 2 stops a call before permission rules are evaluated, but
-leaves Bash alone and can name the cheap route instead of merely refusing.
-
-`hooks/lib/tools.sh` is the one to know about first. mise is not activated in a
-Claude Code shell, so without its `PATH` prefix `ts_query_ls` is absent entirely
-and `.husky/pre-commit` skips the whole tree-sitter query gate in silence, while
-`luafmt` and the two `emmylua` binaries resolve to a cargo build rather than to
-the pin. Source it before running any gate by hand. Do not reach for `mise exec`
-instead: `mise.toml` pins the editor toolchain beside the gates, so it begins
-installing 22 tools before it answers.
-
-A skill's frontmatter `description` is the only thing deciding whether it loads,
-and each is written as a folded block scalar (`description: >-`) rather than a
-bare `description:`. The reflow hook rewraps a long description either way, but
-a bare key yields a plain multiline scalar, which is valid YAML that **cannot
-contain `": "`**; `>-` folds to the same single line and tolerates a colon
-anywhere. That was established by probe rather than reasoned about. `/fresh` is
-the end-of-session check that all of this is still true of the tree.
+The **`claude-assets` skill** holds the rest, and is what to read before adding
+or changing anything under `.claude/`: how each kind of asset loads, the one
+namespace a command and a skill share, the frontmatter rules
+`tests/test_claude_assets.lua` enforces, and why a `PreToolUse` hook is
+preferred to a `permissions.deny` rule.
 
 ## Commands
 
@@ -476,9 +436,9 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   `sync-repo-metadata` GitHub Action on push to `main`
   (`.github/workflows/sync-repo-metadata.yaml`) whenever this file changes.
 - `.github/`: the workflows, the three composite actions they share, and
-  `scripts/tool_version.py`, which is how a job reads a pin out of `mise.toml`
-  rather than restating it. `.github/CLAUDE.md` holds the rules, including the
-  two ways a job here can go green over a gate that never ran.
+  `.github/scripts/tool_version.py`, which is how a job reads a pin from
+  `mise.toml` rather than restating it. `.github/CLAUDE.md` holds the rules,
+  including the two ways a job here can go green over a gate that never ran.
 
 ## Conventions
 
