@@ -59,8 +59,11 @@ recollection is partial. Say so rather than implying coverage you do not have.
 1. **Did this session establish anything by probe that is not written down?** A
    behaviour confirmed by running something, rather than reasoned about, is
    exactly what these files are for. A reason goes in the skill that owns the
-   subsystem, or in `.claude/CLAUDE.md` if it bears on every edit. A fact goes
-   in the README or a doc comment.
+   subsystem, or in that directory's own `CLAUDE.md` when it is a rule for
+   anything written there, or in `.claude/CLAUDE.md` only when it bears on every
+   edit. Prefer the narrowest of the three that reaches the reader who needs it,
+   since the last is loaded into every session regardless of relevance. A fact
+   goes in the README or a doc comment.
 
 2. **Did this session contradict anything already written?** Prose that
    disagrees with the tree is the failure this whole arrangement exists to
