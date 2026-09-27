@@ -1,0 +1,228 @@
+# vim:set textwidth=78 tabstop=8 filetype=help:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/doc/nvim-config.txt
+#
+#
+
+*nvim-config.txt*  Configuration reference
+
+==============================================================================
+CONTENTS                                                *nvim-config-contents*
+
+    1. KEYMAPS ..........................................|nvim-config-keymaps|
+    2. PLUGIN MAPPINGS ..........................|nvim-config-plugin-mappings|
+    3. COMMANDS ........................................|nvim-config-commands|
+    4. OPTIONS ..........................................|nvim-config-options|
+    5. AUTOCOMMANDS ................................|nvim-config-autocommands|
+
+==============================================================================
+KEYMAPS                                                  *nvim-config-keymaps*
+
+Mappings this configuration sets itself, each listed under the modes it
+applies to.
+
+n  <leader>h            :noh - Clear highlight of search match
+n  <leader>in           :Inspect highlight groups under cursor
+n  <leader>ln           Blink line number in gutter
+n  <leader>nn           Blink relativenumber
+n  <leader>rf           Reload foldmethod
+n  <leader>rn           Toggle relativenumber
+n  <leader>tw           Format buffer line wrapping according to textwidth
+n  gx                   Open URL or owner/repo under cursor
+n  x                    Blackhole Register: Single character deletion
+n,x  gF                 Create or open new file according to path under cursor
+n,x  gf                 Open file and if provided, go to line number
+v  p                    Blackhole Register: Pasted over selection
+x  <                    Remain in visual mode after indenting
+x  >                    Remain in visual mode after indenting
+
+==============================================================================
+PLUGIN MAPPINGS                                  *nvim-config-plugin-mappings*
+
+Mappings declared by a plugin spec's `keys`, with the plugin that owns each.
+Plugins switched off in lua/plugin.lua are omitted.
+
+<C-S-N>                 Harpoon: next in list (harpoon)
+<C-S-P>                 Harpoon: previous in list (harpoon)
+<C-e>                   Harpoon: toggle quick menu (harpoon)
+<C-h>                   Harpoon: select 1 (harpoon)
+<C-n>                   Harpoon: select 3 (harpoon)
+<C-s>                   Harpoon: select 4 (harpoon)
+<C-t>                   Harpoon: select 2 (harpoon)
+<leader>.               Scratch buffer (count selects which) (snacks.nvim)
+<leader>?               Buffer-local keymaps (which-key) (which-key.nvim)
+<leader>HS              Herdr: send annotations to the agent (herdr-nvim)
+<leader>Ha              Herdr: queue a comment on the selection (herdr-nvim)
+<leader>Ha              Herdr: queue a comment on this line (herdr-nvim)
+<leader>Hc              Herdr: ask about this line (herdr-nvim)
+<leader>Hc              Herdr: ask about this selection (herdr-nvim)
+<leader>Hf              Herdr: pick a file the agent touched (herdr-nvim)
+<leader>Hg              Herdr: list the agents visible from here (herdr-nvim)
+<leader>Hk              Herdr: keep the agent's edit under the cursor
+                        (herdr-nvim)
+<leader>Hl              Herdr: list annotations (herdr-nvim)
+<leader>Hr              Herdr: follow up with the last agent (herdr-nvim)
+<leader>Hs              Herdr: paste annotations into the agent's input
+                        (herdr-nvim)
+<leader>Ht              Herdr: choose which agent to ask (herdr-nvim)
+<leader>Hu              Herdr: undo the agent's edit under the cursor
+                        (herdr-nvim)
+<leader>S               Select a scratch buffer (snacks.nvim)
+<leader>aC              Continue Claude (claudecode.nvim)
+<leader>aa              Accept diff (claudecode.nvim)
+<leader>ab              Add current buffer (claudecode.nvim)
+<leader>ac              Toggle Claude (claudecode.nvim)
+<leader>ad              Deny diff (claudecode.nvim)
+<leader>af              Focus Claude (claudecode.nvim)
+<leader>am              Select Claude model (claudecode.nvim)
+<leader>ar              Resume Claude (claudecode.nvim)
+<leader>as              Add file (claudecode.nvim)
+<leader>as              Send to Claude (claudecode.nvim)
+<leader>dO              DAP: Step out (nvim-dap)
+<leader>db              DAP: Toggle breakpoint (nvim-dap)
+<leader>dc              DAP: Continue (nvim-dap)
+<leader>di              DAP: Step into (nvim-dap)
+<leader>do              DAP: Step over (nvim-dap)
+<leader>dr              DAP: Toggle REPL (nvim-dap)
+<leader>dt              DAP: Terminate (nvim-dap)
+<leader>du              DAP: Toggle UI (nvim-dap-ui)
+<leader>ha              Harpoon: add file (harpoon)
+<leader>u               undo history (telescope-undo.nvim)
+[n                      Herdr: previous annotation (herdr-nvim)
+[r                      Herdr: previous agent edit (herdr-nvim)
+]n                      Herdr: next annotation (herdr-nvim)
+]r                      Herdr: next agent edit (herdr-nvim)
+gb                      Comment: block operator (Comment.nvim)
+gbc                     Comment: Toggle block (Comment.nvim)
+gc                      Comment: line operator (Comment.nvim)
+gcA                     Comment: Append to line end (Comment.nvim)
+gcO                     Comment: Add above (Comment.nvim)
+gcc                     Comment: Toggle line (Comment.nvim)
+gco                     Comment: Add below (Comment.nvim)
+
+==============================================================================
+COMMANDS                                                *nvim-config-commands*
+
+User commands, all of them XX-prefixed. A [!] marks a command that takes a
+bang and {args} one that takes arguments.
+
+                                                    *nvim-config-insertheader*
+:XXInsertHeader         Prepend buffer with a header, templated according to
+                        filepath and extension.
+                                                 *nvim-config-interpretescape*
+:XXInterpretEscape[!]   Translate and interpret escape codes in terminal
+                        buffer
+                                                      *nvim-config-luachecker*
+:XXLuaChecker {args}    Switch nvim-lint's lua type checker
+                        (luals_check/emmylua_check); bare toggles
+                                                         *nvim-config-mdtable*
+:XXMdTable {args}       Markdown pipe tables
+                        (format/buffer/left/center/right/none/toggle/enable/di
+                        sable);
+                        bare formats the one under the cursor
+                                                         *nvim-config-nexnote*
+:XXNexNote {args}       Notes in ~chewygumxx/nex.git
+                        (new/commit/toggle/enable/disable); bare scaffolds a
+                        new one
+                                                    *nvim-config-redirautocmd*
+:XXRedirAutocmd[!] {args}
+                        Redirect to temporary buffer (bypass bang!): autocmd
+                                                    *nvim-config-redircommand*
+:XXRedirCommand[!] {args}
+                        Redirect to temporary buffer (bypass bang!): command
+                                                  *nvim-config-redirhighlight*
+:XXRedirHighlight[!] {args}
+                        Redirect to temporary buffer (bypass bang!): highlight
+                                                        *nvim-config-redirmap*
+:XXRedirMap[!] {args}   Redirect to temporary buffer (bypass bang!): map
+                                                         *nvim-config-vistrav*
+:XXVisTrav              Toggle: Visual traversal in current buffer
+                                                  *nvim-config-vistravdisable*
+:XXVisTravDisable       Disable: Visual traversal in current buffer
+                                                   *nvim-config-vistravenable*
+:XXVisTravEnable        Enable: Visual traversal in current buffer
+                                                   *nvim-config-vistravtoggle*
+:XXVisTravToggle        Toggle: Visual traversal in current buffer
+                                                             *nvim-config-wip*
+:XXWip[!] {args}        WIP snapshots to refs/wip/<branch>
+                        (toggle/enable/disable/snapshot/drop); bare toggles
+
+==============================================================================
+OPTIONS                                                  *nvim-config-options*
+
+Every option this configuration sets, with the value it sets.
+
+'clipboard'             unnamedplus
+'expandtab'             true
+'fillchars'             "fold: "
+'foldlevel'             2
+'foldmethod'            expr
+'foldtext'              v:lua.require("option.fold").foldtext()
+'formatoptions'         tcqjro
+'ignorecase'            true
+'jumpoptions'           view
+'linebreak'             true
+'mouse'                 ""
+'number'                true
+'relativenumber'        true
+'scrolloff'             5
+'shiftwidth'            4
+'showcmd'               true
+'smartcase'             true
+'spelllang'             en
+'splitright'            true
+'statusline'            %<%#CgxxStatuslineSlug#%{v:lua.require'util.statusline
+                        '.slug()}%#CgxxStatuslineBranch#%{v:lua.require'util.s
+                        tatusline'.branch()}%#CgxxStatuslinePath#%{v:lua.requi
+                        re'util.statusline'.path()}%*%{%v:lua.require'util.sta
+                        tusline'.fallback()%}
+                        %h%w%m%r %{%
+                        v:lua.require('vim._core.util').term_exitcode()
+                        %}%=%{% luaeval('(package.loaded[''vim.ui''] and
+                        vim.api.nvim_get_current_win() ==
+                        tonumber(vim.g.actual_curwin or -1) and
+                        vim.ui.progress_status()) or '''' ')%}%{% &showcmdloc
+                        == 'statusline' ? '%-10.S ' : '' %}%{%
+                        exists('b:keymap_name') ? '<'..b:keymap_name..'> ' :
+                        '' %}%{% &busy > 0 ? '◐ ' : '' %}%{%
+                        luaeval('(package.loaded[''vim.diagnostic''] and
+                        next(vim.diagnostic.count()) and
+                        vim.diagnostic.status() .. '' '') or '''' ') %}%{%
+                        &ruler ? ( &rulerformat == '' ? '%-14.(%l,%c%V%) %P' :
+                        &rulerformat ) : '' %}
+'tabstop'               4
+'termguicolors'         true
+'timeoutlen'            1000
+'undofile'              true
+'virtualedit'           block
+
+==============================================================================
+AUTOCOMMANDS                                        *nvim-config-autocommands*
+
+Autocommands this configuration registers, by event.
+
+BufDelete,BufWipeout    Release the buffer's WIP debounce timer
+BufDelete,BufWipeout    Release the buffer's statusline resolve marker
+BufFilePost,BufWritePost
+                        Invalidate the buffer's cached statusline git segment
+BufNewFile              Designates new file buffer for pending header
+                        insertion.
+BufReadPost             Move cursor to last position within file
+BufReadPost,BufEnter    For unmodifiable buffers: Keymap (nv) q->quit
+BufWinEnter             Fold Claude Code's last-response context, if present
+BufWritePost            Stage and commit a written nex note
+BufWritePost,BufLeave,FocusLost
+                        Take a WIP snapshot at an editing checkpoint
+FileType                If exists, implements filetype-specific configuration
+FileType                Inserts templated header into new file buffer once
+                        filetype is known.
+FocusGained,VimResume,ShellCmdPost,TermClose
+                        Invalidate every cached statusline git segment
+InsertLeave,TextChanged Reformat the markdown table under the cursor
+TextChanged,TextChangedI
+                        Debounce a WIP snapshot of the changed buffer
+

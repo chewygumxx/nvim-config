@@ -18,6 +18,13 @@
 /LICENSE    -sync-header-metadata
 *.json      -sync-header-metadata
 
+# `doc/nvim-config.txt` is deliberately absent here: it carries the header
+# in `# %s`, and the action preserves whatever precedes a marker, so it
+# syncs like any other file. `doc/tags` cannot: it is strict
+# tag<TAB>file<TAB>pattern records with nowhere to put a comment, and
+# `helptags` rewrites it on every generator run regardless.
+/doc/tags   -sync-header-metadata
+
 # ---------------------
 # Binary
 # ---------------------
