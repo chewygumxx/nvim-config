@@ -95,59 +95,43 @@ preferred to a `permissions.deny` rule.
 
 ## Commands
 
-There is no build step; everything is a check. The **`gates` skill** holds all
-of it: what each tool is for and where its config lives, `mise.toml` as the
-single source of every pin, how to reach that toolchain from a shell where mise
-is not active, the two sweeps that are deliberately not gates, what
+There is no build step; everything is a check, and the **`gates` skill** holds
+all of it: what each tool is for and where its config lives, `mise.toml` as the
+single source of every pin, the sweeps that are deliberately not gates, what
 `.husky/pre-commit` actually runs and why it skips a missing tool in silence,
-and the two rules that make a `lua-language-server` result believable.
-`/gate-battery` runs the battery in the caller's own context, with the output;
-the `gate-runner` subagent runs the same sequence and reports only failures,
-keeping the thousands of passing lines out.
+and the rules that make a result believable. `/gate-battery` runs the battery in
+the caller's own context with the output; the `gate-runner` subagent runs the
+same sequence and reports only failures. The **`generated-output` skill** holds
+the two generators, which are deliberately neither gates nor part of
+`.husky/pre-commit`; `/regen` runs both and verifies them.
 
-The **`generated-output` skill** holds the two generators, `scripts/genhelp.lua`
-and `scripts/gendoc.lua`, which are deliberately neither gates nor part of
-`.husky/pre-commit`. `/regen` runs both and verifies them.
-
-`.husky/commit-msg` enforces commitlint.
-
-Unlike the dotfiles repo's free-form scopes, this repo's `.commitlintrc.mts`
-defines a fixed `scope.enum` (`hl`, `opt`, `ft`, `key`, `ucmd`, `acmd`, `lsp`,
-`spec`, `util`, `asset`, `claude`, each with a `fullName`/`description` used to
-label `npm run commit`'s prompt) alongside its `type.enum` (`feat`, `fix`,
-`tweak`, `chore`, `style`, `docs`, `ci`, `refactor`, `perf`, `build`, `test`,
-`revert`); scope is optional, and per `scope-delimiter-style` multiple scopes
-can be joined with `/`. `header-max-length` caps the whole
+`.husky/commit-msg` enforces commitlint, and unlike the dotfiles repo's
+free-form scopes this one's `.commitlintrc.mts` fixes `scope.enum` at `hl`,
+`opt`, `ft`, `key`, `ucmd`, `acmd`, `lsp`, `spec`, `util`, `asset` and `claude`.
+Scope is optional and several can be joined with `/`, but nothing outside that
+list is accepted, **including a type name**: `docs(ci)` is rejected, since `ci`
+is a type rather than a scope. `header-max-length` caps the whole
 `type(scope): Subject` header at 50 characters, so keep subjects short.
 
 ## Architecture
 
 ### Entry point and load order
 
-`init.lua` calls `require(modpath).setup()` directly for each top-level module;
-there is no `require_guard`/`setup_guard` safety wrapper. Earlier revisions had
-one, but it was deliberately removed (`refactor: Remove global variables`): now
-that this config is its own repository rather than a nested subdirectory of the
-dotfiles repo, a misconfigured module is cheaply fixed by reverting the local
-checkout, so guarding every `setup()` call against a broken sibling module
-stopped being worth the complexity.
-
-`init.lua` then loads top-level modules in a deliberate order, documented
-inline: `option`, `keymap`, `filetype` (after option/keymap, so its
-`FileType`-triggered overrides win), `autocmd`, `usercmd`, `plugin` (after
-keymap/filetype/autocmd, since lazy-loaded plugin specs key off
-`vim.g.mapleader`, filetype autocmds, and augroups defined earlier), then
-`highlight` last, so it overwrites whatever the colorscheme and treesitter
-plugins set. Note the sixth call is `require("plugin").setup()` and not
-`util.lazy` directly: `lua/plugin.lua` is what decides the spec list and hands
-it to `util.lazy.setup`, so the comments inside `init.lua` naming `util.lazy`
-describe the dependency rather than the call.
+`init.lua` calls `require(modpath).setup()` directly for each top-level module,
+with no `require_guard`/`setup_guard` wrapper. One existed and was deliberately
+removed: now that this configuration is its own repository rather than a
+subdirectory of the dotfiles repo, a misconfigured module is cheaply fixed by
+reverting the checkout, so guarding every call against a broken sibling stopped
+earning its complexity. The load order is deliberate and documented inline
+there, `highlight` last so it outranks whatever the colourscheme and Tree-sitter
+set. Note the sixth call is `require("plugin").setup()` and not `util.lazy`
+directly, so the comments naming `util.lazy` describe the dependency rather than
+the call.
 
 There is no `cgxx` settings-as-plugin indirection layer and no
-`lua/plugin_manager.lua`; earlier revisions of this file described one, but it
-has since been removed. Machine- and environment-specific choices (colorscheme,
-fuzzy finder, Herdr/Termux checks) are now made directly at the point of use in
-the relevant module or plugin spec, described below.
+`lua/plugin_manager.lua`, whatever an earlier revision of this file claimed.
+Machine- and environment-specific choices, ie. colourscheme, fuzzy finder and
+the Herdr and Termux checks, are made at the point of use.
 
 ### Plugin bootstrap (`lua/util/lazy.lua`) and specs (`lua/spec/`)
 
@@ -167,45 +151,21 @@ specific to the plugin rather than a policy about it, and two currently do on
 top of being listed: **reading only `lua/plugin.lua` tells you what is disabled,
 but not always why**.
 
-`lazy-lock.json` is **tracked**, which is the one decision here whose
-consequences reach outside this section. One file serves Arch, Termux and Herdr
-despite their differing plugin sets, because lazy.nvim's writer keeps the
-entries of plugins it is not currently managing. **An entry therefore records a
-pin to return to, not that the plugin is in use**, and the lock cannot be used
-to tell an elided plugin from a condemned one. `.prettierignore` excludes it,
-since lazy.nvim writes one line per plugin and prettier expands each across
-four.
-
-Plugin specs load through lazy.nvim's own `{ import = "spec" }` mechanism,
-walking `lua/spec/*.lua` directly; there is no repo-specific spec resolver. Each
-file is a self-contained `LazySpec` for one plugin, matching the plugin's own
-repo name (e.g. `lua/spec/fzf-lua.lua` -> `ibhagwan/fzf-lua`).
-`M.defaults.spec = "spec"` is the bare form of that, and `lua/plugin.lua`
-overrides it with `M.import()`.
-
-Colourscheme selection is inlined rather than indirected:
-`lua/spec/starry.lua`'s `config()` calls `vim.cmd("colorscheme starry")`
-directly. `lua/spec/fzf-lua.lua` is the fuzzy finder;
-`lua/spec/telescope.nvim.lua` is still present but elided, so it is a spec kept
-for reference rather than a fallback that loads.
+The second is that `lazy-lock.json` is **tracked**, and one file serves Arch,
+Termux and Herdr despite their differing plugin sets, because lazy.nvim's writer
+keeps the entries of plugins it is not currently managing. **An entry therefore
+records a pin to return to, not that the plugin is in use**, so the lock cannot
+be read as a list of what loads here.
 
 ### LSP (`lsp/`, `lua/spec/nvim-lspconfig.lua`, `lua/util/lsp.lua`)
 
-This config uses Neovim's **native** `vim.lsp.config`/`vim.lsp.enable` mechanism
-(0.11+), not `nvim-lspconfig`'s old `setup{}` API. Per-server config tables live
-in `/lsp/<name>.lua` at the repo root: Neovim's built-in runtimepath convention,
-auto-discovered by `vim.lsp.enable()`. `mason-lspconfig.nvim`
-(`lua/spec/mason-lspconfig.nvim.lua`) installs everything in `ensure_installed`
-and calls `vim.lsp.enable()` for all of them via `automatic_enable = true`. On
-Termux the whole mason trio is disabled, since it lacks mason's toolchain, but
-that gate lives in `lua/plugin.lua`'s `condemn` list rather than on the specs
-themselves, and `mise.toml` is where those same servers come from instead.
-`lua/util/lsp.lua` centralizes what would otherwise be duplicated per-server:
-capabilities (merges blink.cmp's completion capabilities over Neovim's
-defaults), `vim.diagnostic.config()`, and the buffer-local keymaps wired up on
-every `LspAttach` (`gd`, `gr`, `K`, `<leader>ca`, etc.), so a per-server
-`lsp/*.lua` only needs to add what's actually server-specific (`root_markers`,
-extra `capabilities`, an `on_attach` for highlight groups).
+This configuration uses Neovim's **native** `vim.lsp.config` and
+`vim.lsp.enable` mechanism, not `nvim-lspconfig`'s old `setup{}` API, with one
+table per server in `lsp/` at the repository root and everything shared in
+`lua/util/lsp.lua`. `mason-lspconfig.nvim` installs and enables them, and is
+condemned outright under Termux, which is why `mise.toml` pins the same servers.
+`lsp/CLAUDE.md` holds what belongs in a per-server file and what does not,
+including why an empty one is a legitimate configuration.
 
 ### Filetype system (`lua/filetype/`)
 
@@ -236,19 +196,16 @@ Markdown filetypes.
 ### Statusline (`lua/util/statusline.lua`)
 
 `option.view.setup()` installs a 'statusline' that replaces Neovim's default
-leading `%f` with the same repository notation this config writes into file
-headers, ie. `~chewygumxx/nvim-config.git:main:/lua/util/statusline.lua`.
-`M.value()` reads the option's _default_ (never its live value, which is what
-makes it idempotent) and splices `M.items` over the `%<%f` it finds, so the rest
-of that default (terminal exit code, LSP progress, `showcmd`, `b:keymap_name`,
-the busy spinner, `vim.diagnostic.status()`, the ruler) survives untouched.
+leading `%f` with the same repository notation this configuration writes into
+file headers, ie. `~chewygumxx/nvim-config.git:main:/lua/util/statusline.lua`,
+splicing over the option's _default_ so that everything else Neovim puts there
+survives untouched.
 
-Three decisions there are load-bearing and each has a test that fails if it is
-undone: the segment is a plain `%{}` and never the nested `%{%...%}` form, the
-fallback emits a literal `%f` for Neovim to expand rather than reproducing it,
-and nothing in the render path calls git. The **`statusline` skill** has those
-in full, along with why `M.items` holds three items rather than one, why the
-cache is a string rather than a table, and what invalidates it.
+Three decisions are load-bearing and each has a test that fails if it is undone:
+the segment is a plain `%{}` and never the nested `%{%...%}` form, the fallback
+emits a literal `%f` for Neovim to expand rather than reproducing it, and
+nothing in the render path calls git. The **`statusline` skill** has those in
+full, along with the caching.
 
 ### Generated help (`doc/`, `lua/util/vimdoc.lua`, `scripts/genhelp.lua`)
 
@@ -263,17 +220,10 @@ neither the session nor the filesystem, which is what lets
 `tests/test_util_vimdoc.lua` assert column arithmetic without running any
 `setup()`, while `scripts/genhelp.lua` harvests and writes.
 
-`doc/` beside `docs/` is genuinely confusable, and is not a rename waiting to
-happen: `doc/` is the only name Neovim's `runtimepath` scan accepts. `docs/` is
-the browsable LuaCATS reference and `doc/` is `:help`. Both are generated,
-tracked, and never edited by hand, which `.claude/hooks/block-generated.sh`
-enforces.
-
-The **`generated-output` skill** holds both trees: the regeneration procedure
-and why it is verified with `git status --porcelain` rather than a diff, why
-nothing is parsed out of the source, how plugin mappings are filtered against
-`elide`/`condemn` and a spec's own condition, and the header and modeline
-decisions. `/regen` runs it.
+`doc/` beside `docs/` is genuinely confusable and is not a rename waiting to
+happen: `doc/` is the only name Neovim's `runtimepath` scan accepts, and holds
+`:help`, while `docs/` is the browsable LuaCATS reference. The
+**`generated-output` skill** holds both trees, and `/regen` runs them.
 
 ### WIP snapshots (`lua/util/wip.lua`)
 
@@ -288,18 +238,9 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
 
 ### Other directories
 
-- `lua/util/`: shared helpers used across the config, not plugin specs
-  themselves: `lsp.lua` (above), `lazy.lua` (bootstraps lazy.nvim, see above),
-  `header.lua` (backs the `XXInsertHeader` user command; generates this repo's
-  file-header convention, see below), `wip.lua` (above), `minitest.lua` (this
-  config's `MiniTest.Config`, in the one place both entry points can reach: the
-  plugin spec's `config` and `scripts/minitest.lua`, since a spec whose `config`
-  is a function never has its `opts` applied by lazy.nvim), `statusline.lua`
-  (above), `markdown_list.lua` (above), `vimdoc.lua` (above), `claude.lua`,
-  `git.lua`, `lua_checker.lua`, `markdown_table.lua`, `modeline.lua`, `nex.lua`,
-  `shebang.lua`, `text.lua`, `treesitter.lua`, `visual_traversal.lua`, and
-  `spec.lua`, which is superseded by `lua/plugin.lua`'s import groups and
-  required by nothing.
+- `lua/util/`: the shared helpers, which are libraries first rather than modules
+  with a `setup` contract. `lua/util/CLAUDE.md` holds what a module here owes,
+  including the annotation habits `luafmt` will otherwise silently undo.
 - `lua/usercmd/`: user commands are defined centrally in `lua/usercmd/init.lua`,
   each delegating to a feature module (`lua/usercmd/*.lua` or `lua/util/*.lua`)
   rather than inlining logic.
@@ -311,40 +252,22 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   stated exemption, and `test_claude_assets.lua` requires every rooted path
   named anywhere under `.claude/` to exist.
 
-- `scripts/`: `minimal_init.lua` and `minitest.lua`, the headless test bootstrap
-  and runner; `luals_untyped.lua` and `typecheck_sensitive.lua`, the
-  annotation-coverage gate and the sensitive typecheck sweep; `lazy_merge.lua`,
-  which runs lazy.nvim's real spec resolution and prints the result as JSON for
-  `tests/test_lazy_integration.lua` to read; `gendoc.lua`, which renders
-  `docs/`; and `genhelp.lua`, which renders `doc/`. The first four are described
-  by the `gates` skill and the last two by `generated-output`. `lazy_merge.lua`
-  asserts lazy.nvim is already installed rather than letting `util.lazy.setup`
-  clone it, and forces `install.missing = false` plus `checker`/`rocks` off, so
-  it never reaches the network.
+- `scripts/`: the headless entry points, described by the `gates` skill except
+  for `scripts/gendoc.lua` and `scripts/genhelp.lua`, which belong to
+  `generated-output`. **None of them may reach the network**, which is why
+  `scripts/lazy_merge.lua` asserts lazy.nvim is already installed rather than
+  letting `util.lazy.setup` clone it, and forces `install.missing = false` with
+  `checker` and `rocks` off.
 - `docs/`: the browsable LuaCATS reference. Generated, tracked, and never edited
   by hand; gated by the `Docs` job. See the `generated-output` skill.
 - `doc/`: this repository's own `:help`. Generated, tracked, and never edited by
   hand; gated by the `Help` job. See the `generated-output` skill.
-- `queries/`: custom/overriding Tree-sitter queries (`markdown`,
-  `markdown_inline`, `norg`, `norg_meta`, `comment`), picked up by Neovim's
-  runtimepath convention. None carries an `; extends` comment, so each fully
-  _replaces_ the runtime query for its language rather than adding to it;
-  `test_queries.lua` records that per file, so changing it is a deliberate edit
-  to the registry. `queries/comment/highlights.scm` is this repository's own,
-  highlighting the file headers described under Conventions, and is the sole
-  user of the three custom predicates `lua/util/treesitter.lua` registers
-  (`adjacent?`, `last-matching?`, `header-line?`). `norg`/`norg_meta` are
-  dormant while neorg is condemned, which is not the same as unchecked. Layout
-  here is owned by `ts_query_ls format`, which is why the modelines and
-  `.editorconfig`'s `[*.scm]` block say two spaces against the repository's
-  usual four, and why the header box is contiguous in these files alone: the
-  formatter collapses blank lines inside a leading comment run.
-  `queries/CLAUDE.md` holds the rest, including why a single format pass does
-  not converge. Adding those gates immediately found five `(#set! conceal "")`
-  patterns in `markdown_inline/highlights.scm` with no capture to attach to,
-  which Tree-sitter discards silently, so Markdown link concealment had never
-  worked; the repair was `@conceal` and deliberately not upstream's
-  `@markup.link`, whose removal that file documents as intentional.
+- `queries/`: Tree-sitter queries picked up by Neovim's runtimepath convention,
+  and each one **replaces** the runtime query for its language rather than
+  extending it, since none carries an `; extends` comment. Layout here is owned
+  by `ts_query_ls format`, which is the reason `.editorconfig` has a `[*.scm]`
+  block at two spaces against the repository's usual four. `queries/CLAUDE.md`
+  holds the rest.
 - `snippets/`: a friendly-snippets-style manifest (`package.json`, using the
   VSCode `contributes.snippets` shape) plus per-language snippet JSON (currently
   `zsh.json`). LuaSnip itself is in `lua/plugin.lua`'s `elide` list, so the spec
@@ -365,55 +288,31 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
 
 ## Conventions
 
-- **File headers**: nearly every tracked file starts with an editor modeline, an
-  `SPDX-License-Identifier: GPL-3.0-only` line, and a boxed comment giving the
-  repo slug and the file's repo-relative path (e.g. `::: :/lua/util/lsp.lua`),
-  using that file's line-comment syntax. These are auto-maintained by the
-  `sync-header-metadata` GitHub Action on every push/PR to `main`
-  (`.github/workflows/sync-header-metadata.yaml`), which commits corrections
-  back as `chore: Sync header metadata`. Follow the header style of a sibling
-  file of the same type rather than inventing one; CI fixes minor drift, and
-  `XXInsertHeader` (backed by `lua/util/header.lua`) can generate one from
-  scratch.
-- **Markdown headers** are the same three parts wearing YAML: a `__cgxx: |`
-  literal block scalar inside the frontmatter holds the modeline
-  (`shiftwidth=2`, `foldlevel=3`), the SPDX line and the box, each indented two
-  spaces and commented `#`, followed by `ctime:`, `title:`, `description:` and
-  `tags:` keys and then the `#` heading. `util.header.frontmatter` renders the
-  whole document head and is the only description of that shape:
-  `util.header.insert` calls it for a plain Markdown buffer and
-  `util.nex.render` calls it for a note, which differs only in filling in its
-  own compound filetype, the `nex` repository and no SPDX line. The branch is
-  gated on `filetype == "markdown"` exactly, so `markdown.claude` and
-  `markdown.nex-note` do not take it. `util.text.yaml_scalar` is where the
-  quoting rule lives, shared for the same reason; `util.nex.yaml_scalar` remains
-  as a delegate because callers assembling a note have no reason to know that.
-- **Indentation**: `.editorconfig` sets 4 spaces by default, 2 spaces for `*.md`
-  and 2 for `*.scm`; LF endings, trailing whitespace trimmed, final newline
-  inserted. Lua specifically also goes through `luafmt`'s own
-  `max_line_width = 80`. The `*.scm` entry is not a preference:
-  `ts_query_ls format` indents at two and offers no way to change it, so that
-  block and the query modelines follow the formatter rather than the other way
-  round.
-- **Lua annotations vs. `luafmt`**: `luafmt` re-lays out call arguments, and it
-  will happily move an inline `--[[@as T]]` cast onto a line of its own,
-  silently detaching it from the expression it was annotating so that LuaLS
-  stops honouring it. Where a cast is needed, assign to a `---@type`-annotated
-  local instead. That same habit is what keeps `table.insert(list, s:gsub(...))`
-  correct, since `gsub` returns a count as its second value which `table.insert`
-  would read as an index. A multi-line `---@type` table shape is re-indented
-  differently on each `luafmt` pass, reported as "formatting is not idempotent",
-  so declare a `---@class` with one `---@field` per line instead.
-  `---@diagnostic disable-next-line: <rule>` is the escape hatch for what LuaLS
-  is right to flag but that cannot be written around, e.g. `duplicate-set-field`
-  when a test stubs `vim.notify`, or `missing-fields` on a synthetic
-  `command_args` table built to exercise a user command callback directly.
-- **Commit messages**: Conventional Commits, enforced by commitlint + husky.
-  Scopes must come from this repo's fixed `scope.enum` (`hl`, `opt`, `ft`,
-  `key`, `ucmd`, `acmd`, `lsp`, `spec`, `util`, `asset`, `claude`); do not
-  invent ad hoc scopes like the parent dotfiles repo's `feat(nvim): ...` style.
-  `claude` is for anything under `.claude/`, ie. hooks, skills, commands and
-  agents. Headers are capped at 50 characters, so keep subjects short.
+- **File headers**: nearly every tracked file opens with an editor modeline, an
+  `SPDX-License-Identifier: GPL-3.0-only` line and a boxed comment giving the
+  repository slug and the file's repo-relative path (eg.
+  `::: :/lua/util/lsp.lua`), in that file's line-comment syntax. Follow a
+  sibling of the same type rather than inventing one; `XXInsertHeader` generates
+  one, and the `sync-header-metadata` Action corrects drift on every push to
+  `main`.
+- **Markdown headers** are those same three parts wearing YAML: a `__cgxx: |`
+  block inside the frontmatter, each line indented two spaces and commented `#`,
+  then `ctime:`, `title:`, `description:` and `tags:`, then the `#` heading.
+  `util.header.frontmatter` renders the whole document head and is the only
+  description of that shape, so copy a sibling or call it rather than assembling
+  one by hand. It is gated on `filetype == "markdown"` exactly, which is why
+  `markdown.claude` and `markdown.nex-note` do not get it automatically.
+- **Indentation**: owned by `.editorconfig`, 4 spaces except 2 for `*.md` and
+  `*.scm`, and Lua additionally by `luafmt`'s `max_line_width = 80`. The `*.scm`
+  entry follows `ts_query_ls format` rather than the other way round.
+- **Lua annotations vs. `luafmt`**: two habits exist because the formatter will
+  otherwise silently undo the annotation, and `lua/util/CLAUDE.md` states both
+  with their reasons. They apply to Lua anywhere in the repository, not only
+  under `lua/util/`.
+- **Commit messages**: Conventional Commits, enforced by commitlint and husky,
+  with scope from the fixed list above and `claude` for anything under
+  `.claude/`. Do not invent ad hoc scopes like the dotfiles repo's
+  `feat(nvim): ...` style.
 - **No AI co-author trailers**: do not add a `Co-Authored-By: Claude ...` (or
   similar) trailer unless explicitly asked to, on that specific commit.
 
@@ -424,24 +323,14 @@ regression in them is silent and has to be looked at. All four were confirmed by
 hand in a live Neovim on 2026-09-27, which is what makes them a baseline rather
 than an open question; re-check the relevant one after touching it.
 
-- The three statusline colours. `tests/test_util_statusline.lua` asserts the
-  highlight _runs_ that `nvim_eval_statusline` reports, ie. that the right group
-  covers the right byte range. Whether the palette in `lua/highlight.lua` is
-  legible against the colorscheme is not something it can know. Truncation
-  shortening from the left is likewise a property of `%<`'s position that only
-  shows in a narrow window.
-- The `gitcommit` header overflow. `tests/test_filetype_modules.lua` drives the
-  module through `filetype.config` and checks the options and highlight links it
-  declares; that `colorcolumn=51,73` actually lands where git's limits are needs
-  a real commit buffer.
-- `<leader>.` returning the same scratch buffer after a restart. That is snacks'
-  `filekey` hashing over name, filetype, `v:count1`, cwd and branch plus a
-  `root` under `stdpath("data")`, and persistence across processes is exactly
-  what a single headless run cannot observe.
-- which-key's group labels. The popup is where a prefix collision becomes
-  visible, which is the reason the plugin was un-elided at all, so the labels
-  being right is the feature rather than a detail of it. It is no longer the
-  _only_ such place: `doc/nvim-config.txt`'s keymaps and plugin-mappings
-  sections list the same ground and, being generated and diffed by CI, show a
-  collision to a headless process. The popup is still the only place the
-  grouping and its wording can be judged.
+- **The statusline colours, and truncation from the left.** The tests assert
+  which highlight group covers which byte range, not whether the palette is
+  legible against the colourscheme, and `%<` only shows in a narrow window.
+- **The `gitcommit` header overflow.** The tests check that `colorcolumn=51,73`
+  is declared, not that it lands where git's limits are.
+- **`<leader>.` returning the same scratch buffer after a restart.** Persistence
+  across processes is exactly what a single headless run cannot observe.
+- **which-key's group labels.** A prefix collision is now visible to a headless
+  process, since `doc/nvim-config.txt` lists the same ground and CI diffs it,
+  but the popup remains the only place the grouping and its wording can be
+  judged.

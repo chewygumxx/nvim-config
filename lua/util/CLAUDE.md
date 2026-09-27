@@ -65,3 +65,9 @@ types; confirm against the repo-wide run before acting.
 
 `lua/util/spec.lua` is superseded by `lua/plugin.lua`'s import groups and
 required by nothing. Do not build on it.
+
+`lua/util/minitest.lua` looks like an odd place for this configuration's
+`MiniTest.Config` and is the only place both entry points can reach, ie. the
+plugin spec's `config` and `scripts/minitest.lua`. A spec whose `config` is a
+function never has its `opts` applied by lazy.nvim, so the configuration cannot
+live on the spec if the headless runner is to see the same one.
