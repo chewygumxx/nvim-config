@@ -106,6 +106,16 @@ emmylua_doc_cli                  = { version = "0.25.1", matching = "emmylua_doc
 "pypi:yamllint"                    = "1.38.0"
 
 #
+# `jq` is not editor tooling. Every hook under `.claude/hooks/` parses its
+# event JSON from stdin with it, and each one fails open when it is
+# absent: the call it was meant to refuse proceeds, and nothing is said,
+# because a hook's stderr on exit 0 reaches the debug log and never the
+# session. That was confirmed by hiding `jq` and watching a write into
+# `docs/` succeed. Pinned so `mise install` leaves the guards working.
+#
+"aqua:jqlang/jq" = "1.8.2"
+
+#
 # Markdown. Three language servers because they do different jobs and
 # `lsp/` configures all three: `remark_ls` lints against the
 # `remarkConfig` in `package.json`, `marksman` handles cross-file links
