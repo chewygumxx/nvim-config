@@ -30,7 +30,7 @@ and CI setup, and no chezmoi involvement.
 Plugins are managed by [lazy.nvim](https://lazy.folke.io), language servers by
 Neovim's native `vim.lsp.config`, and every tool version by
 [mise](https://mise.jdx.dev). The test suite is
-[mini.test](https://github.com/nvim-mini/mini.test), currently 604 cases.
+[mini.test](https://github.com/nvim-mini/mini.test), currently 628 cases.
 
 ## Requirements
 
@@ -73,6 +73,7 @@ types/                   ---@meta stubs for what LuaLS cannot see on its own
 tests/                   The mini.test suite, one file per module under test
 scripts/                 Headless entry points: test runner, typecheck sweeps
 docs/                    Generated LuaCATS reference; never edited by hand
+doc/                     Generated :help and its tags; never edited by hand
 spell/                   Compiled spell file
 ```
 
@@ -101,6 +102,7 @@ coverage and the generated documentation are checked by CI only.
 | Tests               | `nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua`        |
 | Annotation coverage | `nvim --headless -u scripts/minimal_init.lua -l scripts/luals_untyped.lua`   |
 | Generated docs      | `nvim --headless -u scripts/minimal_init.lua -l scripts/gendoc.lua`          |
+| Generated help      | `nvim --headless -u scripts/minimal_init.lua -l scripts/genhelp.lua`         |
 
 The typecheck needs `VIMRUNTIME` exported, so that `$VIMRUNTIME/lua` in
 `.luarc.json`'s `workspace.library` resolves. Neither the hook nor CI trusts its
@@ -113,11 +115,12 @@ not converge, so the hook runs it twice and then asserts with `--check`. Note it
 indents at two spaces and offers no way to change that, which is why
 `.editorconfig` has a `[*.scm]` block.
 
-The last row regenerates `docs/` rather than checking it. Nothing there is
-written by hand; CI regenerates and then fails if
-`git status --porcelain -- docs/` reports anything, so a stale page cannot
-survive a pull request. Run it after changing any annotation under `lua/`,
-`lsp/` or `init.lua`.
+The last two rows regenerate rather than check. Nothing under `docs/` or `doc/`
+is written by hand; CI regenerates each and then fails if
+`git status --porcelain` reports anything against it, so a stale page cannot
+survive a pull request. Run the docs one after changing any annotation under
+`lua/`, `lsp/` or `init.lua`, and the help one after changing a mapping, a user
+command, an option, an autocommand or a plugin spec's `keys`.
 
 To run part of the suite, set `MINITEST_PATTERN` to a Lua pattern matching the
 case descriptions you want:
@@ -161,6 +164,15 @@ not by omission: its own ftplugin removes the `formatoptions` flags that would.
 `lua/util/markdown_list.lua` computes the next `- `, `- [ ] `, `2. ` or `> `
 prefix instead, on `o`, `O` and `<M-CR>`, and never on `<CR>`, which belongs to
 completion.
+
+**Its own `:help`.** `doc/nvim-config.txt` is generated from the configuration
+rather than written beside it, so `:help nvim-config` answers with the mappings,
+commands, options and autocommands actually registered. `stdpath("config")` is
+always first on `runtimepath`, which is what makes a config repository able to
+host help at all; `doc/tags` is tracked because lazy.nvim runs `helptags` for
+plugins and never for the configuration directory. Nothing is parsed out of the
+source: each module's `setup()` is called under a stub of the API it writes
+through.
 
 **File headers.** Nearly every tracked file opens with a modeline, an SPDX
 identifier and a boxed comment naming the repository and the file's path within
