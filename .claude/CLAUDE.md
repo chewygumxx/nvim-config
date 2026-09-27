@@ -11,15 +11,20 @@ except where it may be unfeasable to do so eg. URL.
 [lazy.nvim](https://lazy.folke.io). It is not part of the dotfiles repo; it has
 its own git history, its own commitlint/CI setup, and no chezmoi involvement.
 
-Three tracked documents, with different jobs. `README.md` orients someone
-arriving at the repository: requirements, `mise install`, the directory layout,
-the gate commands in a table, and the handful of features worth knowing about.
-**This** file is the long-form reference: why each decision is the way it is,
-and what a given change is likely to break. Anything that is a fact about the
-code belongs in the README or a doc comment; anything that is a reason belongs
-here. `plan.md` is the working plan for the current tranche of work, tracked at
-the request of the session that wrote it, and goes stale by design once its
-phases land.
+Two tracked documents, with different jobs. `README.md` orients someone arriving
+at the repository: requirements, `mise install`, the directory layout, the gate
+commands in a table, and the handful of features worth knowing about. **This**
+file is the long-form reference: why each decision is the way it is, and what a
+given change is likely to break. Anything that is a fact about the code belongs
+in the README or a doc comment; anything that is a reason belongs here.
+
+A `plan.md` was tracked for one tranche of work and retired once its phases
+landed, which is the expectation for any future one: a working plan is a
+scaffold, and a reason worth keeping belongs in this file rather than in the
+plan that produced it. It is worth knowing that a plan of that kind reasons from
+how things ought to work and the implementation finds out how they do, so its
+text will disagree with the tree in places; where that disagreement mattered it
+was moved here.
 
 Six directories additionally carry their own `CLAUDE.md`: `.github/workflows/`,
 `lua/spec/`, `tests/`, `lua/util/`, `lsp/` and `queries/`. Each is deliberately
