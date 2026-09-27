@@ -72,6 +72,7 @@ snippets/                friendly-snippets-style manifest and per-language JSON
 types/                   ---@meta stubs for what LuaLS cannot see on its own
 tests/                   The mini.test suite, one file per module under test
 scripts/                 Headless entry points: test runner, typecheck sweeps
+docs/                    Generated LuaCATS reference; never edited by hand
 spell/                   Compiled spell file
 ```
 
@@ -84,8 +85,9 @@ colourscheme and Tree-sitter set.
 ## Checks
 
 Every gate below runs from the repository root. `.husky/pre-commit` runs the
-formatters and linters over staged files, then the last two over the whole
-repository regardless of what was staged.
+formatters and linters over staged files, then the Lua typecheck and the test
+suite over the whole repository regardless of what was staged. Annotation
+coverage and the generated documentation are checked by CI only.
 
 | What                | Command                                                                      |
 | ------------------- | ---------------------------------------------------------------------------- |
@@ -93,14 +95,29 @@ repository regardless of what was staged.
 | Lua lint            | `selene <file>.lua`                                                          |
 | TOML                | `tombi format --check --offline && tombi lint --error-on-warnings --offline` |
 | JSON, YAML          | `npx prettier --check <files>`                                               |
+| Query format        | `ts_query_ls format --check queries`                                         |
+| Query lint          | `ts_query_ls lint queries`                                                   |
 | Lua typecheck       | `lua-language-server --check=. --checklevel=Warning`                         |
 | Tests               | `nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua`        |
 | Annotation coverage | `nvim --headless -u scripts/minimal_init.lua -l scripts/luals_untyped.lua`   |
+| Generated docs      | `nvim --headless -u scripts/minimal_init.lua -l scripts/gendoc.lua`          |
 
 The typecheck needs `VIMRUNTIME` exported, so that `$VIMRUNTIME/lua` in
 `.luarc.json`'s `workspace.library` resolves. Neither the hook nor CI trusts its
 exit code, which some releases leave at zero with problems found; both read its
 `no problems found` summary line instead.
+
+Query formatting is owned by the tool, not by you: drop the `--check` and it
+rewrites `queries/`, which is what `.husky/pre-commit` does. One write pass does
+not converge, so the hook runs it twice and then asserts with `--check`. Note it
+indents at two spaces and offers no way to change that, which is why
+`.editorconfig` has a `[*.scm]` block.
+
+The last row regenerates `docs/` rather than checking it. Nothing there is
+written by hand; CI regenerates and then fails if
+`git status --porcelain -- docs/` reports anything, so a stale page cannot
+survive a pull request. Run it after changing any annotation under `lua/`,
+`lsp/` or `init.lua`.
 
 To run part of the suite, set `MINITEST_PATTERN` to a Lua pattern matching the
 case descriptions you want:

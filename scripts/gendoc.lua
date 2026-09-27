@@ -24,11 +24,12 @@
 -- say nothing about it. `scripts/typecheck_sensitive.lua` exists in this
 -- form for the same reason.
 --
--- `lua/spec/` is excluded rather than documented. 48 of this
--- repository's 103 Lua files are declarative `LazySpec` tables with no
+-- `lua/spec/` is excluded rather than documented. Getting on for half the
+-- Lua files in this repository are declarative `LazySpec` tables with no
 -- callable API, so including them would fill the tree that the `Docs` job
 -- in `.github/workflows/lint-config.yaml` has to diff without describing
--- anything a reader can call.
+-- anything a reader can call. Stated as a proportion rather than a count
+-- on purpose: a count here would be wrong by the next spec added.
 --
 -- Two of the defaults are wrong for this use and are always passed:
 -- `--output-format` is `html` unless asked otherwise, and `--output`

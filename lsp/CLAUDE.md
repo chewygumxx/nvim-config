@@ -43,3 +43,19 @@ servers this directory configures, so adding a server without adding it there
 fails the suite, and so does the reverse. Under Termux the whole mason trio is
 condemned from `lua/plugin.lua`, and `mise.toml` is where those same servers
 come from instead, so a server added here should be reachable by both routes.
+
+An empty `local M = {}` is a legitimate configuration and not an unfinished one.
+`nvim-lspconfig` ships its own `lsp/<name>.lua` for most servers, Neovim merges
+it with this one, and where every upstream value is already what this repository
+wants there is nothing left to say. The file still has to exist even so, because
+of the `ensure_installed` parity assertion above. Five are in that state:
+`eslint`, `marksman`, `sqls`, `ts_query_ls` and `vtsls`.
+
+Only `ts_query_ls.lua` says why, and a new one should follow it rather than the
+other four: nothing distinguishes a deliberate deferral to upstream from a stub
+somebody abandoned except a comment saying which it is. Name the values being
+deferred to as well. Upstream's `ts_query_ls` config is what supplies
+`filetypes = { "query" }`, the `.tsqueryrc.json` root marker and the
+`vim.g.query_lint_on = {}` that stops Neovim's own query linter reporting
+everything a second time, so a reader can see the emptiness was checked rather
+than assumed.

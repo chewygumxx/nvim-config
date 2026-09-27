@@ -48,17 +48,19 @@ There is no build step. Linting/formatting/typechecking:
 
 - **Toolchain**: `mise.toml` at the repo root is the single place any tool
   version is named, and `mise install` provides all of them. It covers the gates
-  (`luafmt`, `selene`, `tombi`, `lua-language-server`, Neovim itself) and the
-  editor toolchain mason would otherwise install (LSPs, linters, formatters,
-  debug adapters, `universal-ctags`). The editor half is listed for a specific
-  reason: `lua/plugin.lua` condemns the whole mason trio under Termux, which has
-  no toolchain for it, so this is that platform's only supported route to the
-  same binaries. Backends are named explicitly (`aqua:`, `github:`, `npm:`,
-  `pipx:`, `pypi:`) rather than relying on registry aliases, so resolution is
-  visible and cannot change underneath a pin. Note `ubi:` is deprecated upstream
-  and removed in mise 2027.1.0; use `github:`. Three binaries (`luafmt`,
-  `emmylua_check`, `emmylua_doc_cli`) come from one release of
-  `EmmyLuaLs/emmylua-analyzer-rust`, which needs a `[tool_alias]` block each
+  (`luafmt`, `selene`, `tombi`, `lua-language-server`, `ts_query_ls`, Neovim
+  itself) and the editor toolchain mason would otherwise install (LSPs, linters,
+  formatters, debug adapters, `universal-ctags`). `ts_query_ls` is in both
+  halves at once, being the formatter and linter the `Queries` job runs as well
+  as the language server `lsp/ts_query_ls.lua` enables. The editor half is
+  listed for a specific reason: `lua/plugin.lua` condemns the whole mason trio
+  under Termux, which has no toolchain for it, so this is that platform's only
+  supported route to the same binaries. Backends are named explicitly (`aqua:`,
+  `github:`, `npm:`, `pipx:`, `pypi:`) rather than relying on registry aliases,
+  so resolution is visible and cannot change underneath a pin. Note `ubi:` is
+  deprecated upstream and removed in mise 2027.1.0; use `github:`. Three
+  binaries (`luafmt`, `emmylua_check`, `emmylua_doc_cli`) come from one release
+  of `EmmyLuaLs/emmylua-analyzer-rust`, which needs a `[tool_alias]` block each
   plus `matching` on the `[tools]` entry; putting `matching` in the alias block
   instead is ignored **silently** and every alias installs the same asset. As
   configured it works: `mise install emmylua_doc_cli` resolves
@@ -645,25 +647,26 @@ explicit `refs/wip/*` refspec.
   regenerates and fails on the diff, so committed output cannot rot. Run through
   Neovim so the child inherits `$VIMRUNTIME`, which `.luarc.json`'s
   `workspace.library` needs; from a bare shell the analysis silently resolves
-  against nothing. `lua/spec/` is excluded, since 48 of the 103 Lua files here
-  are declarative `LazySpec` tables with no callable API and would crowd out
-  everything a reader can actually call. Three decisions in `scripts/gendoc.lua`
-  are load-bearing and each has its reason inline: the tree is built in a
-  staging directory and only installed once proved non-empty, so a failed run
-  leaves the committed docs alone rather than committing an empty one; it is
-  replaced wholesale rather than written over, because a write-only generator
-  leaves the page for a deleted module behind with `git diff` reporting no
-  change and the gate staying green; and the `mkdocs.yml` the generator emits
-  beside the Markdown is deliberately discarded, since it carries trailing
-  whitespace and CI runs prettier over every `*.yml`, which is the same
-  two-tools-one-file standoff `.prettierignore` settles for `lazy-lock.json`.
-  The gate itself asks `git status --porcelain -- docs/` and fails on any
-  output, rather than `git diff --exit-code`, because three things can make
-  `docs/` stale and a plain diff sees only one: a changed page it does catch, a
-  _new_ page which is untracked and so invisible to it, and a page the generator
-  no longer produces, which `git add -A` would stage away before the diff ran.
-  `status` reports all three and touches no index. Each case was checked in turn
-  rather than reasoned about, which is how the second and third were found.
+  against nothing. `lua/spec/` is excluded, since getting on for half the Lua
+  files here are declarative `LazySpec` tables with no callable API and would
+  crowd out everything a reader can actually call. Three decisions in
+  `scripts/gendoc.lua` are load-bearing and each has its reason inline: the tree
+  is built in a staging directory and only installed once proved non-empty, so a
+  failed run leaves the committed docs alone rather than committing an empty
+  one; it is replaced wholesale rather than written over, because a write-only
+  generator leaves the page for a deleted module behind with `git diff`
+  reporting no change and the gate staying green; and the `mkdocs.yml` the
+  generator emits beside the Markdown is deliberately discarded, since it
+  carries trailing whitespace and CI runs prettier over every `*.yml`, which is
+  the same two-tools-one-file standoff `.prettierignore` settles for
+  `lazy-lock.json`. The gate itself asks `git status --porcelain -- docs/` and
+  fails on any output, rather than `git diff --exit-code`, because three things
+  can make `docs/` stale and a plain diff sees only one: a changed page it does
+  catch, a _new_ page which is untracked and so invisible to it, and a page the
+  generator no longer produces, which `git add -A` would stage away before the
+  diff ran. `status` reports all three and touches no index. Each case was
+  checked in turn rather than reasoned about, which is how the second and third
+  were found.
 - `queries/`: custom/overriding Tree-sitter queries (`markdown`,
   `markdown_inline`, `norg`, `norg_meta`, `comment`), picked up by Neovim's
   runtimepath convention. None carries an `; extends` comment, so each fully
@@ -781,3 +784,28 @@ explicit `refs/wip/*` refspec.
   Headers are capped at 50 characters, so keep subjects short.
 - **No AI co-author trailers**: do not add a `Co-Authored-By: Claude ...` (or
   similar) trailer unless explicitly asked to, on that specific commit.
+
+## Behaviours no gate covers
+
+Four things here are asserted only as far as a headless process can reach, so a
+regression in them is silent and has to be looked at. All four were confirmed by
+hand in a live Neovim on 2026-09-27, which is what makes them a baseline rather
+than an open question; re-check the relevant one after touching it.
+
+- The three statusline colours. `tests/test_util_statusline.lua` asserts the
+  highlight _runs_ that `nvim_eval_statusline` reports, ie. that the right group
+  covers the right byte range. Whether the palette in `lua/highlight.lua` is
+  legible against the colorscheme is not something it can know. Truncation
+  shortening from the left is likewise a property of `%<`'s position that only
+  shows in a narrow window.
+- The `gitcommit` header overflow. `tests/test_filetype_modules.lua` drives the
+  module through `filetype.config` and checks the options and highlight links it
+  declares; that `colorcolumn=51,73` actually lands where git's limits are needs
+  a real commit buffer.
+- `<leader>.` returning the same scratch buffer after a restart. That is snacks'
+  `filekey` hashing over name, filetype, `v:count1`, cwd and branch plus a
+  `root` under `stdpath("data")`, and persistence across processes is exactly
+  what a single headless run cannot observe.
+- which-key's group labels. The popup is the only place a prefix collision
+  becomes visible, which is the reason the plugin was un-elided at all, so the
+  labels being right is the feature rather than a detail of it.
