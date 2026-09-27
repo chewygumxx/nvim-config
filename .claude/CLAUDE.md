@@ -55,15 +55,16 @@ There is no build step. Linting/formatting/typechecking:
   `emmylua_check`, `emmylua_doc_cli`) come from one release of
   `EmmyLuaLs/emmylua-analyzer-rust`, which needs a `[tool_alias]` block each
   plus `matching` on the `[tools]` entry; putting `matching` in the alias block
-  instead is ignored **silently** and every alias installs the same asset. That
-  failure is not hypothetical: `mise ls` currently reports `emmylua_doc_cli` as
-  `(missing)` and the install tree for the pinned release holds only a `luafmt`
-  binary, so the three EmmyLua tools on a working machine may well be coming
-  from somewhere else (a `cargo install` under `~/.local/share/cargo/bin`
-  supplies them here, at the same 0.25.1, agreeing with the pin by luck rather
-  than by construction). CI is unaffected, fetching each release asset by name.
-  Of the three, `emmylua_doc_cli` is the one that is not a gate:
-  `scripts/gendoc.lua` runs it to render `docs/`.
+  instead is ignored **silently** and every alias installs the same asset. As
+  configured it works: `mise install emmylua_doc_cli` resolves
+  `emmylua_doc_cli-linux-x64-glibc.2.17.tar.gz` and lands the right binary under
+  `installs/emmylua-doc-cli/`. Worth knowing when diagnosing one of these three,
+  though, is that `mise ls` reporting a tool `(missing)` means only that its
+  install has not been run, and that a `cargo install` of the same project puts
+  all three in `~/.local/share/cargo/bin`, which will shadow mise on `PATH` and
+  agree with the pin only as long as nobody bumps one of them. Of the three,
+  `emmylua_doc_cli` is the one that is not a gate: `scripts/gendoc.lua` runs it
+  to render `docs/`.
 - **Lua**: format with `luafmt` (EmmyLua formatter, config in `.luafmt.toml`),
   lint with `selene` (config in `selene.toml`,
   `std = "lua51+vim+luajit +busted"`, backed by
