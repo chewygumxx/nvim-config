@@ -429,4 +429,38 @@ describe("claude assets", function()
 
         eq({ unpointed, dangling }, { {}, {} })
     end)
+
+    it("stays inside the always-loaded budget", function()
+        -- `.claude/CLAUDE.md` is the only file here loaded into every
+        -- session and every subagent regardless of relevance, so its
+        -- length is a standing cost rather than one paid when the subject
+        -- comes up. Everything it could say instead has a destination that
+        -- costs nothing until something in scope is read: a skill, a rule,
+        -- or the directory's own `CLAUDE.md`. A failure here is therefore
+        -- an instruction to move a reason somewhere narrower, not to write
+        -- a shorter one.
+        --
+        -- The cap is mechanical because care at write time demonstrably
+        -- does not hold it. On 2026-09-27 the file went from 8609 words to
+        -- 2432 across seven extraction commits, and was back to 2506
+        -- within the hour. It had been compressed by hand twice by then.
+        --
+        -- Words rather than lines, because the Markdown reflow hook
+        -- rewraps this file on every write: a line count would measure the
+        -- hook rather than the prose.
+        ---@type integer
+        local cap = 1200
+
+        ---@type string
+        local prose = table.concat(vim.fn.readfile(".claude/CLAUDE.md"), " ")
+
+        ---@type integer
+        local words = select(2, prose:gsub("%S+", ""))
+
+        ---@type string
+        local verdict = words <= cap and "within budget"
+            or ("over budget by " .. (words - cap) .. " words")
+
+        eq(verdict, "within budget")
+    end)
 end)
