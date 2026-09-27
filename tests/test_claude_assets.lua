@@ -175,6 +175,14 @@ describe("claude assets", function()
     local agents = vim.fn.globpath(".claude/agents", "*.md", true, true)
     table.sort(agents)
 
+    -- Rules are kept out of `described` below on purpose: `paths` is the
+    -- only field Claude Code reads from one, so a rule declares neither a
+    -- name nor a description and the cases for those would be asserting a
+    -- convention nothing loads.
+    ---@type string[]
+    local rules = vim.fn.globpath(".claude/rules", "*.md", true, true)
+    table.sort(rules)
+
     -- Every asset carrying frontmatter. All three kinds are checked, not
     -- the skills alone: a command or an agent whose description drifted
     -- back to a bare `description:` would break only once somebody later
@@ -197,7 +205,8 @@ describe("claude assets", function()
             #skills > 0,
             #commands > 0,
             #agents > 0,
-        }, { true, true, true, true })
+            #rules > 0,
+        }, { true, true, true, true, true })
     end)
 
     -- A command and a skill share one name namespace, Claude Code listing
@@ -328,6 +337,30 @@ describe("claude assets", function()
                 folded = folded or line:match("^description:%s*>%-%s*$") ~= nil
             end
             eq({ path, folded }, { path, true })
+        end)
+    end
+
+    for _, path in ipairs(rules) do
+        it(path .. " scopes itself with paths:", function()
+            -- `paths` is the only field Claude Code reads from a rule and
+            -- every other is ignored without an error, so the singular
+            -- `path:` does not fail: it yields a rule with no `paths` at
+            -- all, and a rule with no `paths` loads at launch with the
+            -- same priority as `.claude/CLAUDE.md`. The typo therefore
+            -- reads as the feature working while doing the opposite of
+            -- what it says. Both directions are asserted because a rule
+            -- that lost its `paths` in an edit is indistinguishable from
+            -- outside: the only symptom either way is a rule arriving in
+            -- a session that should never have seen it.
+            ---@type boolean
+            local scoped = false
+            ---@type boolean
+            local singular = false
+            for _, line in ipairs(frontmatter(path)) do
+                scoped   = scoped or line:match("^paths:") ~= nil
+                singular = singular or line:match("^path:") ~= nil
+            end
+            eq({ path, scoped, singular }, { path, true, false })
         end)
     end
 
