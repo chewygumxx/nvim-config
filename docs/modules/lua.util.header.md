@@ -54,6 +54,41 @@ the one description of the format, so a change here reaches both.
 
 
 
+### M.plain
+---
+```lua
+function M.plain(opt: util.PlainHeaderOpt {
+    commentstring = string,
+    slug = string?,
+    fork_slug = string?,
+    path = string?,
+    spdx = string?,
+    shebang = string?,
+    modeline = util.ModelineOpt?,
+}) -> lines string[]
+```
+
+
+
+
+
+Renders the plain-comment form of this repository's file header: an
+optional shebang, the modeline, the SPDX line and the boxed repository
+notation, each wrapped in opt.commentstring.
+
+Split out of `M.insert` rather than left inline there because
+`util.vimdoc` renders the same box into generated help, where there is
+no buffer to take a 'commentstring' or a filetype from. This is now the
+one description of the plain shape, as `M.frontmatter` is of the
+Markdown one.
+
+
+
+
+
+
+
+
 ### M.insert
 ---
 ```lua

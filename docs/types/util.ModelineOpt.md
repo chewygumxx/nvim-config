@@ -132,6 +132,23 @@ Alias for `ft` (default: buf's own filetype)
 
 
 
+### ModelineOpt.prepend
+---
+```lua
+ModelineOpt.prepend : string?
+```
+
+
+
+Extra `:set` clause(s), prepended verbatim
+
+
+
+
+
+
+
+
 ### ModelineOpt.append
 ---
 ```lua

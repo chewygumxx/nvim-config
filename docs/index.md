@@ -4,6 +4,7 @@
 ## Types
 
 - [alias Align](types/cgxx.mdtable.Align.md)
+- [class Entry](types/cgxx.vimdoc.Entry.md)
 - [class FrontmatterOpt](types/util.FrontmatterOpt.md)
 - [class HeaderInsertOpt](types/util.HeaderInsertOpt.md)
 - [class Item](types/cgxx.markdown_list.Item.md)
@@ -11,6 +12,9 @@
 - [class ModelineOpt](types/util.ModelineOpt.md)
 - [class Module](types/cgxx.filetype.Module.md)
 - [class Note](types/cgxx.nex.Note.md)
+- [class Opt](types/cgxx.vimdoc.Opt.md)
+- [class PlainHeaderOpt](types/util.PlainHeaderOpt.md)
+- [class Section](types/cgxx.vimdoc.Section.md)
 - [class Table](types/cgxx.mdtable.Table.md)
 - [class WrapCommentOpt](types/util.WrapCommentOpt.md)
 - [class info](types/cgxx.git.info.md)
@@ -74,6 +78,7 @@
 - [lua.util.statusline](modules/lua.util.statusline.md)
 - [lua.util.text](modules/lua.util.text.md)
 - [lua.util.treesitter](modules/lua.util.treesitter.md)
+- [lua.util.vimdoc](modules/lua.util.vimdoc.md)
 - [lua.util.visual_traversal](modules/lua.util.visual_traversal.md)
 - [lua.util.wip](modules/lua.util.wip.md)
 
