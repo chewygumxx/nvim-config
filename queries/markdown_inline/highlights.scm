@@ -72,7 +72,7 @@
     "("
     (link_destination)
     ")"
-  ]
+  ] @conceal
   (#set! conceal ""))
 
 
@@ -85,7 +85,7 @@
     "("
     (link_destination)
     ")"
-  ]
+  ] @conceal
   (#set! conceal ""))
 
 ; Conceal full reference links
@@ -94,7 +94,7 @@
     "["
     "]"
     (link_label)
-  ]
+  ] @conceal
   (#set! conceal ""))
 
 ; Conceal collapsed reference links
@@ -102,7 +102,7 @@
   [
     "["
     "]"
-  ]
+  ] @conceal
   (#set! conceal ""))
 
 ; Conceal shortcut links
@@ -110,7 +110,7 @@
   [
     "["
     "]"
-  ]
+  ] @conceal
   (#set! conceal ""))
 
 [
@@ -122,6 +122,21 @@
 ((uri_autolink) @_url
   (#offset! @_url 0 1 0 -1)
   (#set! @_url url @_url))
+
+;
+; `url` metadata for links whose destination is not the link text, so a
+; consumer asking the tree for a link's target finds one. Grouped with the
+; autolink case above rather than with the conceal patterns, since these
+; set metadata and highlight nothing, which is also why both captures are
+; `_`-prefixed.
+;
+((inline_link
+  (link_destination) @_url) @_label
+  (#set! @_label url @_url))
+
+((image
+  (link_destination) @_url) @_label
+  (#set! @_label url @_url))
 
 (entity_reference) @nospell
 
