@@ -1,4 +1,4 @@
-; vim:set expandtab shiftwidth=4 filetype=query:
+; vim:set expandtab shiftwidth=2 filetype=query:
 ; SPDX-License-Identifier: GPL-3.0-only
 ;
 ;
@@ -6,67 +6,62 @@
 ; ::: :/queries/norg_meta/highlights.scm
 ;
 ;
-
 ; Regular keys and values
 (key) @neorg.tags.ranged_verbatim.document_meta.key
+
 (string) @neorg.tags.ranged_verbatim.document_meta.string
+
 (number) @neorg.tags.ranged_verbatim.document_meta.number
 
 ; Literals
 "{" @neorg.tags.ranged_verbatim.document_meta.object.bracket
+
 "}" @neorg.tags.ranged_verbatim.document_meta.object.bracket
+
 "[" @neorg.tags.ranged_verbatim.document_meta.array.bracket
+
 "]" @neorg.tags.ranged_verbatim.document_meta.array.bracket
 
 ; Special Highlights
 (pair
-    (key) @_key
-    (string) @neorg.tags.ranged_verbatim.document_meta.title
-    (#eq? @_key "title")
-)
+  (key) @_key
+  (string) @neorg.tags.ranged_verbatim.document_meta.title
+  (#eq? @_key "title"))
 
 (pair
-    (key) @_key
-    (string) @neorg.tags.ranged_verbatim.document_meta.description
-    (#eq? @_key "description")
-)
+  (key) @_key
+  (string) @neorg.tags.ranged_verbatim.document_meta.description
+  (#eq? @_key "description"))
 
 (pair
-    (key) @_key
-    [
-        (string) @neorg.tags.ranged_verbatim.document_meta.authors
-        (array
-            (string) @neorg.tags.ranged_verbatim.document_meta.authors
-        )
-    ]
-    (#eq? @_key "authors")
-)
+  (key) @_key
+  [
+    (string) @neorg.tags.ranged_verbatim.document_meta.authors
+    (array
+      (string) @neorg.tags.ranged_verbatim.document_meta.authors)
+  ]
+  (#eq? @_key "authors"))
 
 (pair
-    (key) @_key
-    [
-        (string) @neorg.tags.ranged_verbatim.document_meta.categories
-        (array
-            (string) @neorg.tags.ranged_verbatim.document_meta.categories
-        )
-    ]
-    (#eq? @_key "categories")
-)
+  (key) @_key
+  [
+    (string) @neorg.tags.ranged_verbatim.document_meta.categories
+    (array
+      (string) @neorg.tags.ranged_verbatim.document_meta.categories)
+  ]
+  (#eq? @_key "categories"))
 
 (pair
-    (key) @_key
-    (string) @neorg.tags.ranged_verbatim.document_meta.created
-    (#eq? @_key "created")
-)
+  (key) @_key
+  (string) @neorg.tags.ranged_verbatim.document_meta.created
+  (#eq? @_key "created"))
 
 (pair
-    (key) @_key
-    (string) @neorg.tags.ranged_verbatim.document_meta.updated
-    (#eq? @_key "updated")
-)
+  (key) @_key
+  (string) @neorg.tags.ranged_verbatim.document_meta.updated
+  (#eq? @_key "updated"))
 
 (pair
-    (key) @_key
-    (string) @neorg.tags.ranged_verbatim.document_meta.version
-    (#eq? @_key "version")
-)
+  (key) @_key
+  (string) @neorg.tags.ranged_verbatim.document_meta.version
+  (#eq? @_key "version"))

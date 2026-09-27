@@ -1,21 +1,26 @@
-; vim: expandtab:shiftwidth=4:filetype=query:
-
+; vim:set expandtab shiftwidth=2 filetype=query:
 ;
 ;
 ; ~chewygumxx/nvim-config.git
 ; ::: :/queries/markdown/highlights.scm
 ;
 ;
-
 ;
 ; Everybody loves tree-sitter query
 ;
-
 (link_reference_definition
-  (link_label       [ "[" "]" "(" ")"] @markup.link.bracket)
-  (link_destination [ "<" ">" ]        @markup.link.bracket))
-
-
+  (link_label
+    [
+      "["
+      "]"
+      "("
+      ")"
+    ] @markup.link.bracket)
+  (link_destination
+    [
+      "<"
+      ">"
+    ] @markup.link.bracket))
 
 ;From MDeiml/tree-sitter-markdown & Helix
 ;Modified by chewygumxx
@@ -27,20 +32,38 @@
   (paragraph) @markup.heading.2
   (setext_h2_underline) @markup.heading.2)
 
-(atx_heading (atx_h1_marker)) @markup.heading.1
-(atx_heading (atx_h2_marker)) @markup.heading.2
-(atx_heading (atx_h3_marker)) @markup.heading.3
-(atx_heading (atx_h4_marker)) @markup.heading.4
-(atx_heading (atx_h5_marker)) @markup.heading.5
-(atx_heading (atx_h6_marker)) @markup.heading.6
+(atx_heading
+  (atx_h1_marker)) @markup.heading.1
+
+(atx_heading
+  (atx_h2_marker)) @markup.heading.2
+
+(atx_heading
+  (atx_h3_marker)) @markup.heading.3
+
+(atx_heading
+  (atx_h4_marker)) @markup.heading.4
+
+(atx_heading
+  (atx_h5_marker)) @markup.heading.5
+
+(atx_heading
+  (atx_h6_marker)) @markup.heading.6
 
 (info_string) @label
 
-(pipe_table_header (pipe_table_cell) @markup.heading)
+(pipe_table_header
+  (pipe_table_cell) @markup.heading)
 
-(pipe_table_header        "|" @punctuation.special)
-(pipe_table_row           "|" @punctuation.special)
-(pipe_table_delimiter_row "|" @punctuation.special)
+(pipe_table_header
+  "|" @punctuation.special)
+
+(pipe_table_row
+  "|" @punctuation.special)
+
+(pipe_table_delimiter_row
+  "|" @punctuation.special)
+
 (pipe_table_delimiter_cell) @punctuation.special
 
 ; Code blocks (conceal backticks and language annotation)

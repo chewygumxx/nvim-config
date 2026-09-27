@@ -29,3 +29,12 @@ insert_final_newline = true
 # ---------
 [*.md]
 indent_size = 2
+
+# ---------------------
+# Tree-sitter queries
+# ---------------------
+# Not a preference: `ts_query_ls format` indents at two spaces and offers no
+# option to change it, so this is the width the gate will rewrite to anyway.
+# The modelines in `queries/*.scm` name the same width for the same reason.
+[*.scm]
+indent_size = 2

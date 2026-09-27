@@ -1,4 +1,4 @@
-; vim:set expandtab shiftwidth=4 filetype=query:
+; vim:set expandtab shiftwidth=2 filetype=query:
 ; SPDX-License-Identifier: GPL-3.0-only
 ;
 ;
@@ -6,12 +6,13 @@
 ; ::: :/queries/norg_meta/indents.scm
 ;
 ;
-
 (array) @indent.begin
+
 (object) @indent.begin
+
 (ERROR) @indent.begin
 
 [
-    "]"
-    "}"
+  "]"
+  "}"
 ] @indent.branch

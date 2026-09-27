@@ -1,40 +1,80 @@
-; vim: expandtab:shiftwidth=4:filetype=query:
-
+; vim:set expandtab shiftwidth=2 filetype=query:
 ;
 ;
 ; ~chewygumxx/nvim-config.git
 ; ::: :/queries/markdown_inline/highlights.scm
 ;
 ;
-
 ;
 ; Treesitter query, our favourite x-x
 ;
+(full_reference_link
+  [
+    "["
+    "]"
+    "("
+    ")"
+  ] @markup.link.bracket)
 
-(full_reference_link      [ "[" "]" "(" ")" ] @markup.link.bracket)
-(collapsed_reference_link [ "[" "]" "(" ")" ] @markup.link.bracket)
-(inline_link              [ "[" "]" "(" ")" ] @markup.link.bracket)
-(link_label               [ "[" "]" "(" ")" ] @markup.link.bracket)
-(shortcut_link            [ "[" "]" "(" ")" ] @markup.link.bracket)
-(image                    [ "[" "]" "(" ")" ] @markup.link.bracket)
-(link_destination         [ "<" ">" ]        @markup.link.bracket )
+(collapsed_reference_link
+  [
+    "["
+    "]"
+    "("
+    ")"
+  ] @markup.link.bracket)
 
+(inline_link
+  [
+    "["
+    "]"
+    "("
+    ")"
+  ] @markup.link.bracket)
 
-(link_text)  @markup.link.text
+(link_label
+  [
+    "["
+    "]"
+    "("
+    ")"
+  ] @markup.link.bracket)
+
+(shortcut_link
+  [
+    "["
+    "]"
+    "("
+    ")"
+  ] @markup.link.bracket)
+
+(image
+  [
+    "["
+    "]"
+    "("
+    ")"
+  ] @markup.link.bracket)
+
+(link_destination
+  [
+    "<"
+    ">"
+  ] @markup.link.bracket)
+
+(link_text) @markup.link.text
+
 (link_title) @markup.link.title
+
 [
   (link_label)
   (image_description)
 ] @markup.link.label
 
-
-
-
 ;
 ; From tree-sitter-grammars/tree-sitter-markdown
 ; (removed @markup.link)
 ;
-
 ; From MDeiml/tree-sitter-markdown
 (code_span) @markup.raw @nospell
 
@@ -74,7 +114,6 @@
     ")"
   ] @conceal
   (#set! conceal ""))
-
 
 ; Conceal image links
 (image
