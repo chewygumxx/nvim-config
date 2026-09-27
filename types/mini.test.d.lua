@@ -18,12 +18,35 @@
 
 ---@meta
 
+--- The execution record `MiniTest.execute` writes onto a case as it runs
+--- it. Declared rather than left to the `[string]` catch-all below, which
+--- resolves to `any` and so fails the annotation-coverage gate at every
+--- reader's call site rather than here.
+---@class MiniTest.CaseExec
+---@field state? string   Progress, ie. "Executing test" or "Pass"
+---@field fails  string[] Assertion failures; empty until one happens
+---@field notes  string[] `MiniTest.add_note` messages
+
 --- A collected test case, as `collect.filter_cases` is handed one. `desc`
 --- is the array of descriptions it was built from, outermost first: the
 --- file, then each enclosing `describe`, then the `it`.
 ---@class MiniTest.Case
 ---@field desc     string[]
+---@field exec?    MiniTest.CaseExec
 ---@field [string] any
+
+--- What `execute.reporter` is set to. Every field is optional because
+--- `MiniTest.execute` calls whichever are present and skips the rest, which
+--- is what lets one reporter delegate to another and add a field of its
+--- own.
+---@class mini.test.Reporter
+---@field start?  fun(cases: MiniTest.Case[])
+---@field update? fun(case_num: integer)
+---@field finish? fun()
+
+---@class mini.test.GenReporter
+---@field buffer fun(opts?: table): mini.test.Reporter
+---@field stdout fun(opts?: table): mini.test.Reporter
 
 ---@class (exact) MiniTest.CollectOpts
 ---@field emulate_busted? boolean
@@ -31,7 +54,7 @@
 ---@field filter_cases?   fun(case: MiniTest.Case): boolean
 
 ---@class (exact) MiniTest.ExecuteOpts
----@field reporter?      table
+---@field reporter?      mini.test.Reporter
 ---@field stop_on_error? boolean
 
 ---@class MiniTest.Config
@@ -67,6 +90,7 @@
 
 ---@class mini.test
 ---@field expect           mini.test.Expect
+---@field gen_reporter     mini.test.GenReporter
 ---@field setup            fun(config?: MiniTest.Config)
 ---@field run              fun(opts?: table)
 ---@field run_file         fun(file?: string, opts?: table)
