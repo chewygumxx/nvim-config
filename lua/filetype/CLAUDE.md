@@ -54,6 +54,12 @@ same rule cost `prose.lua` its `spell` setting when `gitcommit` arrived: a
 had to be copied rather than inherited. Check what a filetype displaces before
 assuming it composes.
 
+The same rule reaches outside this directory. `util.header.frontmatter` renders
+the repository's Markdown document head gated on `filetype == "markdown"`
+exactly, so `markdown.claude` and `markdown.nex-note` do not get one
+automatically: a compound filetype is not `markdown` for the purposes of an
+equality test, whatever it inherits by aliasing.
+
 `gitcommit.lua` takes both `gitcommit` and `gitrebase` and parses nothing,
 deliberately. `tree-sitter-gitcommit` and `tree-sitter-git-rebase` are both in
 `lua/spec/nvim-treesitter.lua`'s `ensure_installed`, and those grammars already
