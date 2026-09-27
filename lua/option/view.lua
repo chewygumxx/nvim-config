@@ -19,10 +19,18 @@ local opts = {
     -- Color
     termguicolors = true,
 
-    -- Margin
+    -- Gutter
     number         = true,
     relativenumber = true,
-    scrolloff      = 5,
+
+    -- Scroll
+    --
+    -- No 'scroll' here, deliberately. It is window local and Neovim
+    -- recomputes it to half the window height on every resize, so a value
+    -- set once at startup holds for one window until the first split and
+    -- never again. The five line scroll distance is carried on the keys
+    -- instead, by `keymap.scroll_distance`.
+    scrolloff = 5,
 
     -- Window Splitting
     splitright = true,
