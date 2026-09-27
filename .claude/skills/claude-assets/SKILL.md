@@ -64,9 +64,11 @@ deprecation.
 
 There is therefore no `commands/` here, and two things decide it. A skill is a
 directory, so it can bundle a reference file, a template or a script beside its
-prose, which one Markdown file cannot. And a skill declares its own `name`, so
-what it answers to is independent of where it is filed, whereas a command's
-slash name is welded to its filename and can only be changed by moving the file.
+prose, which one Markdown file cannot. And a skill can carry `paths`, so it
+could be scoped to a tree the way a rule is, which a command has no way to
+express. Neither is about the name: a skill's slash name comes from its
+directory just as a command's comes from its filename, so renaming either means
+moving a file.
 
 The unification is observable from inside a session rather than only asserted.
 Before the three were moved, `/context` already priced `fresh`, `gate-battery`
@@ -148,12 +150,24 @@ somebody later wrote a colon-space into it, which is the quietest possible
 failure.
 
 A skill declares `name:` matching its directory and an agent declares `name:`
-matching its filename stem, because that is what each loader keys on. A command
-declares no name at all: its filename is the slash command, which is half of why
-a skill is the better home for a workflow. A rule declares neither, and no
-`description` either, which is why the description cases skip `rules/` rather
-than having been forgotten there. Every asset also carries the repository's
-Markdown document head, ie. the `__cgxx:` block, `ctime`, `title` and `tags`.
+matching its filename stem. For the agent that is what the loader keys on. For
+the skill it is a consistency rule rather than a mechanism, and the reason is
+worth stating because the obvious one is wrong: **a skill loads and is
+advertised under its directory name whether or not it declares a `name:` at
+all.** A probe skill in `probe-dir/` declaring `name: probe-renamed` was
+advertised to a fresh session as `probe-dir`, and the three workflows here were
+announced under their new directory names in the moment they were moved, before
+any `name:` had been added to them. But `Skill(skill = "probe-renamed")` then
+succeeded on its first call. So a `name:` that disagrees with its directory does
+not rename the skill, it gives it a second address that nothing advertises, and
+the assertion exists to keep a file from claiming a name the listing will not
+show.
+
+A command declares no name at all: its filename is the slash command. A rule
+declares neither, and no `description` either, which is why the description
+cases skip `rules/` rather than having been forgotten there. Every asset also
+carries the repository's Markdown document head, ie. the `__cgxx:` block,
+`ctime`, `title` and `tags`.
 
 ## Prefer a hook to a `permissions.deny` rule
 
@@ -169,6 +183,13 @@ route instead of merely refusing.
 Every hook wired in `settings.json` has to be executable, which the suite
 checks, and it checks that the table is non-empty in the same case so that a
 shape change cannot pass as "nothing broken".
+
+`lint-lua.sh` is `PostToolUse`, so it reports on a write that has already landed
+rather than refusing one, and it fires per edit. A change that introduces a
+local before the edit that consumes it therefore reports `unused_variable` on
+the intermediate state, twice in a row if the consumer takes two edits. Read a
+failure there as a description of the file as it stands, not as an edit that was
+rejected.
 
 ## `hooks/lib/tools.sh`
 
