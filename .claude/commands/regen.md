@@ -1,5 +1,6 @@
 ---
-description: Regenerate doc/ and docs/ and verify both trees are clean
+description: >-
+  Regenerate doc/ and docs/ and verify both trees are clean
 ---
 
 Regenerate this repository's two generated trees. Invoke the `generated-output`

@@ -1,5 +1,5 @@
 ---
-description:
+description: >-
   Run every local gate in the order CI runs them and report only failures
 ---
 
