@@ -59,11 +59,13 @@ references that load only when that subsystem is touched, which is why this file
 is roughly half the length it once was: the reasons did not go away, they
 stopped being loaded into every session regardless of relevance. `commands/`
 holds `/gates`, `/regen` and `/fresh`; `agents/gate-runner.md` runs the gate
-battery without its output reaching the caller; and `hooks/` makes five of the
-rules here mechanical rather than advisory, refusing a write into a generated
-tree, refusing a commit while a gate binary is absent, refusing a whole-file
-read of the wordlists and the compiled spell file, linting Lua at write time,
-and reporting that the generated help has gone stale.
+battery without its output reaching the caller, though note a newly added agent
+is not selectable as a `subagent_type` until the session restarts, so the one
+that creates it cannot use it; and `hooks/` makes five of the rules here
+mechanical rather than advisory, refusing a write into a generated tree,
+refusing a commit while a gate binary is absent, refusing a whole-file read of
+the wordlists and the compiled spell file, linting Lua at write time, and
+reporting that the generated help has gone stale.
 
 That fifth one is a hook rather than a `permissions.deny` rule for a reason
 worth knowing before reaching for `deny` again. A `Read(...)` rule is not scoped
@@ -533,6 +535,14 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   is right to flag but that cannot be written around, e.g. `duplicate-set-field`
   when a test stubs `vim.notify`, or `missing-fields` on a synthetic
   `command_args` table built to exercise a user command callback directly.
+- **Reading a `luafmt` diff**: when it proposes exploding a whole call into the
+  one-argument-per-line form, ie. turning `it("...", function()` into `it(`, a
+  string, a `function()` and a closing `)`, the cause is almost never the call
+  itself. It is one over-long line somewhere inside the body, and `luafmt`
+  reformats the nearest enclosing call rather than the offending line. Shorten
+  that line, usually by binding a long expression to a local, and the compact
+  layout comes back. Chasing the proposed diff instead produces an ugly reformat
+  that is also, briefly, idempotent, which makes it look correct.
 - **Commit messages**: Conventional Commits, enforced by commitlint + husky.
   Scopes must come from this repo's fixed `scope.enum` (`hl`, `opt`, `ft`,
   `key`, `ucmd`, `acmd`, `lsp`, `spec`, `util`, `asset`, `claude`); do not
