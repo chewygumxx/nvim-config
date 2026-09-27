@@ -346,3 +346,64 @@ The everyday `~/.config/nvim` is a separate checkout at `034e3f4`, thirteen
 commits behind by the end of this plan, and Phase 0.3 will have moved the shared
 plugin directory to the newly synced commits. Nothing here touches that
 checkout; pull it separately.
+
+## As built
+
+All phases landed. Six ways the result departs from what was planned above,
+recorded because each was found by checking rather than by reasoning, and the
+plan's version is wrong.
+
+**Phase 3.3 gained a prerequisite commit.**
+`ci: Install mini.test for the LuaCATS job` came first. The
+`Check annotation coverage` step runs under `scripts/minimal_init.lua`, which
+raises when mini.test is absent, but that file is passed as `-u`, so the raise
+is a startup error: Neovim reports it and carries on without ever reaching its
+`runtimepath` assignment. Run 36223542610 logged
+`E5113 ... mini.test is not installed` and still reported success, so the gate
+had been running degraded since it was added. `install-mini-test` was wired only
+into `test.yaml`.
+
+**Two `emmylua_doc_cli` defaults had to be overridden.** `--output-format`
+defaults to `html`, not markdown, and `--output` defaults to `./output`, not
+`./docs`. Both are now passed explicitly.
+
+**`lua/spec/` is excluded from the generated reference.** 48 of the 103 Lua
+files under `lua/`, `lsp/` and `init.lua` are declarative `LazySpec` tables with
+no callable API, so documenting them would have filled the tree the CI gate has
+to diff without describing anything a reader can call. The result is 69 pages.
+
+**The tree is staged and installed wholesale rather than written in place.** Two
+failure modes peculiar to committing generated output drove this: a run that
+produced nothing still exits 0, so an empty `docs/` would be committed as truth,
+and a generator that only ever writes leaves the page for a deleted module
+behind for good with `git diff` reporting no change. Building in a temp
+directory and proving the result non-empty before replacing `docs/` covers both,
+and has the side benefit that a failed run leaves the committed documentation
+intact.
+
+**`mkdocs.yml` is discarded rather than tracked.** The generator emits it beside
+the Markdown, and it carries trailing whitespace while CI runs prettier over
+every `*.yml` that `git ls-files` reports, which is the two-tools-one-file
+standoff `.prettierignore` settles for `lazy-lock.json`. No `.prettierignore`
+entry was needed for the Markdown itself: it has neither trailing whitespace nor
+a missing final newline, and no gate globs `*.md`.
+
+**The gate is `git status --porcelain -- docs/`, not `git diff --exit-code`.**
+The planned command was wrong in two ways, both demonstrated rather than argued.
+`git diff` cannot see an untracked file, so a newly generated page nobody
+committed passed. And staging intents first with `git add --intent-to-add -A`
+does not fix it, because `-A` stages deletions in full, so a page the generator
+no longer produces lands in the index and the subsequent diff reports clean,
+missing exactly the stale-page case the wholesale replacement exists to create.
+`status` reports modified, untracked and deleted alike and touches no index; all
+four cases were checked in turn.
+
+Also note the localised instruction files departed from the plan's premise that
+`.github/workflows/CLAUDE.md` is "the precedent with the new header". It does
+carry a `__cgxx` header, but an older one: no `foldlevel`, no `description:`,
+and a flow-style `tags: [llm, claude]`. The five new files follow
+`util.header.frontmatter` instead, and that file's header was brought into line,
+since one shape describing every Markdown file is worth more than
+self-consistency among the CLAUDE.md files alone. Its body is untouched,
+including a pre-existing "Ensure any that any workflow" typo left for a separate
+decision.
