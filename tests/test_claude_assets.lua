@@ -1,0 +1,329 @@
+#!/bin/false
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
+
+--
+--
+-- ~chewygumxx/nvim-config.git
+-- ::: :/tests/test_claude_assets.lua
+--
+--
+
+--
+-- The `.claude/` assets, checked against the tree they describe.
+--
+-- `.claude/CLAUDE.md` and the skills beside it are prose, so nothing can
+-- check that what they say is true. What can be checked is that the files
+-- they name still exist, which is the drift that actually happens: a
+-- module is renamed and six paragraphs keep naming the old path.
+--
+-- The extraction rule below is narrower than the obvious one, and
+-- deliberately. Every backticked token ending in a file extension gives
+-- 130 candidates here of which 53 do not resolve, and none of those 53 is
+-- drift: they are bare basenames used in running prose (`statusline.lua`,
+-- `test_keymap.lua`) where the surrounding sentence already established
+-- the directory. Requiring a separator and a real top-level root cuts that
+-- to 66 assertions with four false positives, which are registered below.
+-- A checker built on the obvious rule would have cried wolf 53 times and
+-- been switched off within a week.
+--
+-- `.husky/pre-commit` does not run the suite for a `.claude/`-only commit,
+-- and that is the right call rather than an oversight. The drift this
+-- catches is a rename under `lua/`, which already triggers the suite, so
+-- the expensive case is covered while the repository's granular commit
+-- convention pays nothing. CI runs the suite on every push regardless,
+-- which is what catches a bad path introduced by a `.claude/`-only commit.
+--
+
+local eq = require("mini.test") --[[@as mini.test]]
+    .expect
+    .equality
+
+--- Tokens that look like repository paths, are rooted like repository
+--- paths, and deliberately name nothing.
+---
+--- A reason rather than a bare list, for the reason
+--- `tests/test_coverage.lua`'s `exempt` table gives: "this one does not
+--- have to exist" is a decision, and the next reader deserves to know
+--- which decision it was.
+---@type table<string, string>
+local not_a_path = {
+    ["lua/plugin_manager.lua"] = "named as a thing that was removed, in "
+        .. "the passage explaining that there is no indirection layer",
+    ["lua/spec/lazy.nvim.lua"] = "the spec that would pin lazy.nvim's own "
+        .. "branch, considered and deliberately not written",
+    ["lua/util/X.lua"] = "the placeholder in the test-naming derivation, "
+        .. "ie. lua/util/X.lua -> tests/test_util_X.lua",
+    ["tests/test_util_X.lua"] = "the other half of that same placeholder",
+}
+
+--- Every Markdown asset under `.claude/`.
+---@return string[] paths
+local assets = function()
+    ---@type string[]
+    local found = vim.fn.globpath(".claude", "**/*.md", true, true)
+    table.sort(found)
+    return found
+end
+
+--- Whether a repository-relative path names something that is there.
+---
+--- Directories count, since the prose names `queries/` and `lua/spec/` as
+--- readily as it names a file, and `doc/tags` is a file with no extension.
+---@param path string
+---@return boolean exists
+local present = function(path)
+    return vim.fn.filereadable(path) == 1 or vim.fn.isdirectory(path) == 1
+end
+
+--- The backticked tokens in a file that name repository paths, resolved.
+---
+--- Rooted means the first segment is a directory that exists at the
+--- repository root, which is what separates `lua/util/git.lua` from the
+--- bare `git.lua` that prose uses once the directory is established, and
+--- from `$VIMRUNTIME/ftplugin/markdown.vim` or `~/.local/share/cargo/bin`.
+--- Globs and angle-bracket placeholders are dropped, since neither names
+--- one file.
+---
+--- An asset also writes paths relative to `.claude/` itself, ie.
+--- `hooks/lib/tools.sh` rather than `.claude/hooks/lib/tools.sh`, so that
+--- root is tried second and the token is returned resolved. Without it
+--- every such reference is invisible here, which was found by moving the
+--- file out of the way and watching this pass regardless.
+---@param path string Repository-relative path of the asset to read
+---@return string[] paths Sorted, deduplicated, repository-relative
+local referenced = function(path)
+    local text = table.concat(vim.fn.readfile(path), "\n")
+
+    ---@type table<string, boolean>
+    local seen = {}
+    for token in text:gmatch("`([^`\n]+)`") do
+        local root = token:match("^([^/]+)/")
+        if root ~= nil and not token:find("[*<>%s]") then
+            if vim.fn.isdirectory(root) == 1 then
+                seen[token] = true
+            elseif vim.fn.isdirectory(".claude/" .. root) == 1 then
+                seen[".claude/" .. token] = true
+            end
+        end
+    end
+
+    ---@type string[]
+    local paths = {}
+    for token in pairs(seen) do
+        table.insert(paths, token)
+    end
+    table.sort(paths)
+    return paths
+end
+
+--- The frontmatter block of a Markdown file, as lines.
+---@param path string
+---@return string[] lines Empty when the file opens with no `---` fence
+local frontmatter = function(path)
+    local lines = vim.fn.readfile(path)
+    if lines[1] ~= "---" then
+        return {}
+    end
+
+    ---@type string[]
+    local block = {}
+    for index = 2, #lines do
+        if lines[index] == "---" then
+            return block
+        end
+        table.insert(block, lines[index])
+    end
+    return {}
+end
+
+--- One hook entry inside `.claude/settings.json`.
+---
+--- Declared as a class rather than written inline, because a multi-line
+--- `---@type` table shape is re-indented differently on each `luafmt`
+--- pass and reported as "formatting is not idempotent".
+---@class cgxx.test.ClaudeHook
+---@field command string
+
+--- One matcher group, holding the hooks that fire for it.
+---@class cgxx.test.ClaudeHookMatcher
+---@field hooks cgxx.test.ClaudeHook[]
+
+describe("claude assets", function()
+    ---@type string[]
+    local files = assets()
+
+    ---@type string[]
+    local skills = vim.fn.globpath(".claude/skills", "*/SKILL.md", true, true)
+    table.sort(skills)
+
+    it("finds the asset files", function()
+        -- The generated cases below cannot fail over an empty list
+        eq({ #files > 8, #skills > 0 }, { true, true })
+    end)
+
+    for _, path in ipairs(files) do
+        it(path .. " names only paths that exist", function()
+            ---@type string[]
+            local missing = {}
+            for _, token in ipairs(referenced(path)) do
+                if not present(token) and not not_a_path[token] then
+                    table.insert(missing, token)
+                end
+            end
+            eq({ path, missing }, { path, {} })
+        end)
+    end
+
+    it("checks a meaningful number of paths", function()
+        -- Guards the extraction rule itself. A pattern change that
+        -- silently matched nothing would leave every case above passing
+        -- over an empty list, which is the failure this suite's runner is
+        -- written to refuse elsewhere for the same reason.
+        ---@type table<string, boolean>
+        local union = {}
+        for _, path in ipairs(files) do
+            for _, token in ipairs(referenced(path)) do
+                union[token] = true
+            end
+        end
+
+        ---@type number
+        local total = 0
+        for _ in pairs(union) do
+            total = total + 1
+        end
+        eq(total > 40, true)
+    end)
+
+    it("registers no exclusion that is now a real path", function()
+        -- An entry outliving its reason is the way this registry rots: the
+        -- file gets created, the exclusion keeps suppressing a check that
+        -- would now pass, and nothing says so.
+        ---@type string[]
+        local resurrected = {}
+        for token in pairs(not_a_path) do
+            if present(token) then
+                table.insert(resurrected, token)
+            end
+        end
+        table.sort(resurrected)
+        eq(resurrected, {})
+    end)
+
+    it("registers no exclusion nothing mentions", function()
+        -- The other direction: prose is deleted, the entry stays, and the
+        -- registry slowly fills with names that mean nothing.
+        ---@type table<string, boolean>
+        local union = {}
+        for _, path in ipairs(files) do
+            for _, token in ipairs(referenced(path)) do
+                union[token] = true
+            end
+        end
+
+        ---@type string[]
+        local orphaned = {}
+        for token, reason in pairs(not_a_path) do
+            if not union[token] or #reason == 0 then
+                table.insert(orphaned, token)
+            end
+        end
+        table.sort(orphaned)
+        eq(orphaned, {})
+    end)
+
+    for _, path in ipairs(skills) do
+        local dir = path:match("^%.claude/skills/([^/]+)/SKILL%.md$")
+
+        it(path .. " declares the name of its directory", function()
+            ---@type string?
+            local declared
+            for _, line in ipairs(frontmatter(path)) do
+                declared = declared or line:match("^name:%s*(%S+)%s*$")
+            end
+            eq({ path, declared }, { path, dir })
+        end)
+
+        it(path .. " folds its description with >-", function()
+            -- A bare `description:` is what the reflow hook turns into a
+            -- plain multiline scalar, which is valid YAML that cannot
+            -- contain ": ". `>-` folds to the same single line and
+            -- tolerates a colon anywhere. Established by probe.
+            ---@type boolean
+            local folded = false
+            for _, line in ipairs(frontmatter(path)) do
+                folded = folded or line:match("^description:%s*>%-%s*$") ~= nil
+            end
+            eq({ path, folded }, { path, true })
+        end)
+    end
+
+    it("wires every hook to a file that can run", function()
+        ---@type string
+        local raw = table.concat(vim.fn.readfile(".claude/settings.json"), "\n")
+        ---@type table<string, any>
+        local settings = vim.json.decode(raw)
+        ---@type table<string, cgxx.test.ClaudeHookMatcher[]>
+        local hooks = settings.hooks
+
+        ---@type string[]
+        local commands = {}
+        for _, matchers in pairs(hooks) do
+            for _, matcher in ipairs(matchers) do
+                for _, hook in ipairs(matcher.hooks) do
+                    table.insert(commands, hook.command)
+                end
+            end
+        end
+
+        ---@type string[]
+        local broken = {}
+        for _, command in ipairs(commands) do
+            local path = command:gsub("%${CLAUDE_PROJECT_DIR}", vim.fn.getcwd())
+            if vim.fn.executable(path) ~= 1 then
+                table.insert(broken, command)
+            end
+        end
+        table.sort(broken)
+
+        -- Asserted together so an empty hook table cannot pass as "nothing
+        -- broken", which is how this check would quietly stop meaning
+        -- anything if the settings shape ever changed
+        eq({ #commands > 0, broken }, { true, {} })
+    end)
+
+    it("points at every skill, and at no skill that is gone", function()
+        -- Whitespace-normalised because the reflow hook wraps freely, so
+        -- "`generated-output` skill" is routinely split across two lines
+        ---@type string
+        local prose = table
+            .concat(vim.fn.readfile(".claude/CLAUDE.md"), " ")
+            :gsub("%s+", " ")
+
+        ---@type string[]
+        local unpointed = {}
+        for _, path in ipairs(skills) do
+            local name = assert(
+                path:match("^%.claude/skills/([^/]+)/SKILL%.md$"),
+                "unexpected skill path: " .. path
+            )
+            if not prose:find("`" .. name .. "` skill", 1, true) then
+                table.insert(unpointed, name)
+            end
+        end
+        table.sort(unpointed)
+
+        ---@type string[]
+        local dangling = {}
+        for name in prose:gmatch("`([a-z-]+)` skill") do
+            local skill = ".claude/skills/" .. name .. "/SKILL.md"
+            if vim.fn.filereadable(skill) == 0 then
+                table.insert(dangling, name)
+            end
+        end
+        table.sort(dangling)
+
+        eq({ unpointed, dangling }, { {}, {} })
+    end)
+end)
