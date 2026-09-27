@@ -38,9 +38,21 @@ localised file that restates a fact creates a second copy of it to drift. None
 of them is reached by any gate, since no workflow or hook globs `*.md`, so
 correctness there is entirely a matter of care at write time.
 
+Six is also the maximum, in the sense that the two directories most in need of a
+"do not edit this by hand" note are the two that cannot hold one.
+`scripts/gendoc.lua` and `scripts/genhelp.lua` both `delete(dir, "rf")` and
+recreate, for the reason each states inline, so any file added to `docs/` or
+`doc/` by hand is removed on the next run without a word. That was confirmed by
+probe rather than reasoned about: a file planted in each vanished and neither
+generator said anything. It rules out a `CLAUDE.md`, a `README`, a `.gitkeep` or
+a banner file in either, and it is the reason the rule below lives here instead.
+
 One hazard specific to working through Claude Code: a hook reflows `.md` files
 on every Write or Edit. That is harmless for prose but would corrupt generated
-output, so never edit anything under `docs/` by hand; regenerate it.
+output, so never edit anything under `docs/` by hand; regenerate it. `doc/` is
+exempt from the hook, holding `.txt` rather than `.md`, which makes hand-editing
+it _easier_ rather than safer: the edit survives the write and is destroyed by
+the next generator run.
 
 ## Commands
 
