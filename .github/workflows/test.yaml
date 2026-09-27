@@ -72,5 +72,27 @@ jobs:
             - name: Install lazy.nvim
               uses: ./.github/actions/install-lazy
 
+            # `MINITEST_SUMMARY` is appended to, and `$GITHUB_STEP_SUMMARY`
+            # is a path GitHub renders as Markdown, so the per-file table
+            # lands in the job summary with no third-party action and no
+            # extra permission. `MINITEST_REPORT` writes the JUnit XML that
+            # the next step attaches. Neither variable changes what runs:
+            # `util.test_report.from_env` only adds output.
+            # Both named in the shell rather than in `env:`, because
+            # `$GITHUB_STEP_SUMMARY` exists only as a runtime variable and
+            # has no `${{ }}` context to read it from.
             - name: Run tests
-              run: nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
+              run: |
+                  MINITEST_REPORT="$RUNNER_TEMP/test-results.xml" \
+                      MINITEST_SUMMARY="$GITHUB_STEP_SUMMARY" \
+                      nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
+
+            # `always()`, because the run that fails is the one whose XML
+            # is worth reading, and a failing step would otherwise skip it.
+            - name: Upload the test results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test-results-${{ matrix.label }}
+                  path: ${{ runner.temp }}/test-results.xml
+                  if-no-files-found: error
