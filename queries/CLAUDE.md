@@ -73,8 +73,14 @@ the languages Neovim bundles a parser for. It earned its place immediately: it
 found five `(#set! conceal "")` patterns in
 `queries/markdown_inline/highlights.scm` with no capture to attach to, which
 Tree-sitter had been discarding without a word, so Markdown link concealment had
-simply never worked. Note its `--fix` **deletes** such a pattern rather than
-giving it a capture, so read a fix before taking it.
+simply never worked. It does now, confirmed in a live buffer on 2026-09-27. The
+repair was `@conceal`, matching the capture the working pattern above it already
+uses, and deliberately **not** upstream's `@markup.link`: this file documents
+having removed that in favour of the finer-grained `@markup.link.bracket`,
+`.text`, `.title` and `.label` captures it declares at the top, so restoring it
+would have undone deliberate work to fix an unrelated defect. Note `--fix`
+**deletes** a pattern like this rather than giving it a capture, so read a fix
+before taking it.
 
 `.tsqueryrc.json` is almost empty on purpose. `valid_predicates` replaces the
 tool's defaults rather than extending them, so declaring the three custom
