@@ -50,7 +50,7 @@ mechanical rather than advisory.
 | Lint, format, typecheck and test gates; tool pins; CI jobs | **`gates` skill**                                  |
 | `doc/` and `docs/`, and the two generators that own them   | **`generated-output` skill**                       |
 | Plugins, specs, `lua/plugin.lua`, `lazy-lock.json`         | **`specs` skill** and `lua/spec/CLAUDE.md`         |
-| Anything under `.claude/`: skills, commands, rules, hooks  | **`claude-assets` skill**                          |
+| Anything under `.claude/`: skills, agents, rules, hooks    | **`claude-assets` skill**                          |
 | The repository-notation statusline                         | **`statusline` skill**                             |
 | WIP snapshots onto `refs/wip`                              | **`wip` skill**                                    |
 | Markdown list continuation and the Markdown keymaps        | **`markdown-continuation` skill**                  |
