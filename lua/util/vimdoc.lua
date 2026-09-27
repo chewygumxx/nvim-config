@@ -65,6 +65,61 @@ local width_of = function(s)
     return vim.fn.strdisplaywidth(s)
 end
 
+--- Returns the longest prefix of s that fits in cells columns, and what is
+--- left of it. At least one character is always taken, so a caller looping
+--- on the remainder cannot spin.
+---@param s     string
+---@param cells integer
+---@return string prefix
+---@return string rest
+local split_at = function(s, cells)
+    local taken = 0
+    for i = 1, vim.fn.strchars(s), 1 do
+        if width_of(vim.fn.strcharpart(s, 0, i)) > cells then
+            break
+        end
+        taken = i
+    end
+    taken = math.max(taken, 1)
+    return vim.fn.strcharpart(s, 0, taken), vim.fn.strcharpart(s, taken)
+end
+
+--- Breaks any line wider than `M.width` at the width, continuing the
+--- remainder at indent.
+---
+--- `util.text.wrap_comment` breaks on whitespace alone, which is right for
+--- prose and wrong here: an option value like 'statusline' or a slash-run
+--- like a command's argument list is one token and would be emitted whole,
+--- past the column a help window shows. Truncating instead would make the
+--- page state the value wrongly, so the token is broken and kept.
+---@param lines  string[]
+---@param indent string   Prefix each continuation line carries
+---@return string[] lines
+M.fit = function(lines, indent)
+    ---@type string[]
+    local out = {}
+    for _, line in ipairs(lines) do
+        local rest  = line
+        local first = true
+        -- The indent has to be counted with the remainder rather than
+        -- against it: a tail of 75 cells fits on its own and does not fit
+        -- beneath a 24-cell gutter, and testing the tail alone emitted it
+        -- at 99
+        while true do
+            local prefix = first and "" or indent
+            if width_of(prefix) + width_of(rest) <= M.width then
+                out[#out + 1] = prefix .. rest
+                break
+            end
+            local chunk, tail = split_at(rest, M.width - width_of(prefix))
+            out[#out + 1]     = prefix .. chunk
+            rest              = tail
+            first             = false
+        end
+    end
+    return out
+end
+
 --- Returns left with tag placed flush right against `M.width`, separated
 --- by at least one space.
 ---@param left string
@@ -124,7 +179,7 @@ M.entry = function(entry)
         table.insert(wrapped, 1, entry.lhs)
     end
 
-    vim.list_extend(lines, wrapped)
+    vim.list_extend(lines, M.fit(wrapped, gutter))
     return lines
 end
 
@@ -143,12 +198,10 @@ M.section = function(section)
     local lines = { M.rule("="), M.flush_right(section.title, section.tag), "" }
 
     if section.intro and section.intro ~= "" then
-        vim.list_extend(
-            lines,
-            util_text.wrap_comment(section.intro, M.width, {
-                commentstring = "%s",
-            })
-        )
+        local intro = util_text.wrap_comment(section.intro, M.width, {
+            commentstring = "%s",
+        })
+        vim.list_extend(lines, M.fit(intro, ""))
         lines[#lines + 1] = ""
     end
 

@@ -101,6 +101,55 @@ describe("util.vimdoc.entry", function()
     end)
 end)
 
+describe("util.vimdoc.fit", function()
+    it("leaves a line that already fits alone", function()
+        eq(vimdoc.fit({ "short", "" }, "  "), { "short", "" })
+    end)
+
+    -- The case `wrap_comment` cannot serve: 'statusline' is one token of
+    -- close to two hundred characters, and there is no space to break at
+    it("breaks an unbreakable token at the width", function()
+        -- 161 characters over a four-space continuation indent: 78, then
+        -- 4 + 74, then the 9 that are left
+        local token = string.rep("x", vimdoc.width * 2 + 5)
+        local lines = vimdoc.fit({ token }, "    ")
+        eq(#lines, 3)
+        eq(#lines[1], vimdoc.width)
+        eq(#lines[2], vimdoc.width)
+        eq(lines[2]:sub(1, 4), "    ")
+        eq(lines[3], "    " .. string.rep("x", 9))
+        -- Parenthesised: `gsub` returns a count as its second value, which
+        -- would otherwise arrive as a third argument to `eq`
+        eq((table.concat(lines):gsub(" ", "")), token)
+    end)
+
+    -- Breaking by character count would overshoot here, since each of
+    -- these is one character and two cells
+    it("breaks on screen cells rather than characters", function()
+        local wide  = string.rep("あ", vimdoc.width)
+        local lines = vimdoc.fit({ wide }, "")
+        for _, line in ipairs(lines) do
+            eq(vim.fn.strdisplaywidth(line) <= vimdoc.width, true)
+        end
+    end)
+
+    -- The regression: a tail short enough to fit on its own line is not
+    -- short enough to fit beneath the gutter, and counting it alone let a
+    -- 99-column line into the generated 'statusline' entry
+    it("counts the continuation indent against the remainder", function()
+        local gutter = string.rep(" ", vimdoc.indent)
+        local token  = string.rep("x", vimdoc.width + 60)
+        for _, line in ipairs(vimdoc.fit({ token }, gutter)) do
+            eq(#line <= vimdoc.width, true)
+        end
+    end)
+
+    it("cannot spin when the indent leaves no room", function()
+        local lines = vimdoc.fit({ "abc" }, string.rep(" ", vimdoc.width + 10))
+        eq(#lines > 0, true)
+    end)
+end)
+
 describe("util.vimdoc.contents", function()
     it("right-aligns every link and fills the gap with dots", function()
         local lines = vimdoc.contents({
