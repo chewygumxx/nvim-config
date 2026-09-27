@@ -1,6 +1,6 @@
 ---
 __cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown:
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
   # SPDX-License-Identifier: GPL-3.0-only
 
   #
@@ -12,7 +12,11 @@ __cgxx: |
 
 ctime: 2026-09-26
 title: CLAUDE.md
-tags: [llm, claude]
+description: >-
+  The one repository-wide rule the GitHub Actions workflows have to hold to.
+tags:
+  - llm
+  - claude
 ---
 
 # CLAUDE.md

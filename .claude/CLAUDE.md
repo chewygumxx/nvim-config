@@ -21,6 +21,22 @@ here. `plan.md` is the working plan for the current tranche of work, tracked at
 the request of the session that wrote it, and goes stale by design once its
 phases land.
 
+Six directories additionally carry their own `CLAUDE.md`: `.github/workflows/`,
+`lua/spec/`, `tests/`, `lua/util/`, `lsp/` and `queries/`. Each is deliberately
+short and holds only what is easy to violate from outside the directory and not
+derivable from reading it, ie. the `elide`/`condemn` distinction that is
+invisible after lazy.nvim's merge, the one-shared-process discipline the test
+suite depends on, the two annotation habits `luafmt` will otherwise undo, the
+`ensure_installed` parity assertion, and the absence of `; extends`. They are
+rules and reasons rather than inventories, for the same reason this file is: a
+localised file that restates a fact creates a second copy of it to drift. None
+of them is reached by any gate, since no workflow or hook globs `*.md`, so
+correctness there is entirely a matter of care at write time.
+
+One hazard specific to working through Claude Code: a hook reflows `.md` files
+on every Write or Edit. That is harmless for prose but would corrupt generated
+output, so never edit anything under `docs/` by hand; regenerate it.
+
 ## Commands
 
 There is no build step. Linting/formatting/typechecking:
