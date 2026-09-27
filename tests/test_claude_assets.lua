@@ -52,6 +52,26 @@ local not_a_path = {
         .. "branch, considered and deliberately not written",
 }
 
+--- Skills reached by slash rather than by being routed to.
+---
+--- `.claude/CLAUDE.md`'s table says where a reason lives, and a workflow
+--- skill holds no reason: it is a sequence run on request. Its absence
+--- from that table is therefore not drift, which is why the pointer case
+--- below skips one. The reader those pointers exist for is a subagent
+--- with no `Skill` tool, ie. `.claude/agents/gate-runner.md`, which
+--- cannot invoke a workflow at all and reaches a reference skill only by
+--- reading the file the table names.
+---
+--- Discovery never depended on a pointer either way: every skill's
+--- `description` is resident in every session regardless of what names
+--- this prose happens to carry.
+---@type table<string, string>
+local workflow = {
+    ["gate-battery"] = "the gate sequence, run on request",
+    ["regen"] = "the two generators, run on request",
+    ["fresh"] = "the end-of-session judgement pass",
+}
+
 --- Every Markdown asset under `.claude/`.
 ---@return string[] paths
 local assets = function()
@@ -165,6 +185,12 @@ describe("claude assets", function()
     local skills = vim.fn.globpath(".claude/skills", "*/SKILL.md", true, true)
     table.sort(skills)
 
+    -- Expected empty. A command and a skill are one mechanism, and only a
+    -- skill can bundle a file beside its prose or name itself something
+    -- other than its filename, so every workflow here is a skill and
+    -- `.claude/commands/` is gone. The glob stays for the shadowing case
+    -- below, which is the one thing that would go unchecked if a command
+    -- were ever added back.
     ---@type string[]
     local commands = vim.fn.globpath(".claude/commands", "*.md", true, true)
     table.sort(commands)
@@ -181,10 +207,12 @@ describe("claude assets", function()
     local rules = vim.fn.globpath(".claude/rules", "*.md", true, true)
     table.sort(rules)
 
-    -- Every asset carrying frontmatter. All three kinds are checked, not
-    -- the skills alone: a command or an agent whose description drifted
-    -- back to a bare `description:` would break only once somebody later
-    -- wrote a colon-space into it, which is the quietest possible failure.
+    -- Every asset carrying frontmatter. All three kinds are named, not
+    -- the skills alone: an agent whose description drifted back to a bare
+    -- `description:` would break only once somebody later wrote a
+    -- colon-space into it, which is the quietest possible failure. The
+    -- commands contribute nothing today, there being none, and are named
+    -- anyway so that a re-added one is checked rather than exempt.
     ---@type string[]
     local described = {}
     for _, group in ipairs({ skills, commands, agents }) do
@@ -197,26 +225,34 @@ describe("claude assets", function()
     it("finds the asset files", function()
         -- The generated cases below cannot fail over an empty list, and
         -- each kind is counted separately so a glob that stopped matching
-        -- one of them cannot hide behind the other two
+        -- one of them cannot hide behind the others. The commands are the
+        -- one kind with no count, an empty `.claude/commands/` being the
+        -- intended state rather than a glob that broke.
         eq({
             #files > 8,
             #skills > 0,
-            #commands > 0,
             #agents > 0,
             #rules > 0,
-        }, { true, true, true, true, true })
+        }, { true, true, true, true })
     end)
 
     -- A command and a skill share one name namespace, Claude Code listing
     -- the first by its filename stem and the second by its directory, so
     -- a collision leaves exactly one of the pair reachable and reports
-    -- nothing about the other. That is not hypothetical: the command now
-    -- filed as `gate-battery.md` was written as `gates.md` and shadowed
-    -- by `.claude/skills/gates/` from that day, unreachable for as long
-    -- as `.claude/CLAUDE.md` described it as the way to run the battery.
-    -- The three groups above are each checked independently, which is
-    -- exactly why every case passed over it. Agents are left out on
-    -- purpose, being chosen by `subagent_type` rather than by slash.
+    -- nothing about the other. That is not hypothetical: the gate battery
+    -- was written as a command named `gates.md` and shadowed by
+    -- `.claude/skills/gates/` from that day, unreachable for as long as
+    -- `.claude/CLAUDE.md` described it as the way to run the battery,
+    -- which is why it answers to `gate-battery` still. The groups above
+    -- are each checked independently, which is exactly why every case
+    -- passed over it.
+    --
+    -- This case passes vacuously now, every workflow having become a
+    -- skill, and is kept rather than deleted because two skills cannot
+    -- collide at all: a directory name is unique by construction, so
+    -- adding a command back is the only way to reintroduce the hazard.
+    -- Agents are left out on purpose, being chosen by `subagent_type`
+    -- rather than by slash.
     it("gives every command a name no skill claims", function()
         local skill_pat = "^%.claude/skills/([^/]+)/SKILL%.md$"
         local cmd_pat   = "^%.claude/commands/(.+)%.md$"
@@ -396,7 +432,7 @@ describe("claude assets", function()
         eq({ #wired > 0, broken }, { true, {} })
     end)
 
-    it("points at every skill, and at no skill that is gone", function()
+    it("points at each reference skill, and at none gone", function()
         -- Whitespace-normalised because the reflow hook wraps freely, so
         -- "`generated-output` skill" is routinely split across two lines
         ---@type string
@@ -411,7 +447,8 @@ describe("claude assets", function()
                 path:match("^%.claude/skills/([^/]+)/SKILL%.md$"),
                 "unexpected skill path: " .. path
             )
-            if not prose:find("`" .. name .. "` skill", 1, true) then
+            if not workflow[name]
+                and not prose:find("`" .. name .. "` skill", 1, true) then
                 table.insert(unpointed, name)
             end
         end
@@ -427,7 +464,22 @@ describe("claude assets", function()
         end
         table.sort(dangling)
 
-        eq({ unpointed, dangling }, { {}, {} })
+        -- The registry asserted the other way too, for the reason
+        -- `not_a_path` and `tests/test_coverage.lua`'s `exempt` are: an
+        -- entry naming a skill that is gone reads as a deliberate
+        -- omission, and goes on excusing the name if a later skill picks
+        -- it up. An exemption nothing exempts is the quiet kind of stale.
+        ---@type string[]
+        local stale = {}
+        for name in pairs(workflow) do
+            local skill = ".claude/skills/" .. name .. "/SKILL.md"
+            if vim.fn.filereadable(skill) == 0 then
+                table.insert(stale, name)
+            end
+        end
+        table.sort(stale)
+
+        eq({ unpointed, dangling, stale }, { {}, {}, {} })
     end)
 
     it("stays inside the always-loaded budget", function()

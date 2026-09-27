@@ -6,12 +6,13 @@ __cgxx: |
   #
   #
   # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/commands/regen.md
+  # ::: :/.claude/skills/regen/SKILL.md
   #
   #
 
 ctime: 2026-09-27
-title: /regen
+title: Tree regeneration
+name: regen
 description: >-
   Regenerate doc/ and docs/ and verify both trees are clean
 tags:

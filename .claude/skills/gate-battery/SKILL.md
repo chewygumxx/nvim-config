@@ -6,12 +6,13 @@ __cgxx: |
   #
   #
   # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/commands/gate-battery.md
+  # ::: :/.claude/skills/gate-battery/SKILL.md
   #
   #
 
 ctime: 2026-09-27
-title: /gate-battery
+title: Gate battery
+name: gate-battery
 description: >-
   Run every local gate in the order CI runs them and report only failures
 tags:

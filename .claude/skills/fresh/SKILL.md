@@ -6,12 +6,13 @@ __cgxx: |
   #
   #
   # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/commands/fresh.md
+  # ::: :/.claude/skills/fresh/SKILL.md
   #
   #
 
 ctime: 2026-09-27
-title: /fresh
+title: Session freshness pass
+name: fresh
 description: >-
   Judge whether this session left the assets under .claude/ still true. The
   mechanical checks are a gate now, so this is the half that needs a person.
@@ -48,9 +49,9 @@ loses quietly.
 
 **Whether the prose is true.** A skill whose explanation has quietly become
 wrong passes every assertion above, because every path it names still resolves.
-`.claude/commands/fresh.md` itself went stale within an hour of being written,
-by instructing four checks a gate had just taken over, and nothing mechanical
-noticed.
+`.claude/skills/fresh/SKILL.md` itself went stale within an hour of being
+written, by instructing four checks a gate had just taken over, and nothing
+mechanical noticed.
 
 So the rest of this is judgement, not verification, and it runs on recollection
 of the session rather than on a record of it. After a compaction that
