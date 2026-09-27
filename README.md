@@ -75,6 +75,7 @@ scripts/                 Headless entry points: test runner, typecheck sweeps
 docs/                    Generated LuaCATS reference; never edited by hand
 doc/                     Generated :help and its tags; never edited by hand
 spell/                   Compiled spell file
+.claude/                 Agent tooling: hooks, skills, commands, long-form reference
 ```
 
 `init.lua` loads those modules in a deliberate order, documented inline there:
@@ -185,14 +186,25 @@ head of their YAML frontmatter.
 Commits are [Conventional Commits](https://www.conventionalcommits.org),
 enforced by commitlint through husky. Scopes come from a fixed list in
 `.commitlintrc.mts` (`hl`, `opt`, `ft`, `key`, `ucmd`, `acmd`, `lsp`, `spec`,
-`util`, `asset`), and the whole `type(scope): Subject` header is capped at 50
-characters, so subjects stay short. `npm run commit` walks through it
-interactively.
+`util`, `asset`, `claude`), and the whole `type(scope): Subject` header is
+capped at 50 characters, so subjects stay short. `npm run commit` walks through
+it interactively.
 
 `.claude/CLAUDE.md` is the long-form reference: what each directory is for,
 which decisions are load-bearing and why, and what a given change is likely to
 break. Read it before changing anything structural. Several directories carry
-their own `CLAUDE.md` with conventions specific to them.
+their own `CLAUDE.md` with conventions specific to them, and `.claude/skills/`
+holds the per-subsystem reasoning that only matters when you are in that
+subsystem.
+
+`.claude/settings.json` wires five hooks that run if you work here through
+Claude Code, and they are worth knowing about before one surprises you: writes
+into `doc/` and `docs/` are refused because both are regenerated wholesale, a
+commit is refused while any gate binary is missing from `PATH`, Lua is formatted
+and linted at write time, a reminder fires when a change makes the generated
+`:help` stale, and whole-file reads of the wordlists and the compiled spell file
+are refused in favour of `head` or `wc`. None of them affects a normal editor
+session.
 
 ## Licence
 
