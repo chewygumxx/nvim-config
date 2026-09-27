@@ -80,14 +80,30 @@ the next generator run.
 references that load only when that subsystem is touched, which is why this file
 is roughly half the length it once was: the reasons did not go away, they
 stopped being loaded into every session regardless of relevance. `commands/`
-holds `/gates`, `/regen` and `/fresh`; `agents/gate-runner.md` runs the gate
-battery without its output reaching the caller, though note a newly added agent
-is not selectable as a `subagent_type` until the session restarts, so the one
-that creates it cannot use it; and `hooks/` makes five of the rules here
+holds `/gate-battery`, `/regen` and `/fresh`; `agents/gate-runner.md` runs the
+gate battery without its output reaching the caller, though note a newly added
+agent is not selectable as a `subagent_type` until the session restarts, so the
+one that creates it cannot use it; and `hooks/` makes five of the rules here
 mechanical rather than advisory, refusing a write into a generated tree,
 refusing a commit while a gate binary is absent, refusing a whole-file read of
 the wordlists and the compiled spell file, linting Lua at write time, and
 reporting that the generated help has gone stale.
+
+A command and a skill share one name namespace, which is why the first of those
+is `/gate-battery` and not the `/gates` it would otherwise read as. Claude Code
+lists a command by its filename stem beside a skill by its directory name, so a
+collision leaves exactly one of the pair reachable and says nothing at all about
+the other. `/gates` lost to the `gates` skill from the day it was written, and
+sat unreachable and unread for as long as this file went on describing it as the
+way to run the battery. That was established by probe rather than reasoned
+about: only one `gates` entry ever reached a session listing and it carried the
+skill's description, invoking the name returned the skill's body, and renaming
+the command made both appear at once within the same session.
+`tests/test_claude_assets.lua` now asserts the two sets of names are disjoint,
+which nothing did before: it had always checked skills, commands and agents as
+three independent groups, so a shadowed command passed every case. Agents are a
+separate namespace, chosen by `subagent_type` rather than by slash, so
+`gate-runner` can sit beside both without shadowing either.
 
 That fifth one is a hook rather than a `permissions.deny` rule for a reason
 worth knowing before reaching for `deny` again. A `Read(...)` rule is not scoped
@@ -122,8 +138,10 @@ of it: what each tool is for and where its config lives, `mise.toml` as the
 single source of every pin, how to reach that toolchain from a shell where mise
 is not active, the two sweeps that are deliberately not gates, what
 `.husky/pre-commit` actually runs and why it skips a missing tool in silence,
-and the two rules that make a `lua-language-server` result believable. `/gates`
-runs the battery; the `gate-runner` subagent runs it and reports only failures.
+and the two rules that make a `lua-language-server` result believable.
+`/gate-battery` runs the battery in the caller's own context, with the output;
+the `gate-runner` subagent runs the same sequence and reports only failures,
+keeping the thousands of passing lines out.
 
 The **`generated-output` skill** holds the two generators, `scripts/genhelp.lua`
 and `scripts/gendoc.lua`, which are deliberately neither gates nor part of

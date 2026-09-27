@@ -203,6 +203,38 @@ describe("claude assets", function()
         }, { true, true, true, true })
     end)
 
+    -- A command and a skill share one name namespace, Claude Code listing
+    -- the first by its filename stem and the second by its directory, so
+    -- a collision leaves exactly one of the pair reachable and reports
+    -- nothing about the other. That is not hypothetical: the command now
+    -- filed as `gate-battery.md` was written as `gates.md` and shadowed
+    -- by `.claude/skills/gates/` from that day, unreachable for as long
+    -- as `.claude/CLAUDE.md` described it as the way to run the battery.
+    -- The three groups above are each checked independently, which is
+    -- exactly why every case passed over it. Agents are left out on
+    -- purpose, being chosen by `subagent_type` rather than by slash.
+    it("gives every command a name no skill claims", function()
+        local skill_pat = "^%.claude/skills/([^/]+)/SKILL%.md$"
+        local cmd_pat   = "^%.claude/commands/(.+)%.md$"
+
+        ---@type table<string, boolean>
+        local claimed = {}
+        for _, path in ipairs(skills) do
+            claimed[assert(path:match(skill_pat), path)] = true
+        end
+
+        ---@type string[]
+        local shadowed = {}
+        for _, path in ipairs(commands) do
+            local name = assert(path:match(cmd_pat), path)
+            if claimed[name] then
+                table.insert(shadowed, name)
+            end
+        end
+
+        eq(shadowed, {})
+    end)
+
     for _, path in ipairs(files) do
         it(path .. " names only paths that exist", function()
             ---@type string[]
