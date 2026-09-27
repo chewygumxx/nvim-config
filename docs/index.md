@@ -32,6 +32,7 @@
 - [lsp.shuck](modules/lsp.shuck.md)
 - [lsp.sqls](modules/lsp.sqls.md)
 - [lsp.tombi](modules/lsp.tombi.md)
+- [lsp.ts_query_ls](modules/lsp.ts_query_ls.md)
 - [lsp.vtsls](modules/lsp.vtsls.md)
 - [lsp.yamlls](modules/lsp.yamlls.md)
 - [lua.autocmd](modules/lua.autocmd.md)

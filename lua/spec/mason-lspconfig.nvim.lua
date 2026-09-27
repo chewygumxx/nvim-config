@@ -59,6 +59,9 @@ M.opts = {
 
         -- Zsh
         "shuck",
+
+        -- Tree-sitter queries
+        "ts_query_ls",
     },
     automatic_enable = true,
 }
