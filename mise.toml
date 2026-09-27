@@ -117,6 +117,20 @@ emmylua_doc_cli                  = { version = "0.25.1", matching = "emmylua_doc
 "npm:markdownlint-cli2"             = "0.23.3"
 
 #
+# Tree-sitter queries. One binary is the formatter, the linter and the
+# language server for the eight `.scm` files under `queries/`, which had no
+# gate of any kind before it. It complements `tests/test_queries.lua` rather
+# than overlapping it: that file validates what a query *means* (it parses as
+# the query language, its predicates resolve, it compiles against its
+# grammar), and this validates how the query is written. Its `lint`
+# subcommand is the one CI runs, because unlike `check` it needs no parser
+# objects and so reaches all eight files rather than only the languages
+# Neovim bundles a parser for.
+# https://github.com/ribru17/ts_query_ls/releases
+#
+"github:ribru17/ts_query_ls" = "3.16.0"
+
+#
 # Shell. `bashls` owns bash and sh; `shuck` is scoped to zsh in
 # `lsp/shuck.lua`, and serves as that filetype's linter and formatter too.
 #
