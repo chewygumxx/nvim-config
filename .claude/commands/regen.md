@@ -1,6 +1,22 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/commands/regen.md
+  #
+  #
+
+ctime: 2026-09-27
+title: /regen
 description: >-
   Regenerate doc/ and docs/ and verify both trees are clean
+tags:
+  - llm
+  - claude
 ---
 
 Regenerate this repository's two generated trees. Invoke the `generated-output`

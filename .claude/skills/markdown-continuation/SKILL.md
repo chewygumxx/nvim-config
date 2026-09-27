@@ -1,4 +1,17 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/skills/markdown-continuation/SKILL.md
+  #
+  #
+
+ctime: 2026-09-27
+title: Markdown list continuation
 name: markdown-continuation
 description: >-
   Work on Markdown list continuation and the buffer-local Markdown keymaps. Use
@@ -6,6 +19,9 @@ description: >-
   lua/filetype/markdown.lua, lua/filetype/nex_note.lua or
   lua/filetype/claude.lua, when o/O or <M-CR> behaves wrongly in a Markdown
   buffer, or when a completion key stops working there.
+tags:
+  - llm
+  - claude
 ---
 
 # Markdown list continuation

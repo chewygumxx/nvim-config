@@ -1,4 +1,17 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/agents/gate-runner.md
+  #
+  #
+
+ctime: 2026-09-27
+title: Gate runner
 name: gate-runner
 description: >-
   Runs this repository's full gate battery and reports only what failed. Use
@@ -7,6 +20,9 @@ description: >-
   anything.
 tools: Bash, Read, Grep, Glob
 model: sonnet
+tags:
+  - llm
+  - claude
 ---
 
 # Gate runner

@@ -1,4 +1,17 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/skills/statusline/SKILL.md
+  #
+  #
+
+ctime: 2026-09-27
+title: Statusline
 name: statusline
 description: >-
   Work on this configuration's repository-notation statusline. Use when editing
@@ -6,6 +19,9 @@ description: >-
   lua/highlight.lua, the 'statusline' option in lua/option/view.lua, or
   tests/test_util_statusline.lua, and when the statusline renders wrongly,
   flickers, hangs or shows the wrong colours.
+tags:
+  - llm
+  - claude
 ---
 
 # Statusline

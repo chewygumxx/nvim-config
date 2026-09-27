@@ -1,4 +1,17 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/skills/gates/SKILL.md
+  #
+  #
+
+ctime: 2026-09-27
+title: Gates
 name: gates
 description: >-
   Run or diagnose this repository's lint, format, typecheck and test gates. Use
@@ -6,6 +19,9 @@ description: >-
   or the mini.test suite, when a gate fails or appears to pass wrongly, when
   .husky/pre-commit or a CI job in .github/workflows/lint-config.yaml behaves
   unexpectedly, or when diagnosing a tool that mise.toml pins.
+tags:
+  - llm
+  - claude
 ---
 
 # Gates

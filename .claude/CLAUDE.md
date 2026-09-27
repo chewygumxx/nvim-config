@@ -1,3 +1,25 @@
+---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/CLAUDE.md
+  #
+  #
+
+ctime: 2026-09-26
+title: CLAUDE.md
+description: >-
+  The long-form reference for this configuration: why each decision is the way
+  it is, and what a given change is likely to break.
+tags:
+  - llm
+  - claude
+---
+
 # CLAUDE.md
 
 Absolutely no em dashes are to be employed within this repository.

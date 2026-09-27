@@ -1,4 +1,17 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/skills/generated-output/SKILL.md
+  #
+  #
+
+ctime: 2026-09-27
+title: Generated output
 name: generated-output
 description: >-
   Regenerate or reason about this repository's two generated trees, doc/ and
@@ -6,6 +19,9 @@ description: >-
   lua/util/vimdoc.lua, when the Help or Docs CI job fails, when a mapping, user
   command, option, autocommand or a spec's keys has changed, or when anything
   wants to write into doc/ or docs/ by hand.
+tags:
+  - llm
+  - claude
 ---
 
 # Generated output

@@ -1,6 +1,22 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/commands/gates.md
+  #
+  #
+
+ctime: 2026-09-27
+title: /gates
 description: >-
   Run every local gate in the order CI runs them and report only failures
+tags:
+  - llm
+  - claude
 ---
 
 Run this repository's full gate battery locally. Invoke the `gates` skill first

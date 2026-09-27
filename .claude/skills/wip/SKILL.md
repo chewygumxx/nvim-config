@@ -1,10 +1,26 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/skills/wip/SKILL.md
+  #
+  #
+
+ctime: 2026-09-27
+title: WIP snapshots
 name: wip
 description: >-
   Work on or recover from the WIP snapshot system that commits unsaved buffer
   text onto refs/wip. Use when editing lua/util/wip.lua or
   tests/test_util_wip.lua, when the XXWip user command misbehaves, when refs/wip
   has grown or needs pruning, or when recovering buffer text lost to a crash.
+tags:
+  - llm
+  - claude
 ---
 
 # WIP snapshots

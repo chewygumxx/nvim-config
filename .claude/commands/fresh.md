@@ -1,7 +1,23 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/commands/fresh.md
+  #
+  #
+
+ctime: 2026-09-27
+title: /fresh
 description: >-
   Judge whether this session left the assets under .claude/ still true. The
   mechanical checks are a gate now, so this is the half that needs a person.
+tags:
+  - llm
+  - claude
 ---
 
 Run this before concluding a session.

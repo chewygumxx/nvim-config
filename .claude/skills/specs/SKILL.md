@@ -1,4 +1,17 @@
 ---
+__cgxx: |
+  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
+  # SPDX-License-Identifier: GPL-3.0-only
+
+  #
+  #
+  # ~chewygumxx/nvim-config.git
+  # ::: :/.claude/skills/specs/SKILL.md
+  #
+  #
+
+ctime: 2026-09-27
+title: Plugin specs and the lazy.nvim bootstrap
 name: specs
 description: >-
   Add, change, enable or disable a plugin in this Neovim configuration. Use when
@@ -6,6 +19,9 @@ description: >-
   lazy-lock.json, when a plugin is loaded or not loaded unexpectedly, when
   adding a leader-prefixed mapping, or when tests/test_spec.lua,
   test_lockfile.lua or test_lazy_integration.lua fails.
+tags:
+  - llm
+  - claude
 ---
 
 # Plugin specs and the lazy.nvim bootstrap
