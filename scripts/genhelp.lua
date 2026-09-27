@@ -394,12 +394,13 @@ local sections = {
 }
 
 local lines = vimdoc.render({
-    file     = "nvim-config.txt",
-    tagline  = "Configuration reference",
-    slug     = "chewygumxx/nvim-config",
-    path     = ":/doc/nvim-config.txt",
-    spdx     = "GPL-3.0-only",
-    sections = sections,
+    file      = "nvim-config.txt",
+    tagline   = "Configuration reference",
+    slug      = "chewygumxx/nvim-config",
+    path      = ":/doc/nvim-config.txt",
+    spdx      = "GPL-3.0-only",
+    generator = "scripts/genhelp.lua",
+    sections  = sections,
 })
 
 --
