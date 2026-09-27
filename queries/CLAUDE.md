@@ -51,9 +51,40 @@ When adding a predicate, note that `vim.treesitter.query.list_predicates()` and
 `list_directives()` return names already carrying their `?` or `!`. Appending
 one yields `eq??` and reports every core predicate as missing.
 
-Copy the `set`-style modeline that `util.modeline.base` generates. Two files
-still carry an older form, and two lack the SPDX line; both are the
-bundled-query overrides and neither is a pattern to follow.
+**Do not hand-indent anything here.** `ts_query_ls format` owns the layout, the
+`Queries` CI job runs it as `--check`, and `.husky/pre-commit` runs it as a
+write. It indents at two spaces and offers no option to change that, which is
+why `.editorconfig` has a `[*.scm]` block and the modelines all say
+`shiftwidth=2`: they follow the formatter rather than the repository's usual 4.
+It also collapses every blank line in a leading comment run, so the header box
+here is contiguous where every other filetype separates the modeline, the SPDX
+line and the box. Expect lines past 80 columns as well, since it will join a
+wrapped predicate's arguments back onto one line and nothing caps the width of a
+`.scm` file.
+
+One surprise worth knowing before you debug a failing gate: a single `format`
+pass is not a fixed point. Joining those predicate arguments is a change the
+tool's own `--check` demands but that one write pass will not make, so
+`.husky/pre-commit` runs it twice and then asserts with `--check`.
+
+`ts_query_ls lint` is the linter, chosen over `check` because it needs no parser
+objects and so reaches all eight files, where `check` would silently cover only
+the languages Neovim bundles a parser for. It earned its place immediately: it
+found five `(#set! conceal "")` patterns in
+`queries/markdown_inline/highlights.scm` with no capture to attach to, which
+Tree-sitter had been discarding without a word, so Markdown link concealment had
+simply never worked. Note its `--fix` **deletes** such a pattern rather than
+giving it a capture, so read a fix before taking it.
+
+`.tsqueryrc.json` is almost empty on purpose. `valid_predicates` replaces the
+tool's defaults rather than extending them, so declaring the three custom
+predicates there would make every core `#eq?` an "unrecognized predicate".
+Predicate parity stays where it already was, in `tests/test_queries.lua` against
+`lua/util/treesitter.lua`.
+
+Two files lack the SPDX line, and that is left alone rather than corrected: they
+are the bundled-query overrides, largely copied from upstream, so asserting
+`GPL-3.0-only` over them would be a licensing claim rather than a tidy-up.
 
 `norg` and `norg_meta` are dormant while neorg is condemned in `lua/plugin.lua`,
 which is not the same as unchecked: the query-language parse and the predicate

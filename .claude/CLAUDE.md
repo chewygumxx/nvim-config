@@ -80,7 +80,17 @@ There is no build step. Linting/formatting/typechecking:
 - **JSON/YAML**: `npx prettier --check <files>`. prettier is configured by the
   `prettier` key inside `package.json` rather than a `.prettierrc` file, and
   `.prettierignore` excludes `lazy-lock.json`; see the lockfile note under
-  Plugin bootstrap for why.
+  Plugin bootstrap for why. Note prettier reads `.editorconfig`, which is why
+  `.luarc.json` is 4-space and passes; there is no `tabWidth` anywhere.
+- **Tree-sitter queries**: `ts_query_ls format --check queries` /
+  `ts_query_ls lint queries` (`.tsqueryrc.json`), the `Queries` CI job. `lint`
+  rather than `check` because it needs no parser objects and so reaches all
+  eight files, where `check` would cover only the languages Neovim bundles a
+  parser for. A single `format` write pass is not a fixed point, so
+  `.husky/pre-commit` runs it twice and then asserts with `--check`; see
+  `queries/CLAUDE.md`. These gates are new, and are separate from
+  `tests/test_queries.lua`, which validates what a query means rather than how
+  it is written.
 - **Lua typecheck**: `lua-language-server --check=. --checklevel=Warning`, which
   is repo-wide rather than per-file, and needs `VIMRUNTIME` exported so that
   `$VIMRUNTIME/lua` in `.luarc.json`'s `workspace.library` resolves.
@@ -144,18 +154,21 @@ There is no build step. Linting/formatting/typechecking:
   `mise.toml` because `patchedDependencies` needs `npm patch`.
 
 `.husky/pre-commit` runs `luafmt --write` + `selene`, `tombi format` +
-`tombi lint`, and `prettier --write` on staged files matching each type
-(silently skipping any tool that isn't on `PATH`), then re-stages the results.
-`selene` is held back from `types/`, whose `---@meta` stubs would otherwise be
-flagged for their intentional global declarations. It then gates the commit on
-two whole-repo checks that ignore what was staged: `lua-language-server --check`
-at `Warning` whenever any `*.lua` file is staged, and the full `mini.test` suite
-whenever anything under `lua/`, `tests/`, `scripts/`, `lsp/`, `queries/` or
-`init.lua` is. Each asks `git diff --cached` for its own file list rather than
-reading a variable another function left behind. Both are skipped when
-`nvim`/`lua-language-server` are absent, which is the reason CI repeats the
-LuaLS check rather than trusting the hook. `.husky/commit-msg` enforces
-commitlint.
+`tombi lint`, `prettier --write`, and `ts_query_ls format` + `ts_query_ls lint`
+on staged files matching each type (silently skipping any tool that isn't on
+`PATH`), then re-stages the results. `selene` is held back from `types/`, whose
+`---@meta` stubs would otherwise be flagged for their intentional global
+declarations. `lintfmt_query` is the one that formats _before_ it lints, so what
+is linted is the bytes being committed, and the one that runs its formatter
+twice followed by a `--check`, because a single pass does not converge. It then
+gates the commit on two whole-repo checks that ignore what was staged:
+`lua-language-server --check` at `Warning` whenever any `*.lua` file is staged,
+and the full `mini.test` suite whenever anything under `lua/`, `tests/`,
+`scripts/`, `lsp/`, `queries/` or `init.lua` is. Each asks `git diff --cached`
+for its own file list rather than reading a variable another function left
+behind. Both are skipped when `nvim`/`lua-language-server` are absent, which is
+the reason CI repeats the LuaLS check rather than trusting the hook.
+`.husky/commit-msg` enforces commitlint.
 
 Unlike the dotfiles repo's free-form scopes, this repo's `.commitlintrc.mts`
 defines a fixed `scope.enum` (`hl`, `opt`, `ft`, `key`, `ucmd`, `acmd`, `lsp`,
@@ -655,7 +668,17 @@ explicit `refs/wip/*` refspec.
   highlighting the file headers described under Conventions, and is the sole
   user of the three custom predicates `lua/util/treesitter.lua` registers
   (`adjacent?`, `last-matching?`, `header-line?`). `norg`/`norg_meta` are
-  dormant while neorg is condemned, which is not the same as unchecked.
+  dormant while neorg is condemned, which is not the same as unchecked. Layout
+  here is owned by `ts_query_ls format`, which is why the modelines and
+  `.editorconfig`'s `[*.scm]` block say two spaces against the repository's
+  usual four, and why the header box is contiguous in these files alone: the
+  formatter collapses blank lines inside a leading comment run.
+  `queries/CLAUDE.md` holds the rest, including why a single format pass does
+  not converge. Adding those gates immediately found five `(#set! conceal "")`
+  patterns in `markdown_inline/highlights.scm` with no capture to attach to,
+  which Tree-sitter discards silently, so Markdown link concealment had never
+  worked; the repair was `@conceal` and deliberately not upstream's
+  `@markup.link`, whose removal that file documents as intentional.
 - `snippets/`: a friendly-snippets-style manifest (`package.json`, using the
   VSCode `contributes.snippets` shape) plus per-language snippet JSON (currently
   `zsh.json`). LuaSnip itself is in `lua/plugin.lua`'s `elide` list, so the spec
@@ -726,9 +749,13 @@ explicit `refs/wip/*` refspec.
   `markdown.nex-note` do not take it. `util.text.yaml_scalar` is where the
   quoting rule lives, shared for the same reason; `util.nex.yaml_scalar` remains
   as a delegate because callers assembling a note have no reason to know that.
-- **Indentation**: `.editorconfig` sets 4 spaces by default, 2 spaces for
-  `*.md`; LF endings, trailing whitespace trimmed, final newline inserted. Lua
-  specifically also goes through `luafmt`'s own `max_line_width = 80`.
+- **Indentation**: `.editorconfig` sets 4 spaces by default, 2 spaces for `*.md`
+  and 2 for `*.scm`; LF endings, trailing whitespace trimmed, final newline
+  inserted. Lua specifically also goes through `luafmt`'s own
+  `max_line_width = 80`. The `*.scm` entry is not a preference:
+  `ts_query_ls format` indents at two and offers no way to change it, so that
+  block and the query modelines follow the formatter rather than the other way
+  round.
 - **Lua annotations vs. `luafmt`**: `luafmt` re-lays out call arguments, and it
   will happily move an inline `--[[@as T]]` cast onto a line of its own,
   silently detaching it from the expression it was annotating so that LuaLS
