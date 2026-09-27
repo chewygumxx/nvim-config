@@ -196,6 +196,9 @@ one binding yields a different buffer per project and per branch, and
 `3<leader>.` is a third one. Its `root` is stated explicitly rather than left
 implicit, since a scratch file is machine state under `stdpath("data")`, which
 is the opposite call from `lazy-lock.json` living inside `stdpath("config")`.
+Whether `<leader>.` really returns the same buffer after a restart is a hand
+check and cannot be anything else: persistence across processes is precisely
+what a single headless run cannot observe.
 
 `lua/spec/claudecode.nvim.lua` sets three options and leaves the rest
 upstream's. `terminal.provider = "snacks"` is named rather than left as
