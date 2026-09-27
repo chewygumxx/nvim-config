@@ -164,6 +164,14 @@ entry nothing under `.claude/` mentions any more. Deleting a passage that
 carried the only mention of an excluded token means editing that registry in the
 same commit.
 
+It also caps `.claude/CLAUDE.md` at 1200 words. That file is the only one here
+loaded into every session and every subagent regardless of relevance, and
+hand-restraint demonstrably does not hold it: on 2026-09-27 it went from 8609
+words to 2432 across seven extraction commits and was back to 2506 within the
+hour. A failure there is an instruction to move a reason somewhere narrower
+rather than to write a shorter one, since a skill, a rule and a directory
+`CLAUDE.md` all cost nothing until something in scope is read.
+
 Its reach stops at `.claude/`. **No workflow or hook globs `*.md`**: prettier
 takes `*.json`, `*.jsonc`, `*.yaml` and `*.yml` and nothing else, in both
 `.husky/pre-commit` and CI. So the directory `CLAUDE.md` files scattered through
