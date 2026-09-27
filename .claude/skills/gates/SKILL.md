@@ -65,10 +65,20 @@ with problems found. `.husky/pre-commit` and the `LuaCATS` CI job both read the
 spurious problem on an untouched file often enough that it is a known behaviour
 rather than a surprise. A second run on the same tree is clean.
 
-The editor's own live diagnostics are a third thing again, and not this check: a
-cold or mid-indexing LuaLS reports spurious `undefined-global` on `vim` and
-`undefined-doc-name` on real types like `TSNode`. Confirm against the repo-wide
-run before acting on either.
+Live diagnostics are a third thing again, and not this check. A cold or
+mid-indexing LuaLS in the editor reports spurious `undefined-global` on `vim`
+and `undefined-doc-name` on real types like `TSNode`, so confirm against the
+repo-wide run before acting on either.
+
+The same two codes arriving in bulk are not that and do not clear on a rerun.
+Claude Code spawns its own `lua-language-server` through the official `lua-lsp`
+plugin, from a process holding no `$VIMRUNTIME`, which empties `.luarc.json`'s
+`workspace.library` and makes every `vim.*` symbol genuinely undefined to that
+server: 3179 Warnings in 107 files, all of them false.
+`~/.local/bin/lua-language-server` from `~chewygumxx/dotfiles.git` shadows the
+binary and probes the variable at spawn time to prevent it. If that scale of
+noise returns, check the wrapper is still first on `PATH` before reading a
+single line of it.
 
 ## The gates, in the order CI runs them
 
