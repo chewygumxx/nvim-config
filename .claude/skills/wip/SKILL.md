@@ -1,6 +1,6 @@
 ---
 name: wip
-description:
+description: >-
   Work on or recover from the WIP snapshot system that commits unsaved buffer
   text onto refs/wip. Use when editing lua/util/wip.lua or
   tests/test_util_wip.lua, when the XXWip user command misbehaves, when refs/wip

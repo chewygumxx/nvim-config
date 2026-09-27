@@ -1,6 +1,6 @@
 ---
 name: markdown-continuation
-description:
+description: >-
   Work on Markdown list continuation and the buffer-local Markdown keymaps. Use
   when editing lua/util/markdown_list.lua, lua/util/markdown_table.lua,
   lua/filetype/markdown.lua, lua/filetype/nex_note.lua or

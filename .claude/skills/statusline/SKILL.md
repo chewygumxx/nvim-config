@@ -1,6 +1,6 @@
 ---
 name: statusline
-description:
+description: >-
   Work on this configuration's repository-notation statusline. Use when editing
   lua/util/statusline.lua, the CgxxStatusline highlight groups in
   lua/highlight.lua, the 'statusline' option in lua/option/view.lua, or

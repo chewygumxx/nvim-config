@@ -1,6 +1,6 @@
 ---
 name: gates
-description:
+description: >-
   Run or diagnose this repository's lint, format, typecheck and test gates. Use
   when running luafmt, selene, tombi, prettier, ts_query_ls, lua-language-server
   or the mini.test suite, when a gate fails or appears to pass wrongly, when

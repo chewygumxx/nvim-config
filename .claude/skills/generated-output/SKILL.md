@@ -1,6 +1,6 @@
 ---
 name: generated-output
-description:
+description: >-
   Regenerate or reason about this repository's two generated trees, doc/ and
   docs/. Use when touching scripts/genhelp.lua, scripts/gendoc.lua or
   lua/util/vimdoc.lua, when the Help or Docs CI job fails, when a mapping, user

@@ -1,6 +1,6 @@
 ---
 name: specs
-description:
+description: >-
   Add, change, enable or disable a plugin in this Neovim configuration. Use when
   editing anything under lua/spec/, lua/plugin.lua, lua/util/lazy.lua or
   lazy-lock.json, when a plugin is loaded or not loaded unexpectedly, when
