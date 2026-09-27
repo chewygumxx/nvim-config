@@ -197,6 +197,49 @@ to itself.
 
 
 
+### M.scroll_distance
+---
+```lua
+function M.scroll_distance(
+  count: integer?,
+  down: string?,
+  up: string?
+) ->  nil
+```
+@param `count` - Default: 5
+
+@param `down` - Default: "<C-d>"
+
+@param `up` - Default: "<C-u>"
+
+
+
+
+
+
+Maps down/up to scroll `count` lines rather than half a window.
+
+The count is carried on the keys rather than set as an option, because
+'scroll' is window local and Neovim recomputes it to half the window
+height on every resize; `lua/option/view.lua` says the same from the
+other side. A count given to CTRL-D or CTRL-U sets 'scroll' to it, so
+re-issuing it on each press is what makes the distance stick.
+
+Mode is normal and visual only, never insert: `lua/spec/mkdnflow.lua`
+binds insert-mode "<C-d>" to `MkdnDedentListItem`.
+
+`expr` rather than a plain right-hand side, because Vim prefixes a
+typed count onto the result: "5<C-d>" would turn "10<C-d>" into
+"105<C-d>". Returning the count only when `vim.v.count` is zero leaves
+an explicit one working.
+
+
+
+
+
+
+
+
 ### M.visual_indent_persist
 ---
 ```lua

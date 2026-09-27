@@ -36,6 +36,8 @@ n  <leader>rn           Toggle relativenumber
 n  <leader>tw           Format buffer line wrapping according to textwidth
 n  gx                   Open URL or owner/repo under cursor
 n  x                    Blackhole Register: Single character deletion
+n,x  <C-d>              Scroll down 5 lines
+n,x  <C-u>              Scroll up 5 lines
 n,x  gF                 Create or open new file according to path under cursor
 n,x  gf                 Open file and if provided, go to line number
 v  p                    Blackhole Register: Pasted over selection
