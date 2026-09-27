@@ -59,10 +59,21 @@ references that load only when that subsystem is touched, which is why this file
 is roughly half the length it once was: the reasons did not go away, they
 stopped being loaded into every session regardless of relevance. `commands/`
 holds `/gates`, `/regen` and `/fresh`; `agents/gate-runner.md` runs the gate
-battery without its output reaching the caller; and `hooks/` makes four of the
+battery without its output reaching the caller; and `hooks/` makes five of the
 rules here mechanical rather than advisory, refusing a write into a generated
-tree, refusing a commit while a gate binary is absent, linting Lua at write
-time, and reporting that the generated help has gone stale.
+tree, refusing a commit while a gate binary is absent, refusing a whole-file
+read of the wordlists and the compiled spell file, linting Lua at write time,
+and reporting that the generated help has gone stale.
+
+That fifth one is a hook rather than a `permissions.deny` rule for a reason
+worth knowing before reaching for `deny` again. A `Read(...)` rule is not scoped
+to the Read tool: Claude Code recognises file-naming commands inside Bash and
+applies the rule to those too, so `Read(/words.txt)` also denies
+`head -3 words.txt`, `wc -l words.txt` and `ls -la words.txt`, and blocks Edit
+and Write on the path besides. That was established by adding the rule and
+running each command rather than reasoned about. A `PreToolUse` hook blocks just
+as hard, since exit 2 stops a call before permission rules are evaluated, but
+leaves Bash alone and can name the cheap route instead of merely refusing.
 
 `hooks/lib/tools.sh` is the one to know about first. mise is not activated in a
 Claude Code shell, so without its `PATH` prefix `ts_query_ls` is absent entirely
