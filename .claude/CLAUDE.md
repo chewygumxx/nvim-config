@@ -27,6 +27,9 @@ Absolutely no em dashes are to be employed within this repository.
 Ensure any printed conversation output line length is limited to 80 characters
 except where it may be unfeasable to do so eg. URL.
 
+For all work performed in this repository, please compose single-line commit
+messages for granular commits and continuously commit as you work.
+
 ## What this repository is
 
 `chewygumxx/nvim-config`: a standalone Neovim configuration, plugin-managed by
