@@ -110,6 +110,18 @@ jobs:
             - name: Setup Neovim
               uses: ./.github/actions/setup-neovim
 
+            # `Check annotation coverage` below runs under
+            # `scripts/minimal_init.lua`, which raises when mini.test is
+            # absent. That raise does not stop the job: the file is passed
+            # as `-u`, so the error is reported during startup and Neovim
+            # carries on without ever reaching its `runtimepath`
+            # assignment. Run 36223542610 logged exactly that, `E5113 ...
+            # mini.test is not installed`, and still reported success, so
+            # the gate was running degraded rather than failing. Installing
+            # it is what makes that step mean something.
+            - name: Install mini.test
+              uses: ./.github/actions/install-mini-test
+
             - name: Cache lua-language-server
               id: cache-lua-ls
               uses: actions/cache@v6
