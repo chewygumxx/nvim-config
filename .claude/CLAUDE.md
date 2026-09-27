@@ -39,10 +39,15 @@ There is no build step. Linting/formatting/typechecking:
   `emmylua_check`, `emmylua_doc_cli`) come from one release of
   `EmmyLuaLs/emmylua-analyzer-rust`, which needs a `[tool_alias]` block each
   plus `matching` on the `[tools]` entry; putting `matching` in the alias block
-  instead is ignored **silently** and every alias installs the same asset. Of
-  those three, nothing currently runs `emmylua_doc_cli`: it is pinned for the
-  LuaCATS-to-Markdown generator that does not exist yet, so an absent
-  `scripts/gendoc.lua` is a gap rather than a deletion.
+  instead is ignored **silently** and every alias installs the same asset. That
+  failure is not hypothetical: `mise ls` currently reports `emmylua_doc_cli` as
+  `(missing)` and the install tree for the pinned release holds only a `luafmt`
+  binary, so the three EmmyLua tools on a working machine may well be coming
+  from somewhere else (a `cargo install` under `~/.local/share/cargo/bin`
+  supplies them here, at the same 0.25.1, agreeing with the pin by luck rather
+  than by construction). CI is unaffected, fetching each release asset by name.
+  Of the three, `emmylua_doc_cli` is the one that is not a gate:
+  `scripts/gendoc.lua` runs it to render `docs/`.
 - **Lua**: format with `luafmt` (EmmyLua formatter, config in `.luafmt.toml`),
   lint with `selene` (config in `selene.toml`,
   `std = "lua51+vim+luajit +busted"`, backed by
@@ -593,10 +598,33 @@ explicit `refs/wip/*` refspec.
   and runner; `luals_untyped.lua` and `typecheck_sensitive.lua`, the
   annotation-coverage gate and the sensitive typecheck sweep; `lazy_merge.lua`,
   which runs lazy.nvim's real spec resolution and prints the result as JSON for
-  `tests/test_lazy_integration.lua` to read. The first four are described under
-  Commands. `lazy_merge.lua` asserts lazy.nvim is already installed rather than
-  letting `util.lazy.setup` clone it, and forces `install.missing = false` plus
-  `checker`/`rocks` off, so it never reaches the network.
+  `tests/test_lazy_integration.lua` to read; and `gendoc.lua`, which renders
+  `docs/`. The first four are described under Commands. `lazy_merge.lua` asserts
+  lazy.nvim is already installed rather than letting `util.lazy.setup` clone it,
+  and forces `install.missing = false` plus `checker`/`rocks` off, so it never
+  reaches the network.
+- `docs/`: generated, tracked, and never edited by hand.
+  `nvim --headless -u scripts/minimal_init.lua -l scripts/gendoc.lua` renders it
+  from the LuaCATS annotations under `lua/`, `lsp/` and `init.lua` via
+  `emmylua_doc_cli`, and the `Docs` job in `.github/workflows/lint-config.yaml`
+  regenerates and fails on the diff, so committed output cannot rot. Run through
+  Neovim so the child inherits `$VIMRUNTIME`, which `.luarc.json`'s
+  `workspace.library` needs; from a bare shell the analysis silently resolves
+  against nothing. `lua/spec/` is excluded, since 48 of the 103 Lua files here
+  are declarative `LazySpec` tables with no callable API and would crowd out
+  everything a reader can actually call. Three decisions in `scripts/gendoc.lua`
+  are load-bearing and each has its reason inline: the tree is built in a
+  staging directory and only installed once proved non-empty, so a failed run
+  leaves the committed docs alone rather than committing an empty one; it is
+  replaced wholesale rather than written over, because a write-only generator
+  leaves the page for a deleted module behind with `git diff` reporting no
+  change and the gate staying green; and the `mkdocs.yml` the generator emits
+  beside the Markdown is deliberately discarded, since it carries trailing
+  whitespace and CI runs prettier over every `*.yml`, which is the same
+  two-tools-one-file standoff `.prettierignore` settles for `lazy-lock.json`.
+  The gate stages intents (`git add --intent-to-add`) before diffing, because
+  `git diff --exit-code` cannot see an untracked file and a new page nobody
+  committed would otherwise pass.
 - `queries/`: custom/overriding Tree-sitter queries (`markdown`,
   `markdown_inline`, `norg`, `norg_meta`, `comment`), picked up by Neovim's
   runtimepath convention. None carries an `; extends` comment, so each fully
