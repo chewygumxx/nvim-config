@@ -48,8 +48,6 @@ local eq = require("mini.test") --[[@as mini.test]]
 --- which decision it was.
 ---@type table<string, string>
 local not_a_path = {
-    ["lua/plugin_manager.lua"] = "named as a thing that was removed, in "
-        .. "the passage explaining that there is no indirection layer",
     ["lua/spec/lazy.nvim.lua"] = "the spec that would pin lazy.nvim's own "
         .. "branch, considered and deliberately not written",
 }
