@@ -49,11 +49,11 @@ text will disagree with the tree in places; where that disagreement mattered it
 was moved here.
 
 Several directories additionally carry their own `CLAUDE.md`, and it is named
-rather than counted here because the count is the half that rots:
-`.github/workflows/`, `lua/spec/`, `lua/filetype/`, `tests/`, `lua/util/`,
-`lsp/` and `queries/`. Each is deliberately short and holds only what is easy to
-violate from outside the directory and not derivable from reading it, ie. the
-`elide`/`condemn` distinction that is invisible after lazy.nvim's merge, the
+rather than counted here because the count is the half that rots: `.github/`,
+`lua/spec/`, `lua/filetype/`, `tests/`, `lua/util/`, `lsp/` and `queries/`. Each
+is deliberately short and holds only what is easy to violate from outside the
+directory and not derivable from reading it, ie. the `elide`/`condemn`
+distinction that is invisible after lazy.nvim's merge, the
 one-module-per-filetype rule, the one-shared-process discipline the test suite
 depends on, the two annotation habits `luafmt` will otherwise undo, the
 `ensure_installed` parity assertion, and the absence of `; extends`. They are
@@ -475,37 +475,10 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   metadata, applied to the GitHub repo's own settings by the
   `sync-repo-metadata` GitHub Action on push to `main`
   (`.github/workflows/sync-repo-metadata.yaml`) whenever this file changes.
-- `.github/scripts/`: `tool_version.py`, which prints the version `mise.toml`
-  pins for a tool. The workflows read their pins through it rather than
-  restating them, in two shapes: a bare tool key prints the version alone for
-  `$(...)` capture, and `NAME=key` pairs print `NAME=version` for appending
-  straight to `$GITHUB_ENV`. It exits non-zero on an unknown key, so a workflow
-  cannot silently fall back to whatever the runner happened to have. Written in
-  Python with `tomllib` rather than as a regex, since a `[tools]` entry is
-  either a bare version string or a table carrying `matching` beside `version`,
-  and the keys themselves contain the `:` and `/` that make them awkward regex
-  subjects.
-- `.github/actions/`: three composite actions the workflows share.
-  `setup-neovim` installs, caches and PATHs the release `mise.toml` pins,
-  reading it through `tool_version.py`; pass `version: nightly` for the canary,
-  which is deliberately never cached. `install-mini-test` reads the tag
-  `lua/spec/mini.test.lua` names, resolves it to a commit with
-  `git ls-remote <url> "refs/tags/<tag>^{}"` and fetches that sha, asking Neovim
-  for `stdpath("data")` rather than assuming it. It resolves rather than cloning
-  the ref because these tags are annotated, so `refs/tags/v0.18.0` names a tag
-  object (`6f129de`) and not the commit (`35c67cb`) it points at, and
-  `git clone --depth 1 --branch` of such a ref makes git print
-  `warning: ... is not a commit!` on every run: harmless, since the checkout and
-  working tree were correct either way, but indistinguishable at a glance from a
-  real failure. Resolving first also makes a tag absent upstream fail with a
-  message naming it. Nothing reads the installed copy's git metadata, so the
-  absent tag ref costs nothing, which was checked by running the suite against a
-  copy carrying no tags. `install-lazy` clones the lazy.nvim commit
-  `lazy-lock.json` pins, fetching that sha directly rather than cloning a
-  branch, and caches it on the commit. `.github/workflows/test.yaml` runs the
-  suite from one matrix, once on the pin and once on nightly with
-  `continue-on-error`, so an upstream change is heard about before it reaches a
-  release and is not reported as the fault of whichever pull request ran next.
+- `.github/`: the workflows, the three composite actions they share, and
+  `scripts/tool_version.py`, which is how a job reads a pin out of `mise.toml`
+  rather than restating it. `.github/CLAUDE.md` holds the rules, including the
+  two ways a job here can go green over a gate that never ran.
 
 ## Conventions
 
