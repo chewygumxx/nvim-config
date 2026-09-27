@@ -83,7 +83,12 @@ M.opts = {
         -- `gen_reporter.stdout()` headlessly, which is what makes a
         -- single `scripts/minitest.lua` work both from `MiniTest.run()`
         -- and from CI, without a plugin-specific override here.
-        reporter = nil,
+        --
+        -- `util.test_report.from_env` returns exactly that `nil` unless a
+        -- headless run named an output path, and its reporter delegates to
+        -- `gen_reporter.stdout()` when it does, so the auto-pick above is
+        -- still what decides in every case this does not cover.
+        reporter = require("util.test_report").from_env(),
 
         -- Whether to stop execution after first error
         stop_on_error = false,
