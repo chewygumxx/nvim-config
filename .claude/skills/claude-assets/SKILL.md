@@ -27,46 +27,74 @@ tags:
 
 # Claude Code assets
 
-`.claude/` holds five kinds of asset beside `CLAUDE.md`, and they load on
-different terms. `skills/` carries the per-subsystem references that load only
-when that subsystem is touched, which is the whole reason `CLAUDE.md` is a
-fraction of the length it once was: the reasons did not go away, they stopped
-being loaded into every session regardless of relevance. `commands/` holds
-`/gate-battery`, `/regen` and `/fresh`. `agents/gate-runner.md` runs the gate
-battery without its output reaching the caller. `rules/` holds a warning per
-tree that needs one, loaded by path rather than by prompt, which is what makes a
-rule the cheapest place to put anything triggered by a path: unlike a skill,
-whose description is resident in every session, a rule costs nothing until
-something in its scope is read. `hooks/` is what makes five rules mechanical
-rather than advisory: refusing a write into a generated tree, refusing a commit
-while a gate binary is absent, refusing a whole-file read of the wordlists and
-the compiled spell file, linting Lua at write time, and reporting that the
-generated help has gone stale.
+`.claude/` holds four kinds of asset beside `CLAUDE.md`, and they load on
+different terms. `skills/` carries two things: the per-subsystem references that
+load only when that subsystem is touched, which is the whole reason `CLAUDE.md`
+is a fraction of the length it once was, and the three slash-invoked workflows,
+`/gate-battery`, `/regen` and `/fresh`. The reasons did not go away when
+`CLAUDE.md` shrank, they stopped being loaded into every session regardless of
+relevance. `agents/gate-runner.md` runs the gate battery without its output
+reaching the caller. `rules/` holds a warning per tree that needs one, loaded by
+path rather than by prompt, which is what makes a rule the cheapest place to put
+anything triggered by a path: unlike a skill, whose description is resident in
+every session, a rule costs nothing until something in its scope is read.
+`hooks/` is what makes five rules mechanical rather than advisory: refusing a
+write into a generated tree, refusing a commit while a gate binary is absent,
+refusing a whole-file read of the wordlists and the compiled spell file, linting
+Lua at write time, and reporting that the generated help has gone stale.
 
 **A newly added agent is not selectable as a `subagent_type` until the session
 restarts**, so the session that writes one cannot use it. A skill is not like
 that: one written mid-session is announced and reachable within the same
 session, which was seen when `claude-assets` itself appeared in the listing
-moments after the file was created. Do not generalise the agent's restart
-requirement to the other three kinds without probing it.
+moments after the file was created, and again when the three workflows were
+announced under their new names in the same session that moved them there. Do
+not generalise the agent's restart requirement to the other kinds without
+probing it.
+
+## Write a skill, not a command
+
+[Commands and skills are one mechanism](https://code.claude.com/docs/en/claude-directory#ce-commands).
+A file at `commands/<name>.md` produces `/<name>` exactly as
+`skills/<name>/SKILL.md` does, both can be invoked by name or reached on their
+description, and the frontmatter is the same set of fields save that a command
+reads no `name` and no `paths`. The documentation's advice is a skill for new
+work, with commands remaining supported, so this is a preference rather than a
+deprecation.
+
+There is therefore no `commands/` here, and two things decide it. A skill is a
+directory, so it can bundle a reference file, a template or a script beside its
+prose, which one Markdown file cannot. And a skill declares its own `name`, so
+what it answers to is independent of where it is filed, whereas a command's
+slash name is welded to its filename and can only be changed by moving the file.
+
+The unification is observable from inside a session rather than only asserted.
+Before the three were moved, `/context` already priced `fresh`, `gate-battery`
+and `regen` under its `Skills` heading beside the subject-matter skills, and the
+session listing carried all ten with nothing separating the two kinds. The
+harness had stopped distinguishing them; only the tree still did.
 
 ## A command and a skill share one name namespace
 
-Claude Code lists a command by its filename stem beside a skill by its directory
-name, so a collision leaves exactly one of the pair reachable and says nothing
-at all about the other. That is why the battery is `/gate-battery` and not the
-`/gates` it would otherwise read as: `/gates` lost to the `gates` skill from the
-day it was written and sat unreachable for as long as `CLAUDE.md` went on
-describing it as the way to run the battery. Established by probe rather than
-reasoned about: only one `gates` entry ever reached a session listing and it
-carried the skill's description, invoking the name returned the skill's body,
-and renaming the command made both appear at once within the same session.
+This is why the battery answers to `gate-battery` rather than the `gates` it
+would otherwise read as. Claude Code lists a command by its filename stem beside
+a skill by its directory name, so a collision leaves exactly one of the pair
+reachable and says nothing at all about the other. `/gates` lost to the `gates`
+skill from the day it was written and sat unreachable for as long as `CLAUDE.md`
+went on describing it as the way to run the battery. Established by probe rather
+than reasoned about: only one `gates` entry ever reached a session listing and
+it carried the skill's description, invoking the name returned the skill's body,
+and renaming it made both appear at once within the same session.
 
-`tests/test_claude_assets.lua` asserts the two sets of names are disjoint, which
-nothing did before: it had always checked skills, commands and agents as three
-independent groups, so a shadowed command passed every case. Agents are a
-separate namespace, chosen by `subagent_type` rather than by slash, so
-`gate-runner` can sit beside both without shadowing either.
+The hazard cannot arise between two skills, a directory name being unique by
+construction, so adding a command back is now the only route to it. That is why
+`tests/test_claude_assets.lua` goes on asserting the two sets of names are
+disjoint over a `commands/` glob matching nothing, rather than dropping a case
+that reads as dead. Nothing asserted it before the rename: the suite had always
+checked skills, commands and agents as three independent groups, so a shadowed
+command passed every case. Agents are a separate namespace, chosen by
+`subagent_type` rather than by slash, so `gate-runner` can sit beside both
+without shadowing either.
 
 ## A rule is scoped by `paths` and nothing else
 
@@ -114,17 +142,18 @@ contents.
 reflow hook rewraps a long value either way, but a bare key yields a plain
 multiline scalar, which is valid YAML that **cannot contain `": "`**; `>-` folds
 to the same single line and tolerates a colon anywhere. Established by probe,
-and now asserted for skills, commands and agents alike, since a command whose
-description drifted back would break only once somebody later wrote a
-colon-space into it, which is the quietest possible failure.
+and now asserted for skills and agents alike, and for a command if one is ever
+added, since an asset whose description drifted back would break only once
+somebody later wrote a colon-space into it, which is the quietest possible
+failure.
 
 A skill declares `name:` matching its directory and an agent declares `name:`
 matching its filename stem, because that is what each loader keys on. A command
-declares no name at all: its filename is the slash command. A rule declares
-neither, and no `description` either, which is why the description cases skip
-`rules/` rather than having been forgotten there. Every asset also carries the
-repository's Markdown document head, ie. the `__cgxx:` block, `ctime`, `title`
-and `tags`.
+declares no name at all: its filename is the slash command, which is half of why
+a skill is the better home for a workflow. A rule declares neither, and no
+`description` either, which is why the description cases skip `rules/` rather
+than having been forgotten there. Every asset also carries the repository's
+Markdown document head, ie. the `__cgxx:` block, `ctime`, `title` and `tags`.
 
 ## Prefer a hook to a `permissions.deny` rule
 
@@ -155,14 +184,24 @@ toolchain beside the gates, so it begins installing 22 tools before it answers.
 `tests/test_claude_assets.lua` checks that every rooted path the prose names
 still exists, the frontmatter rules above, the command-versus-skill namespace,
 that every rule scopes itself with `paths` and none with the singular `path`,
-that every skill is pointed at from `.claude/CLAUDE.md` by the phrase
-`` `<name>` skill `` and that no such phrase names a skill that is gone. It
-cannot check that any of the prose is _true_. Its `not_a_path` registry excludes
-tokens that look like paths and deliberately name nothing, and it asserts in
-both directions: an entry naming a file that now exists fails, and so does an
-entry nothing under `.claude/` mentions any more. Deleting a passage that
-carried the only mention of an excluded token means editing that registry in the
-same commit.
+that every _reference_ skill is pointed at from `.claude/CLAUDE.md` by the
+phrase `` `<name>` skill `` and that no such phrase names a skill that is gone.
+It cannot check that any of the prose is _true_.
+
+Two registries carry the exceptions, and both are asserted in both directions,
+since an exemption nothing exempts is the quiet kind of stale. `not_a_path`
+excludes tokens that look like paths and deliberately name nothing, so an entry
+naming a file that now exists fails, and so does an entry nothing under
+`.claude/` mentions any more; deleting a passage that carried the only mention
+of an excluded token means editing that registry in the same commit. `workflow`
+names the skills reached by slash rather than by being routed to, exempting them
+from the pointer rule, because a workflow holds no reason and
+`.claude/CLAUDE.md`'s table says where a reason lives. Nothing is lost by
+leaving one out of it: a skill's `description` is resident in every session
+regardless, so discovery never depended on the pointer. What the pointer serves
+is a subagent with no `Skill` tool, ie. `gate-runner`, for which the table is
+the only thing naming the file to read, and which could not invoke a workflow
+anyway.
 
 It also caps `.claude/CLAUDE.md` at 1200 words. That file is the only one here
 loaded into every session and every subagent regardless of relevance, and
