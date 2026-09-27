@@ -175,6 +175,7 @@ function M.render(opt: cgxx.vimdoc.Opt {
     slug = string?,
     path = string?,
     spdx = string?,
+    generator = string?,
     sections = cgxx.vimdoc.Section[],
 }) -> lines string[]
 ```

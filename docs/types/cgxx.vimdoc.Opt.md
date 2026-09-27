@@ -104,6 +104,23 @@ SPDX identifier for the header
 
 
 
+### Opt.generator
+---
+```lua
+Opt.generator : string?
+```
+
+
+
+Script named in the do-not-edit line
+
+
+
+
+
+
+
+
 ### Opt.sections
 ---
 ```lua
