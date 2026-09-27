@@ -124,6 +124,14 @@ There is no build step. Linting/formatting/typechecking:
   is written to fail closed: a failed or timed-out `inlayHint` request, a client
   that never finished indexing, an empty file list from the wrong cwd, or a run
   that saw no hints at all is fatal rather than an empty result.
+- **Generated help**:
+  `nvim --headless -u scripts/minimal_init.lua -l scripts/genhelp.lua` renders
+  `doc/nvim-config.txt` and `doc/tags`, gated CI-only by the `Help` job in the
+  same way `gendoc.lua` is by `Docs`, and for the same reason: a generator does
+  not belong in `.husky/pre-commit`, which runs formatters, the LuaLS check and
+  the suite. Unlike `Docs` this job reads no tool pin, since nothing third-party
+  is involved. Run it after changing a mapping, a user command, an option, an
+  autocommand or a spec's `keys`.
 - **Tests**:
   `nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua`. The
   suite is [mini.test](https://github.com/nvim-mini/mini.test), driven through
@@ -505,6 +513,70 @@ mutating buffer state; it also carries the buffer _name_ the in-flight call was
 issued for, which is how a late answer recognises that a rename or a refresh has
 superseded it.
 
+### Generated help (`doc/`, `lua/util/vimdoc.lua`, `scripts/genhelp.lua`)
+
+`doc/nvim-config.txt` is this configuration's own `:help`, generated from the
+configuration rather than written beside it. A config repository can host help
+at all because `stdpath("config")` is always first on `runtimepath`; the only
+plumbing that needs is `doc/tags`, which is tracked because lazy.nvim runs
+`helptags` for the plugins it manages and never for the configuration directory.
+
+The split is the point. `lua/util/vimdoc.lua` is pure rendering and touches
+neither the session nor the filesystem, which is what lets
+`tests/test_util_vimdoc.lua` assert column arithmetic without running any
+`setup()`; `scripts/genhelp.lua` harvests and writes. `M.width` is 78 rather
+than `.editorconfig`'s 80 because that is what a help window shows, and `M.fit`
+exists because `util.text.wrap_comment` breaks on whitespace alone: 'statusline'
+is one token of nearly two hundred characters and was emitted whole until it was
+added. Its first version tested whether the _remainder_ fit rather than the
+remainder plus its continuation gutter, which let a 99-column line through; that
+case is now a named test.
+
+Nothing is parsed out of the source, and that is deliberate.
+`lua/keymap/init.lua` and `lua/usercmd/init.lua` set their mappings and commands
+imperatively inside `setup()`, with `lhs` and `desc` as defaulted function
+parameters, so there is no table to read and reading the `---@param` prose
+instead would make a second source of truth out of a comment. Each `setup()` is
+called under a stub of the API it writes through, which is exactly what
+`tests/test_keymap.lua`, `test_option.lua` and `test_autocmd.lua` already do to
+assert the whole set a module registers; those discard the descriptions, so this
+is the same pattern rather than a shared function. The stubs go in before the
+first `require`, since `lua/autocmd.lua` creates its augroup at module load
+rather than in `setup()` and `require`'s cache will not run the file twice.
+`keymap.gx` defers into `vim.schedule`, so the capture waits for it with the
+stub still installed, and a run where it never arrives is fatal.
+
+Plugin mappings are the opposite case and are read statically, the way
+`tests/test_spec.lua` reads them, because a spec's `keys` is plain data. They
+are filtered against `lua/plugin.lua`'s `elide` and `condemn` lists _and_
+against a spec's own `cond`/`enabled`, since both switch a plugin off and only
+the second is visible from the spec file; a help page advertising `<leader>fu`
+for an elided telescope would be worse than one that omits it.
+
+Two things about the header are worth knowing. Help files have no comment
+syntax, so `# %s` is assumed rather than derived, which is the same move
+`util.header.frontmatter` makes inside frontmatter, and the modeline is the
+expanded `vim:set textwidth=78 tabstop=8 filetype=help:` rather than
+`runtime/doc`'s terse form, which is what the rest of this repository writes
+anyway. `noexpandtab` is deliberately dropped, since everything generated here
+is space-indented and setting it would describe the file wrongly.
+`util.header.plain` was extracted from `M.insert` to render that box without a
+buffer to read a 'commentstring' or filetype from, and `util.modeline.base` grew
+a `prepend` clause because its option order is fixed and `textwidth` has to
+precede `filetype`. `sync-header-metadata` needs no exclusion for the file: it
+finds its two markers by end-anchored regex and preserves whatever precedes
+them, so the comment syntax is never its business. `doc/tags` does need one, in
+`.gitattributes`, being TAB-separated records with nowhere to put a comment.
+
+`doc/` beside `docs/` is genuinely confusable, and is not a rename waiting to
+happen: `doc/` is the only name Neovim's `runtimepath` scan accepts. `docs/` is
+the browsable LuaCATS reference and `doc/` is `:help`.
+
+One thing this partly answers that nothing else did. which-key's popup is listed
+below as the only place a leader-prefix collision becomes visible; the keymaps
+and plugin-mappings sections are now a second place, and unlike the popup they
+are visible to a headless process and to `git diff`.
+
 ### WIP snapshots (`lua/util/wip.lua`)
 
 `lua/util/wip.lua` periodically commits the in-memory text of a tracked buffer
@@ -544,8 +616,8 @@ explicit `refs/wip/*` refspec.
   config's `MiniTest.Config`, in the one place both entry points can reach: the
   plugin spec's `config` and `scripts/minitest.lua`, since a spec whose `config`
   is a function never has its `opts` applied by lazy.nvim), `statusline.lua`
-  (above), `markdown_list.lua` (above), `claude.lua`, `git.lua`,
-  `lua_checker.lua`, `markdown_table.lua`, `modeline.lua`, `nex.lua`,
+  (above), `markdown_list.lua` (above), `vimdoc.lua` (above), `claude.lua`,
+  `git.lua`, `lua_checker.lua`, `markdown_table.lua`, `modeline.lua`, `nex.lua`,
   `shebang.lua`, `text.lua`, `treesitter.lua`, `visual_traversal.lua`, and
   `spec.lua`, which is superseded by `lua/plugin.lua`'s import groups and
   required by nothing.
@@ -635,11 +707,11 @@ explicit `refs/wip/*` refspec.
   and runner; `luals_untyped.lua` and `typecheck_sensitive.lua`, the
   annotation-coverage gate and the sensitive typecheck sweep; `lazy_merge.lua`,
   which runs lazy.nvim's real spec resolution and prints the result as JSON for
-  `tests/test_lazy_integration.lua` to read; and `gendoc.lua`, which renders
-  `docs/`. The first four are described under Commands. `lazy_merge.lua` asserts
-  lazy.nvim is already installed rather than letting `util.lazy.setup` clone it,
-  and forces `install.missing = false` plus `checker`/`rocks` off, so it never
-  reaches the network.
+  `tests/test_lazy_integration.lua` to read; `gendoc.lua`, which renders
+  `docs/`; and `genhelp.lua`, which renders `doc/`. The first four are described
+  under Commands. `lazy_merge.lua` asserts lazy.nvim is already installed rather
+  than letting `util.lazy.setup` clone it, and forces `install.missing = false`
+  plus `checker`/`rocks` off, so it never reaches the network.
 - `docs/`: generated, tracked, and never edited by hand.
   `nvim --headless -u scripts/minimal_init.lua -l scripts/gendoc.lua` renders it
   from the LuaCATS annotations under `lua/`, `lsp/` and `init.lua` via
@@ -667,6 +739,14 @@ explicit `refs/wip/*` refspec.
   diff ran. `status` reports all three and touches no index. Each case was
   checked in turn rather than reasoned about, which is how the second and third
   were found.
+- `doc/`: generated, tracked, and never edited by hand; this repository's own
+  `:help`, rendered by `scripts/genhelp.lua` and gated by the `Help` job, which
+  asks `git status --porcelain -- doc/` for the same three reasons the `Docs`
+  job does. Both files here are generated, `doc/tags` by `helptags` rather than
+  by the script directly, and the `Help` job runs that step against a staging
+  copy so a file `helptags` rejects never reaches `doc/`. See the Generated help
+  section above for why nothing is parsed out of the source and why `doc/` and
+  `docs/` are two directories rather than a naming slip.
 - `queries/`: custom/overriding Tree-sitter queries (`markdown`,
   `markdown_inline`, `norg`, `norg_meta`, `comment`), picked up by Neovim's
   runtimepath convention. None carries an `; extends` comment, so each fully
@@ -806,6 +886,10 @@ than an open question; re-check the relevant one after touching it.
   `filekey` hashing over name, filetype, `v:count1`, cwd and branch plus a
   `root` under `stdpath("data")`, and persistence across processes is exactly
   what a single headless run cannot observe.
-- which-key's group labels. The popup is the only place a prefix collision
-  becomes visible, which is the reason the plugin was un-elided at all, so the
-  labels being right is the feature rather than a detail of it.
+- which-key's group labels. The popup is where a prefix collision becomes
+  visible, which is the reason the plugin was un-elided at all, so the labels
+  being right is the feature rather than a detail of it. It is no longer the
+  _only_ such place: `doc/nvim-config.txt`'s keymaps and plugin-mappings
+  sections list the same ground and, being generated and diffed by CI, show a
+  collision to a headless process. The popup is still the only place the
+  grouping and its wording can be judged.
