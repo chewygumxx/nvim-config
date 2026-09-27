@@ -238,6 +238,66 @@ jobs:
                       while IFS= read -r f; do [ -L "$f" ] || printf '%s\n' "$f"; done |
                       xargs -d '\n' npx --no -- prettier --check
 
+    queries:
+        name: Queries
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            # As in the `lua` job: pinned, but named only in `mise.toml`.
+            # https://github.com/ribru17/ts_query_ls/releases
+            - name: Read the tool pins
+              run: |
+                  python3 .github/scripts/tool_version.py \
+                      TS_QUERY_LS_VERSION=github:ribru17/ts_query_ls \
+                      >> "$GITHUB_ENV"
+
+            - name: Cache ts_query_ls
+              id: cache-ts-query-ls
+              uses: actions/cache@v6
+              with:
+                  path: ${{ runner.temp }}/ts_query_ls
+                  key: ts_query_ls-${{ env.TS_QUERY_LS_VERSION }}
+
+            # This project's tags carry a leading `v`, unlike the EmmyLua
+            # releases the `lua` and `docs` jobs fetch from.
+            - name: Install ts_query_ls
+              if: steps.cache-ts-query-ls.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p "$RUNNER_TEMP/ts_query_ls"
+                  curl -sL "https://github.com/ribru17/ts_query_ls/releases/download/v${TS_QUERY_LS_VERSION}/ts_query_ls-x86_64-unknown-linux-gnu.tar.gz" | tar xzf - -C "$RUNNER_TEMP/ts_query_ls"
+                  chmod +x "$RUNNER_TEMP/ts_query_ls/ts_query_ls"
+
+            - name: Add ts_query_ls to PATH
+              run: echo "$RUNNER_TEMP/ts_query_ls" >> "$GITHUB_PATH"
+
+            # `--check` only, never a write: the committed tree is already
+            # the formatter's fixed point, so this asserts it stayed there.
+            # `.husky/pre-commit` is what writes, and it needs two passes to
+            # get here, which is documented there.
+            - name: Check formatting
+              run: ts_query_ls format --check queries
+
+            # `lint` and not `check`. `check` is the superset, validating
+            # node names and impossible patterns, but it needs the parser
+            # objects for each target language and Neovim bundles only seven,
+            # so it would silently cover markdown and markdown_inline while
+            # skipping norg, norg_meta and comment. `lint` needs no parsers
+            # and so reaches all eight files. It is what found five
+            # `(#set! conceal "")` patterns here with no capture to attach
+            # to, which Tree-sitter had been discarding in silence.
+            #
+            # Both read `.tsqueryrc.json`. That file is deliberately almost
+            # empty: `valid_predicates` replaces the tool's defaults rather
+            # than extending them, so declaring this repository's three
+            # custom predicates there would make every core `#eq?` an
+            # "unrecognized predicate". Predicate parity is already gated,
+            # by `tests/test_queries.lua` against `lua/util/treesitter.lua`.
+            - name: Lint
+              run: ts_query_ls lint queries
+
     docs:
         name: Docs
         runs-on: ubuntu-latest
