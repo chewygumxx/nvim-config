@@ -173,6 +173,79 @@ M.frontmatter = function(opt)
     return trim_lines(lines)
 end
 
+---@class util.PlainHeaderOpt
+---@field commentstring string           printf-style wrapper
+---@field slug?         string           Repository, boxed as `~slug.git`
+---@field fork_slug?    string           Fork of slug, boxed beneath it
+---@field path?         string           Repo-relative path, boxed after `::: `
+---@field spdx?         string           SPDX identifier; the line is omitted without one
+---@field shebang?      string           Interpreter line, above the modeline
+---@field modeline?     util.ModelineOpt Overrides; `commentstring` is forced
+
+--- Renders the plain-comment form of this repository's file header: an
+--- optional shebang, the modeline, the SPDX line and the boxed repository
+--- notation, each wrapped in opt.commentstring.
+---
+--- Split out of `M.insert` rather than left inline there because
+--- `util.vimdoc` renders the same box into generated help, where there is
+--- no buffer to take a 'commentstring' or a filetype from. This is now the
+--- one description of the plain shape, as `M.frontmatter` is of the
+--- Markdown one.
+---@param opt util.PlainHeaderOpt
+---@return string[] lines
+M.plain = function(opt)
+    local commentstring = opt.commentstring
+    ---@type util.ModelineOpt
+    local modeline_opt = vim.tbl_extend(
+        "force",
+        { et = true, sw = 4 },
+        opt.modeline or {},
+        { commentstring = commentstring }
+    )
+
+    ---@type string[]
+    local lines = {}
+    -- Assigning nil is a no-op rather than a hole, which is why an absent
+    -- shebang needs no branch
+    lines[#lines + 1] = opt.shebang
+    lines[#lines + 1] = util_modeline.base(modeline_opt)
+
+    if opt.spdx then
+        local identifier  = "SPDX-License-Identifier: " .. opt.spdx
+        lines[#lines + 1] = string.format(commentstring, identifier)
+    end
+
+    if opt.path then
+        lines[#lines + 1] = ""
+        lines[#lines + 1] = string.format(commentstring, "")
+        lines[#lines + 1] = string.format(commentstring, "")
+        if opt.slug then
+            lines[#lines + 1] = string.format(
+                commentstring,
+                "~" .. opt.slug .. ".git"
+            )
+            if opt.fork_slug then
+                lines[#lines + 1] = string.format(
+                    commentstring,
+                    "└─> ~" .. opt.fork_slug .. ".git"
+                )
+            end
+            lines[#lines + 1] = string.format(
+                commentstring,
+                "::: " .. opt.path
+            )
+        else
+            lines[#lines + 1] = string.format(commentstring, opt.path)
+        end
+        lines[#lines + 1] = string.format(commentstring, "")
+        lines[#lines + 1] = string.format(commentstring, "")
+    end
+
+    lines[#lines + 1] = ""
+
+    return trim_lines(lines)
+end
+
 ---@class util.HeaderInsertOpt
 ---@field commentstring? string Commentstring override
 
@@ -241,53 +314,19 @@ M.insert = function(file, buf, opt)
         return
     end
 
-    -- Modeline
-    ---@type string[]
-    local lines       = {}
-    lines[#lines + 1] = util_shebang.get(file, buf)
-    lines[#lines + 1] = util_modeline.base({
-        et = true,
-        sw = 4,
-        ft = vim.bo[buf].filetype,
+    -- As in the Markdown branch above, the upstream is named first and the
+    -- fork beneath it, so the fork's own slug is what moves to `fork_slug`
+    local lines = M.plain({
         commentstring = commentstring,
+        slug          = upstream_slug or slug,
+        fork_slug     = upstream_slug and slug or nil,
+        path          = path,
+        spdx          = spdx,
+        shebang       = util_shebang.get(file, buf),
+        modeline      = { et = true, sw = 4, ft = vim.bo[buf].filetype },
     })
 
-    lines[#lines + 1] = string.format(
-        commentstring,
-        "SPDX-License-Identifier: " .. spdx
-    )
-
-    if path then
-        lines[#lines + 1] = ""
-        lines[#lines + 1] = string.format(commentstring, "")
-        lines[#lines + 1] = string.format(commentstring, "")
-        if slug then
-            if upstream_slug then
-                lines[#lines + 1] = string.format(
-                    commentstring,
-                    "~" .. upstream_slug .. ".git"
-                )
-                lines[#lines + 1] = string.format(
-                    commentstring,
-                    "└─> ~" .. slug .. ".git"
-                )
-            else
-                lines[#lines + 1] = string.format(
-                    commentstring,
-                    "~" .. slug .. ".git"
-                )
-            end
-            lines[#lines + 1] = string.format(commentstring, "::: " .. path)
-        else
-            lines[#lines + 1] = string.format(commentstring, path)
-        end
-        lines[#lines + 1] = string.format(commentstring, "")
-        lines[#lines + 1] = string.format(commentstring, "")
-    end
-
-    lines[#lines + 1] = ""
-
-    vim.api.nvim_buf_set_lines(buf, 0, 0, false, trim_lines(lines))
+    vim.api.nvim_buf_set_lines(buf, 0, 0, false, lines)
 end
 
 --- `XXInsertHeader` callback: inserts a header into the current buffer.
