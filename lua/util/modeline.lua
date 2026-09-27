@@ -32,6 +32,7 @@ end
 ---@field shiftwidth?    integer | boolean Alias for `sw` (default: buf's own, or 4)
 ---@field ft?            string | boolean
 ---@field filetype?      string | boolean  Alias for `ft` (default: buf's own filetype)
+---@field prepend?       string            Extra `:set` clause(s), prepended verbatim
 ---@field append?        string            Extra `:set` clause(s), appended verbatim
 ---@field commentstring? string            printf-style wrapper (default: buf's own)
 
@@ -49,12 +50,17 @@ M.base = function(opt)
         n(opt.shiftwidth, n(vim.bo[buf].shiftwidth, 4))
     )
     local ft = n(opt.ft, n(opt.filetype, vim.bo[buf].filetype))
-    -- For additional :set options not provided for
+    -- For additional :set options not provided for. Both are verbatim, so
+    -- the caller supplies its own separator; `prepend` exists because the
+    -- clause order here is fixed and a help file's modeline is written
+    -- `textwidth` first, ahead of `filetype`
+    local prepend       = opt.prepend
     local append        = opt.append
     local commentstring = opt.commentstring or (vim.bo[buf].commentstring ~= ""
             and vim.bo[buf].commentstring) or "%s"
 
     local modeline = "vim:set"
+    modeline       = modeline .. (prepend or "")
     modeline       = modeline .. (et and " expandtab" or "")
     modeline       = modeline .. (sw and " shiftwidth=" .. tostring(sw) or "")
     modeline       = modeline .. (ft and ft ~= "" and " filetype=" .. ft or "")

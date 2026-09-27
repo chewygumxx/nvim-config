@@ -52,6 +52,22 @@ describe("util.modeline.base", function()
         )
     end)
 
+    -- The clause order is fixed, so this is the only way to write a
+    -- modeline whose first option is not one `base` names itself. A help
+    -- file needs exactly that, `textwidth` ahead of `filetype`
+    it("prepends extra :set clauses ahead of the rest", function()
+        eq(
+            modeline.base({
+                et = false,
+                sw = false,
+                ft = "help",
+                commentstring = "# %s",
+                prepend = " textwidth=78 tabstop=8",
+            }),
+            "# vim:set textwidth=78 tabstop=8 filetype=help:"
+        )
+    end)
+
     it("falls back to the buffer's own option values when unset", function()
         local buf                 = vim.api.nvim_create_buf(false, true)
         vim.bo[buf].expandtab     = true
