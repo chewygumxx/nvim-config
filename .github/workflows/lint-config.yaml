@@ -372,3 +372,43 @@ jobs:
                       echo "::error::docs/ is stale; regenerate it with nvim --headless -u scripts/minimal_init.lua -l scripts/gendoc.lua"
                       exit 1
                   fi
+
+    help:
+        name: Help
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            # Unlike the `Docs` job this needs no third-party generator and
+            # so reads no pin: `scripts/genhelp.lua` renders the help out of
+            # the configuration itself, through `lua/util/vimdoc.lua`.
+            # Neovim is still the host rather than a bare Lua, since the
+            # script calls `helptags` and the `vim.fn` layer throughout.
+            - name: Setup Neovim
+              uses: ./.github/actions/setup-neovim
+
+            # Required for the same reason as in the `luacats` job:
+            # `scripts/minimal_init.lua` raises without mini.test, and as a
+            # `-u` init that raise does not stop the run.
+            - name: Install mini.test
+              uses: ./.github/actions/install-mini-test
+
+            - name: Regenerate
+              run: nvim --headless -u scripts/minimal_init.lua -l scripts/genhelp.lua
+
+            # `git status --porcelain` for the reason the `Docs` job gives
+            # at length: a plain diff misses a new file, which is untracked
+            # and so invisible to it, and misses a file the generator no
+            # longer produces. Both are live cases here, since `doc/` holds
+            # a regenerated `tags` beside the help text.
+            - name: Check doc/ is current
+              run: |
+                  changed=$(git status --porcelain -- doc/)
+                  if [ -n "$changed" ]; then
+                      printf '%s\n' "$changed"
+                      git diff -- doc/ | head -n 100
+                      echo "::error::doc/ is stale; regenerate it with nvim --headless -u scripts/minimal_init.lua -l scripts/genhelp.lua"
+                      exit 1
+                  fi
