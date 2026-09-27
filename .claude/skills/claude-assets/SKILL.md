@@ -33,12 +33,15 @@ when that subsystem is touched, which is the whole reason `CLAUDE.md` is a
 fraction of the length it once was: the reasons did not go away, they stopped
 being loaded into every session regardless of relevance. `commands/` holds
 `/gate-battery`, `/regen` and `/fresh`. `agents/gate-runner.md` runs the gate
-battery without its output reaching the caller. `rules/` holds the two warnings
-over the generated trees, loaded by path rather than by prompt. `hooks/` is what
-makes five rules mechanical rather than advisory: refusing a write into a
-generated tree, refusing a commit while a gate binary is absent, refusing a
-whole-file read of the wordlists and the compiled spell file, linting Lua at
-write time, and reporting that the generated help has gone stale.
+battery without its output reaching the caller. `rules/` holds a warning per
+tree that needs one, loaded by path rather than by prompt, which is what makes a
+rule the cheapest place to put anything triggered by a path: unlike a skill,
+whose description is resident in every session, a rule costs nothing until
+something in its scope is read. `hooks/` is what makes five rules mechanical
+rather than advisory: refusing a write into a generated tree, refusing a commit
+while a gate binary is absent, refusing a whole-file read of the wordlists and
+the compiled spell file, linting Lua at write time, and reporting that the
+generated help has gone stale.
 
 **A newly added agent is not selectable as a `subagent_type` until the session
 restarts**, so the session that writes one cannot use it. A skill is not like
@@ -160,5 +163,11 @@ both directions: an entry naming a file that now exists fails, and so does an
 entry nothing under `.claude/` mentions any more. Deleting a passage that
 carried the only mention of an excluded token means editing that registry in the
 same commit.
+
+Its reach stops at `.claude/`. **No workflow or hook globs `*.md`**: prettier
+takes `*.json`, `*.jsonc`, `*.yaml` and `*.yml` and nothing else, in both
+`.husky/pre-commit` and CI. So the directory `CLAUDE.md` files scattered through
+the repository are reached by no gate at all, and correctness in them is
+entirely a matter of care at write time.
 
 `/fresh` is the end-of-session pass over the half no gate can reach.
