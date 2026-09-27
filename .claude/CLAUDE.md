@@ -48,26 +48,28 @@ how things ought to work and the implementation finds out how they do, so its
 text will disagree with the tree in places; where that disagreement mattered it
 was moved here.
 
-Six directories additionally carry their own `CLAUDE.md`: `.github/workflows/`,
-`lua/spec/`, `tests/`, `lua/util/`, `lsp/` and `queries/`. Each is deliberately
-short and holds only what is easy to violate from outside the directory and not
-derivable from reading it, ie. the `elide`/`condemn` distinction that is
-invisible after lazy.nvim's merge, the one-shared-process discipline the test
-suite depends on, the two annotation habits `luafmt` will otherwise undo, the
+Several directories additionally carry their own `CLAUDE.md`, and it is named
+rather than counted here because the count is the half that rots:
+`.github/workflows/`, `lua/spec/`, `lua/filetype/`, `tests/`, `lua/util/`,
+`lsp/` and `queries/`. Each is deliberately short and holds only what is easy to
+violate from outside the directory and not derivable from reading it, ie. the
+`elide`/`condemn` distinction that is invisible after lazy.nvim's merge, the
+one-module-per-filetype rule, the one-shared-process discipline the test suite
+depends on, the two annotation habits `luafmt` will otherwise undo, the
 `ensure_installed` parity assertion, and the absence of `; extends`. They are
 rules and reasons rather than inventories, for the same reason this file is: a
 localised file that restates a fact creates a second copy of it to drift. None
 of them is reached by any gate, since no workflow or hook globs `*.md`, so
 correctness there is entirely a matter of care at write time.
 
-Six is also the maximum, in the sense that the two directories most in need of a
-"do not edit this by hand" note are the two that cannot hold one.
-`scripts/gendoc.lua` and `scripts/genhelp.lua` both `delete(dir, "rf")` and
-recreate, for the reason each states inline, so any file added to `docs/` or
-`doc/` by hand is removed on the next run without a word. That was confirmed by
-probe rather than reasoned about: a file planted in each vanished and neither
-generator said anything. It rules out a `CLAUDE.md`, a `README`, a `.gitkeep` or
-a banner file in either, and it is the reason the rule below lives here instead.
+The two directories most in need of a "do not edit this by hand" note are the
+two that cannot hold one. `scripts/gendoc.lua` and `scripts/genhelp.lua` both
+`delete(dir, "rf")` and recreate, for the reason each states inline, so any file
+added to `docs/` or `doc/` by hand is removed on the next run without a word.
+That was confirmed by probe rather than reasoned about: a file planted in each
+vanished and neither generator said anything. It rules out a `CLAUDE.md`, a
+`README`, a `.gitkeep` or a banner file in either, and it is the reason the rule
+below lives here instead.
 
 One hazard specific to working through Claude Code: a hook reflows `.md` files
 on every Write or Edit. That is harmless for prose but would corrupt generated
@@ -247,41 +249,16 @@ extra `capabilities`, an `on_attach` for highlight groups).
 
 ### Filetype system (`lua/filetype/`)
 
-`lua/filetype/init.lua`'s `M.filetypes` table holds custom filetype _detection_
-patterns Neovim doesn't recognize out of the box (e.g. mapping
-`*.service`/`*.conf` to `dosini`, `ignore`/`.chezmoiignore` to `gitignore`,
-gnupg/hypr/zsh paths to `gpg`/`hyprlang`/`zsh`); `M.setup()` registers it via
-`vim.filetype.add()`. Separately, `M.modmap` maps already-detected filetypes to
-specialised per-filetype modules, dispatched by `M.config()` off a `FileType`
-autocmd registered in `M.autocmd()`; several real filetypes can route to one
-module (`dosini`, `confini`, `gitconfig`, `cfg`, `editorconfig` all ->
-`lua/filetype/dosini.lua`). A specialised module is mostly declarative:
-`M.local_opts` (buffer-local options) and `M.hlgroup_defs` (highlight links,
-applied once per session) are read and applied generically by `M.config()`; a
-module only needs its own `M.setup(opts)` when it has logic beyond that, e.g.
-`lua/filetype/help.lua` repositioning the help window.
-
-`lua/filetype/markdown.lua`'s `M.setup` attaches two sets of buffer-local
-keymaps, from `util.markdown_table` and `util.markdown_list`. The dispatcher
-runs exactly one module per filetype, so the compound Markdown filetypes cannot
-inherit that by being Markdown; `filetype.nex_note` aliases `markdown.setup`
-outright and `filetype.claude` calls it before its own work, which is why adding
-to `markdown.setup` covers all three.
-
-`lua/filetype/gitcommit.lua` takes both `gitcommit` and `gitrebase`, and is
-purely declarative: it parses nothing, because `tree-sitter-gitcommit` and
-`tree-sitter-git-rebase` are both in `lua/spec/nvim-treesitter.lua`'s
-`ensure_installed` and the grammar already yields `(prefix (type))`,
-`(prefix (scope))`, the surrounding punctuation, the `!` breaking marker,
-`(subject)`, `(trailer (token))` and `(breaking_change (token))`. The module is
-a `hlgroup_defs` table over those captures, ie. `@keyword.gitcommit` for the
-Conventional Commit type, `@variable.parameter.gitcommit` for the scope, and so
-on. It took prose's `spell` with it, since the dispatcher runs one module per
-filetype. The 50 character header cap is shown by 'colorcolumn' (`51,73`, the
-second being git's body width) and deliberately not by the bundled syntax's
-`gitcommitOverflow`, which exists for exactly this and cannot be seen here:
-`vim.treesitter.start` draws above Vim syntax and the grammar captures the whole
-`(subject)` node, overflow included.
+`lua/filetype/init.lua` keeps detection and dispatch in separate tables:
+`M.filetypes` holds the patterns Neovim does not recognise out of the box and is
+registered through `vim.filetype.add()`, while `M.modmap` routes an
+already-detected filetype to a module beside it off a `FileType` autocmd. **The
+dispatcher runs exactly one module per filetype**, which is the part that
+surprises: a compound filetype inherits nothing from the plain one, so
+`lua/filetype/nex_note.lua` aliases `markdown.setup` outright and
+`lua/filetype/claude.lua` calls it before its own work. `lua/filetype/CLAUDE.md`
+holds the module contract, what that one-module rule has already cost, and the
+`gitcommit` decisions.
 
 ### Markdown list continuation (`lua/util/markdown_list.lua`)
 
