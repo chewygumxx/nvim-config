@@ -1,63 +1,68 @@
 ---
-description:
-  Check every Claude asset under .claude/ is still true of the tree before
-  concluding
+description: >-
+  Judge whether this session left the assets under .claude/ still true. The
+  mechanical checks are a gate now, so this is the half that needs a person.
 ---
 
-Run this before concluding a session. It has a mechanical half you can check
-outright and a judgement half you have to think about.
+Run this before concluding a session.
 
-## Mechanical
+## The mechanical half is no longer your job
 
-1. **Hook paths resolve.** Every `command` in `.claude/settings.json` must point
-   at a file that exists and is executable:
+`tests/test_claude_assets.lua` asserts all of it: that every rooted path the
+assets name still exists, that every skill declares the name of its directory
+and folds its description with `>-`, that every hook in `.claude/settings.json`
+points at something executable, and that every skill is pointed at from
+`.claude/CLAUDE.md` with no pointer naming a skill that is gone. It runs in
+`.husky/pre-commit` on any commit touching `lua/`, `tests/`, `scripts/`, `lsp/`,
+`queries/` or `init.lua`, and in CI on every push. The `Help` and `Docs` jobs
+cover `doc/` and `docs/`.
 
-   ```sh
-   jq -r '.hooks[][].hooks[].command' .claude/settings.json \
-       | sed "s|\${CLAUDE_PROJECT_DIR}|$PWD|" \
-       | while read -r p; do [ -x "$p" ] && echo "ok   $p" || echo "FAIL $p"; done
-   ```
+A `.claude/`-only commit deliberately runs no suite, so if this session touched
+nothing else and you want those checks now rather than at CI:
 
-2. **Skill frontmatter parses.** Each `.claude/skills/*/SKILL.md` needs a `name`
-   matching its directory, and a `description` written as a folded block scalar,
-   ie. `description: >-` with the text indented beneath it. The `.md` reflow
-   hook rewraps any long description, and a bare `description:` becomes a plain
-   multiline scalar that is valid YAML but **cannot contain `": "`**. `>-` folds
-   to the same single line and tolerates a colon anywhere, which is why it is
-   the form used here; that was established by probe rather than assumed. A
-   skill that has drifted back to the bare form is one colon away from breaking
-   silently.
+```sh
+MINITEST_PATTERN='claude assets' nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
+```
 
-3. **Every path a skill names still exists.** Collect the backticked paths out
-   of `.claude/skills/*/SKILL.md`, `.claude/commands/*.md` and
-   `.claude/CLAUDE.md`, and check each against the tree. A renamed or deleted
-   module leaves the prose describing something that is not there, which is
-   worse than saying nothing.
+Do not re-derive any of those checks by hand here. Duplicating a gate in prose
+is how the prose and the gate come to disagree, and the prose is the copy that
+loses quietly.
 
-4. **Every pointer in `.claude/CLAUDE.md` names a skill that exists**, and every
-   skill is pointed at from there.
+## What no gate can reach
 
-5. **The generated trees are clean**: `git status --porcelain -- doc/ docs/` is
-   empty.
+**Whether the prose is true.** A skill whose explanation has quietly become
+wrong passes every assertion above, because every path it names still resolves.
+`.claude/commands/fresh.md` itself went stale within an hour of being written,
+by instructing four checks a gate had just taken over, and nothing mechanical
+noticed.
 
-## Judgement
+So the rest of this is judgement, not verification, and it runs on recollection
+of the session rather than on a record of it. After a compaction that
+recollection is partial. Say so rather than implying coverage you do not have.
 
-6. **Did this session establish anything by probe that is not written down?** A
+1. **Did this session establish anything by probe that is not written down?** A
    behaviour confirmed by running something, rather than reasoned about, is
-   exactly what these files are for. Put a reason in the relevant skill or in
-   `.claude/CLAUDE.md`, and a fact in the README or a doc comment.
+   exactly what these files are for. A reason goes in the skill that owns the
+   subsystem, or in `.claude/CLAUDE.md` if it bears on every edit. A fact goes
+   in the README or a doc comment.
 
-7. **Did this session contradict anything already written?** Prose that
-   disagrees with the tree is the failure mode this whole arrangement exists to
+2. **Did this session contradict anything already written?** Prose that
+   disagrees with the tree is the failure this whole arrangement exists to
    prevent. Correct it where it is wrong rather than adding a second account
-   beside it.
+   beside it, and check whether the contradiction reaches further than the
+   paragraph you noticed it in.
 
-8. **Did a skill fail to load when it should have, or load when it should not?**
-   The frontmatter `description` is the only thing deciding that. If a skill was
-   relevant and stayed quiet, its description is missing the words that would
-   have summoned it.
+3. **Did a skill fail to load when it should have, or load when it should not?**
+   The frontmatter `description` is the only thing deciding that. A skill that
+   was relevant and stayed quiet is missing the words that would have summoned
+   it, and that is a fix to the description rather than to the body.
 
-Report what you changed and what you checked and found already correct. Say
+4. **Did anything here take over work that a gate could do instead?** The
+   mechanical half of this file used to be four hand-run checks. If a judgement
+   item above has become mechanical, move it into `tests/test_claude_assets.lua`
+   and delete it from here.
+
+Report what you changed, and what you checked and found already correct. Say
 plainly if something is stale and you have not fixed it.
 
 $ARGUMENTS
