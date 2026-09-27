@@ -41,42 +41,29 @@ given change is likely to break. Anything that is a fact about the code belongs
 in the README or a doc comment; anything that is a reason belongs here.
 
 A `plan.md` was tracked for one tranche of work and retired once its phases
-landed, which is the expectation for any future one: a working plan is a
-scaffold, and a reason worth keeping belongs in this file rather than in the
-plan that produced it. It is worth knowing that a plan of that kind reasons from
-how things ought to work and the implementation finds out how they do, so its
-text will disagree with the tree in places; where that disagreement mattered it
-was moved here.
+landed, which is the expectation for any future one: a plan reasons from how
+things ought to work and the implementation finds out how they do, so a reason
+worth keeping belongs here rather than in the plan that produced it.
 
-Several directories additionally carry their own `CLAUDE.md`, and it is named
-rather than counted here because the count is the half that rots: `.github/`,
-`lua/spec/`, `lua/filetype/`, `tests/`, `lua/util/`, `lsp/` and `queries/`. Each
-is deliberately short and holds only what is easy to violate from outside the
-directory and not derivable from reading it, ie. the `elide`/`condemn`
-distinction that is invisible after lazy.nvim's merge, the
-one-module-per-filetype rule, the one-shared-process discipline the test suite
-depends on, the two annotation habits `luafmt` will otherwise undo, the
-`ensure_installed` parity assertion, and the absence of `; extends`. They are
-rules and reasons rather than inventories, for the same reason this file is: a
-localised file that restates a fact creates a second copy of it to drift. None
-of them is reached by any gate, since no workflow or hook globs `*.md`, so
-correctness there is entirely a matter of care at write time.
+Several directories additionally carry their own `CLAUDE.md`, named rather than
+counted here because a count is the half that rots: `.github/`, `lua/spec/`,
+`lua/filetype/`, `tests/`, `lua/util/`, `lsp/` and `queries/`. Each is
+deliberately short and holds only what is easy to violate from outside the
+directory and not derivable from reading it, and each is rules and reasons
+rather than an inventory, for the same reason this file is: a localised file
+that restates a fact creates a second copy of it to drift. **None of them is
+reached by any gate**, since no workflow or hook globs `*.md`, so correctness
+there is entirely a matter of care at write time.
 
-The two directories most in need of a "do not edit this by hand" note are the
-two that cannot hold one. `scripts/gendoc.lua` and `scripts/genhelp.lua` both
-`delete(dir, "rf")` and recreate, for the reason each states inline, so any file
-added to `docs/` or `doc/` by hand is removed on the next run without a word.
-That was confirmed by probe rather than reasoned about: a file planted in each
-vanished and neither generator said anything. It rules out a `CLAUDE.md`, a
-`README`, a `.gitkeep` or a banner file in either, and it is the reason the rule
-below lives here instead.
-
-One hazard specific to working through Claude Code: a hook reflows `.md` files
-on every Write or Edit. That is harmless for prose but would corrupt generated
-output, so never edit anything under `docs/` by hand; regenerate it. `doc/` is
-exempt from the hook, holding `.txt` rather than `.md`, which makes hand-editing
-it _easier_ rather than safer: the edit survives the write and is destroyed by
-the next generator run.
+`docs/` and `doc/` are the two directories most in need of a "do not edit this
+by hand" note and the two that cannot hold one, since `scripts/gendoc.lua` and
+`scripts/genhelp.lua` both `delete(dir, "rf")` and recreate. Confirmed by probe:
+a file planted in each vanished and neither generator said a word, which rules
+out a `CLAUDE.md`, a `README` or a `.gitkeep` there. Working through Claude Code
+adds one wrinkle. A hook reflows `.md` files on every write, which is harmless
+for prose and would corrupt `docs/`, while `doc/` is exempt by holding `.txt`,
+making a hand-edit there survive the write and die at the next generator run.
+Regenerate both; never type into either.
 
 `.claude/` holds more than this file. `skills/` carries the per-subsystem
 references that load only when that subsystem is touched, which is why this file
@@ -143,19 +130,15 @@ retention behaviour means, the leader prefixes and the collision that
 established them, the checklist for adding a spec, and the `vim.tbl_deep_extend`
 merge trap that `lua/spec/hardtime.nvim.lua` demonstrates.
 
-Two things are worth having here rather than only there, because they bear on
-reading any spec at all. Enabling and disabling is centralised in
-`lua/plugin.lua`, not written onto each spec, so that is the first place to
-look. But a spec may still carry its own condition where that condition is
-specific to the plugin rather than a policy about it, and two currently do on
-top of being listed: **reading only `lua/plugin.lua` tells you what is disabled,
-but not always why**.
-
-The second is that `lazy-lock.json` is **tracked**, and one file serves Arch,
-Termux and Herdr despite their differing plugin sets, because lazy.nvim's writer
-keeps the entries of plugins it is not currently managing. **An entry therefore
-records a pin to return to, not that the plugin is in use**, so the lock cannot
-be read as a list of what loads here.
+Two things bear on reading any spec at all, so they are here rather than only
+there. Enabling and disabling is centralised in `lua/plugin.lua` and not written
+onto each spec, but a spec may still carry a condition of its own where that
+condition is about the plugin rather than about our use of it, and two do:
+**`lua/plugin.lua` tells you what is disabled and not always why**. And
+`lazy-lock.json` is **tracked**, one file serving Arch, Termux and Herdr despite
+their differing plugin sets, because lazy.nvim keeps the entries of plugins it
+is not currently managing; **an entry records a pin to return to, not that the
+plugin is in use**.
 
 ### LSP (`lsp/`, `lua/spec/nvim-lspconfig.lua`, `lua/util/lsp.lua`)
 
@@ -180,61 +163,33 @@ surprises: a compound filetype inherits nothing from the plain one, so
 holds the module contract, what that one-module rule has already cost, and the
 `gitcommit` decisions.
 
-### Markdown list continuation (`lua/util/markdown_list.lua`)
+### Four features that carry their own skill
 
-Neovim will not continue a Markdown list, and not by omission:
-`$VIMRUNTIME/ftplugin/markdown.vim` removes the two `formatoptions` flags that
-would, and `comments` could not express the forms this needs anyway, so the
-continuation is computed in Lua. It is bound to `o`/`O` and `<M-CR>` and
-deliberately **not** to `<CR>`, which `lua/spec/blink.cmp.lua` needs for
-completion.
+Each of these is unusual enough that the obvious reading of the code is the
+wrong one, and each has a skill holding the decisions and the traps. What is
+here is only enough to know the feature exists and is deliberate.
 
-The **`markdown-continuation` skill** has the rest, including why adding to
-`lua/filetype/markdown.lua`'s `setup` is what reaches all three compound
-Markdown filetypes.
-
-### Statusline (`lua/util/statusline.lua`)
-
-`option.view.setup()` installs a 'statusline' that replaces Neovim's default
-leading `%f` with the same repository notation this configuration writes into
-file headers, ie. `~chewygumxx/nvim-config.git:main:/lua/util/statusline.lua`,
-splicing over the option's _default_ so that everything else Neovim puts there
-survives untouched.
-
-Three decisions are load-bearing and each has a test that fails if it is undone:
-the segment is a plain `%{}` and never the nested `%{%...%}` form, the fallback
-emits a literal `%f` for Neovim to expand rather than reproducing it, and
-nothing in the render path calls git. The **`statusline` skill** has those in
-full, along with the caching.
-
-### Generated help (`doc/`, `lua/util/vimdoc.lua`, `scripts/genhelp.lua`)
-
-`doc/nvim-config.txt` is this configuration's own `:help`, generated from the
-configuration rather than written beside it. A config repository can host help
-at all because `stdpath("config")` is always first on `runtimepath`; the only
-plumbing that needs is `doc/tags`, which is tracked because lazy.nvim runs
-`helptags` for the plugins it manages and never for the configuration directory.
-
-The split is the point: `lua/util/vimdoc.lua` is pure rendering and touches
-neither the session nor the filesystem, which is what lets
-`tests/test_util_vimdoc.lua` assert column arithmetic without running any
-`setup()`, while `scripts/genhelp.lua` harvests and writes.
-
-`doc/` beside `docs/` is genuinely confusable and is not a rename waiting to
-happen: `doc/` is the only name Neovim's `runtimepath` scan accepts, and holds
-`:help`, while `docs/` is the browsable LuaCATS reference. The
-**`generated-output` skill** holds both trees, and `/regen` runs them.
-
-### WIP snapshots (`lua/util/wip.lua`)
-
-`lua/util/wip.lua` periodically commits the in-memory text of a tracked buffer
-onto `refs/wip/<branch>`, using git plumbing only, so unsaved work survives a
-crash without any of it becoming visible repository state. HEAD, the real index
-and the working tree are never written, so `git status` stays quiet and anything
-already staged survives.
-
-The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
-`XXWip` subcommands and the recovery commands.
+- **Markdown list continuation** (`lua/util/markdown_list.lua`). Neovim will not
+  continue a Markdown list, and not by omission: its own ftplugin removes the
+  `formatoptions` flags that would. Bound to `o`, `O` and `<M-CR>`, never to
+  `<CR>`, which belongs to completion. See the **`markdown-continuation`
+  skill**.
+- **The repository-notation statusline** (`lua/util/statusline.lua`), installed
+  by `option.view.setup()` over the _default_ 'statusline' so that everything
+  else Neovim puts there survives. Three decisions there are load-bearing and
+  each has a test that fails if it is undone. See the **`statusline` skill**.
+- **Its own `:help`** (`doc/`, `lua/util/vimdoc.lua`, `scripts/genhelp.lua`),
+  generated from the configuration rather than written beside it. A
+  configuration repository can host help at all because `stdpath("config")` is
+  first on `runtimepath`, and `doc/tags` is tracked because lazy.nvim runs
+  `helptags` for plugins and never for the configuration directory.
+  `lua/util/vimdoc.lua` is pure rendering and `scripts/genhelp.lua` does all the
+  harvesting and writing, which is what makes the renderer testable. See the
+  **`generated-output` skill**.
+- **WIP snapshots** (`lua/util/wip.lua`), committing the in-memory text of a
+  tracked buffer onto `refs/wip/<branch>` with git plumbing only, so unsaved
+  work survives a crash without becoming visible repository state. HEAD, the
+  real index and the working tree are never written. See the **`wip` skill**.
 
 ### Other directories
 
@@ -251,36 +206,32 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   `test_coverage.lua` requires every module under `lua/` to have a test or a
   stated exemption, and `test_claude_assets.lua` requires every rooted path
   named anywhere under `.claude/` to exist.
-
 - `scripts/`: the headless entry points, described by the `gates` skill except
   for `scripts/gendoc.lua` and `scripts/genhelp.lua`, which belong to
   `generated-output`. **None of them may reach the network**, which is why
   `scripts/lazy_merge.lua` asserts lazy.nvim is already installed rather than
   letting `util.lazy.setup` clone it, and forces `install.missing = false` with
   `checker` and `rocks` off.
-- `docs/`: the browsable LuaCATS reference. Generated, tracked, and never edited
-  by hand; gated by the `Docs` job. See the `generated-output` skill.
-- `doc/`: this repository's own `:help`. Generated, tracked, and never edited by
-  hand; gated by the `Help` job. See the `generated-output` skill.
+- `docs/` and `doc/`: the browsable LuaCATS reference and this repository's own
+  `:help`. Both generated, tracked and never edited by hand, gated by the `Docs`
+  and `Help` jobs, and both refused to a write by
+  `.claude/hooks/block-generated.sh`.
 - `queries/`: Tree-sitter queries picked up by Neovim's runtimepath convention,
   and each one **replaces** the runtime query for its language rather than
   extending it, since none carries an `; extends` comment. Layout here is owned
   by `ts_query_ls format`, which is the reason `.editorconfig` has a `[*.scm]`
   block at two spaces against the repository's usual four. `queries/CLAUDE.md`
   holds the rest.
-- `snippets/`: a friendly-snippets-style manifest (`package.json`, using the
-  VSCode `contributes.snippets` shape) plus per-language snippet JSON (currently
-  `zsh.json`). LuaSnip itself is in `lua/plugin.lua`'s `elide` list, so the spec
-  loads but the plugin does not.
-- `types/`: `---@meta` declaration stubs for things LuaLS cannot see on its own.
-  They are never required or executed, which is why `.husky/pre-commit` holds
-  `selene` back from this directory: their intentional global declarations would
-  otherwise be flagged as real-code bugs. Do not delete a stub because
-  `workspace.library` appears to make it redundant.
-- `.repo-metadata.jsonc`: schema-checked repo description/topics/license
-  metadata, applied to the GitHub repo's own settings by the
-  `sync-repo-metadata` GitHub Action on push to `main`
-  (`.github/workflows/sync-repo-metadata.yaml`) whenever this file changes.
+- `snippets/`: a friendly-snippets-style manifest plus per-language JSON.
+  LuaSnip is elided, so the spec loads and the plugin does not.
+- `types/`: `---@meta` stubs for what LuaLS cannot see on its own, never
+  required or executed, which is why `.husky/pre-commit` holds `selene` back
+  from here: their intentional global declarations would otherwise read as real
+  bugs. **Do not delete a stub because `workspace.library` appears to make it
+  redundant.**
+- `.repo-metadata.jsonc`: the GitHub repository's own description, topics and
+  licence, applied by the `sync-repo-metadata` Action whenever it changes, so
+  those settings are edited here rather than in the web interface.
 - `.github/`: the workflows, the three composite actions they share, and
   `.github/scripts/tool_version.py`, which is how a job reads a pin from
   `mise.toml` rather than restating it. `.github/CLAUDE.md` holds the rules,
