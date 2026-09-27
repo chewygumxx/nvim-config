@@ -9,13 +9,13 @@ Run this before concluding a session.
 ## The mechanical half is no longer your job
 
 `tests/test_claude_assets.lua` asserts all of it: that every rooted path the
-assets name still exists, that every skill declares the name of its directory
-and folds its description with `>-`, that every hook in `.claude/settings.json`
-points at something executable, and that every skill is pointed at from
-`.claude/CLAUDE.md` with no pointer naming a skill that is gone. It runs in
-`.husky/pre-commit` on any commit touching `lua/`, `tests/`, `scripts/`, `lsp/`,
-`queries/` or `init.lua`, and in CI on every push. The `Help` and `Docs` jobs
-cover `doc/` and `docs/`.
+assets name still exists, that every skill, command and agent folds its
+description with `>-`, that every skill and agent declares the name it is filed
+under, that every hook in `.claude/settings.json` points at something
+executable, and that every skill is pointed at from `.claude/CLAUDE.md` with no
+pointer naming a skill that is gone. It runs in `.husky/pre-commit` on any
+commit touching `lua/`, `tests/`, `scripts/`, `lsp/`, `queries/` or `init.lua`,
+and in CI on every push. The `Help` and `Docs` jobs cover `doc/` and `docs/`.
 
 A `.claude/`-only commit deliberately runs no suite, so if this session touched
 nothing else and you want those checks now rather than at CI:

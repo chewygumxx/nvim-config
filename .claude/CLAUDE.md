@@ -331,13 +331,14 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   against the spec directory. `test_lazy_integration.lua` resolves the specs
   through a real lazy.nvim (see below). `test_claude_assets.lua` checks
   `.claude/` against the tree it describes: every rooted path its prose names
-  still exists, every skill declares the name of its directory and folds its
-  description with `>-`, every hook in `.claude/settings.json` points at
-  something executable, and every skill is pointed at from this file. It cannot
-  check that any of the prose is _true_, only that what it names is there.
-  `helpers.lua` holds the shared git fixtures and is deliberately named so the
-  `test_*.lua` glob does not collect it; test files load it with
-  `dofile("tests/helpers.lua")`, since `tests/` is not on the Lua module path.
+  still exists, every skill, command and agent folds its description with `>-`,
+  every skill and agent declares the name it is filed under, every hook in
+  `.claude/settings.json` points at something executable, and every skill is
+  pointed at from this file. It cannot check that any of the prose is _true_,
+  only that what it names is there. `helpers.lua` holds the shared git fixtures
+  and is deliberately named so the `test_*.lua` glob does not collect it; test
+  files load it with `dofile("tests/helpers.lua")`, since `tests/` is not on the
+  Lua module path.
 
   Six conventions hold throughout. Modules that shell out to git are tested
   against real repositories built under `vim.fn.tempname()` by `helpers.repo()`
