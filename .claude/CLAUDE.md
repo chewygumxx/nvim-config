@@ -622,9 +622,13 @@ explicit `refs/wip/*` refspec.
   beside the Markdown is deliberately discarded, since it carries trailing
   whitespace and CI runs prettier over every `*.yml`, which is the same
   two-tools-one-file standoff `.prettierignore` settles for `lazy-lock.json`.
-  The gate stages intents (`git add --intent-to-add`) before diffing, because
-  `git diff --exit-code` cannot see an untracked file and a new page nobody
-  committed would otherwise pass.
+  The gate itself asks `git status --porcelain -- docs/` and fails on any
+  output, rather than `git diff --exit-code`, because three things can make
+  `docs/` stale and a plain diff sees only one: a changed page it does catch, a
+  _new_ page which is untracked and so invisible to it, and a page the generator
+  no longer produces, which `git add -A` would stage away before the diff ran.
+  `status` reports all three and touches no index. Each case was checked in turn
+  rather than reasoned about, which is how the second and third were found.
 - `queries/`: custom/overriding Tree-sitter queries (`markdown`,
   `markdown_inline`, `norg`, `norg_meta`, `comment`), picked up by Neovim's
   runtimepath convention. None carries an `; extends` comment, so each fully

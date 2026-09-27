@@ -237,3 +237,78 @@ jobs:
                   git ls-files -- '*.json' '*.jsonc' '*.yaml' '*.yml' ':!**/symlink_*' |
                       while IFS= read -r f; do [ -L "$f" ] || printf '%s\n' "$f"; done |
                       xargs -d '\n' npx --no -- prettier --check
+
+    docs:
+        name: Docs
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+
+            # As in the `lua` job: pinned, but named only in `mise.toml`.
+            # The key is the bare alias rather than the backend string,
+            # since that is what the `[tools]` table holds, and
+            # `tool_version.py` exits non-zero on a key it does not know
+            # rather than letting this fall back to whatever the runner
+            # happens to have.
+            # https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases
+            - name: Read the tool pins
+              run: |
+                  python3 .github/scripts/tool_version.py \
+                      EMMYLUA_DOC_CLI_VERSION=emmylua_doc_cli \
+                      >> "$GITHUB_ENV"
+
+            # Neovim is not incidental here. `emmylua_doc_cli` discovers
+            # `.luarc.json` on its own, and that file's `workspace.library`
+            # names `$VIMRUNTIME/lua`, so the generator has to run as a
+            # child of Neovim to resolve it. `scripts/gendoc.lua` says so
+            # at more length.
+            - name: Setup Neovim
+              uses: ./.github/actions/setup-neovim
+
+            # Required for the same reason as in the `luacats` job:
+            # `scripts/minimal_init.lua` raises without mini.test, and as a
+            # `-u` init that raise does not stop the run.
+            - name: Install mini.test
+              uses: ./.github/actions/install-mini-test
+
+            - name: Cache emmylua_doc_cli
+              id: cache-emmylua-doc-cli
+              uses: actions/cache@v6
+              with:
+                  path: ${{ runner.temp }}/emmylua_doc_cli
+                  key: emmylua_doc_cli-${{ env.EMMYLUA_DOC_CLI_VERSION }}
+
+            # The same release the `lua` job takes `luafmt` from, laid out
+            # the same way, ie. the bare binary at the archive root. Note
+            # this project's tags carry no leading `v`, unlike tombi's.
+            - name: Install emmylua_doc_cli
+              if: steps.cache-emmylua-doc-cli.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p "$RUNNER_TEMP/emmylua_doc_cli"
+                  curl -sL "https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases/download/${EMMYLUA_DOC_CLI_VERSION}/emmylua_doc_cli-linux-x64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/emmylua_doc_cli"
+                  chmod +x "$RUNNER_TEMP/emmylua_doc_cli/emmylua_doc_cli"
+
+            - name: Add emmylua_doc_cli to PATH
+              run: echo "$RUNNER_TEMP/emmylua_doc_cli" >> "$GITHUB_PATH"
+
+            - name: Regenerate
+              run: nvim --headless -u scripts/minimal_init.lua -l scripts/gendoc.lua
+
+            # `git status --porcelain` and not `git diff --exit-code`.
+            # Three things can make `docs/` stale and a plain diff sees
+            # only one of them: a changed page, yes, but a *new* page is
+            # untracked and invisible to it, and a page the generator no
+            # longer produces is a deletion that `git add -A` would stage
+            # away before the diff ran. `status` reports all three without
+            # touching the index. Verified against each case in turn.
+            - name: Check docs/ is current
+              run: |
+                  changed=$(git status --porcelain -- docs/)
+                  if [ -n "$changed" ]; then
+                      printf '%s\n' "$changed"
+                      git diff -- docs/ | head -n 100
+                      echo "::error::docs/ is stale; regenerate it with nvim --headless -u scripts/minimal_init.lua -l scripts/gendoc.lua"
+                      exit 1
+                  fi
