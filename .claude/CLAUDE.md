@@ -314,7 +314,7 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   each delegating to a feature module (`lua/usercmd/*.lua` or `lua/util/*.lua`)
   rather than inlining logic.
 - `tests/`: the mini.test suite, one `test_<module>.lua` per module under test,
-  plus seven files that are not about one module. `test_spec.lua` is a smoke
+  plus eight files that are not about one module. `test_spec.lua` is a smoke
   test over whole directories: every `lua/spec/*.lua` and `lsp/*.lua` parses,
   evaluates to a table and names the plugin its filename claims, every slug in
   `lua/plugin.lua`'s `elide`/`condemn` lists names a plugin some spec declares,
@@ -329,10 +329,15 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   dispatcher that applies their `local_opts`/`hlgroup_defs`. `test_queries.lua`
   validates `queries/` (see below). `test_lockfile.lua` checks `lazy-lock.json`
   against the spec directory. `test_lazy_integration.lua` resolves the specs
-  through a real lazy.nvim (see below). `helpers.lua` holds the shared git
-  fixtures and is deliberately named so the `test_*.lua` glob does not collect
-  it; test files load it with `dofile("tests/helpers.lua")`, since `tests/` is
-  not on the Lua module path.
+  through a real lazy.nvim (see below). `test_claude_assets.lua` checks
+  `.claude/` against the tree it describes: every rooted path its prose names
+  still exists, every skill declares the name of its directory and folds its
+  description with `>-`, every hook in `.claude/settings.json` points at
+  something executable, and every skill is pointed at from this file. It cannot
+  check that any of the prose is _true_, only that what it names is there.
+  `helpers.lua` holds the shared git fixtures and is deliberately named so the
+  `test_*.lua` glob does not collect it; test files load it with
+  `dofile("tests/helpers.lua")`, since `tests/` is not on the Lua module path.
 
   Six conventions hold throughout. Modules that shell out to git are tested
   against real repositories built under `vim.fn.tempname()` by `helpers.repo()`
