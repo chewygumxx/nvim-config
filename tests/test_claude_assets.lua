@@ -137,6 +137,19 @@ local frontmatter = function(path)
     return {}
 end
 
+--- The name an asset's frontmatter has to declare, if any.
+---
+--- A skill is named by its directory and an agent by its filename stem,
+--- because that is what each loader keys on, so a mismatch is a file that
+--- quietly answers to something other than what it is filed under. A
+--- command declares no name at all: its filename is the slash command.
+---@param path string Repository-relative path of the asset
+---@return string? name `nil` when the asset declares none
+local declares = function(path)
+    return path:match("^%.claude/skills/([^/]+)/SKILL%.md$")
+        or path:match("^%.claude/agents/([^/]+)%.md$")
+end
+
 --- One hook entry inside `.claude/settings.json`.
 ---
 --- Declared as a class rather than written inline, because a multi-line
@@ -157,9 +170,37 @@ describe("claude assets", function()
     local skills = vim.fn.globpath(".claude/skills", "*/SKILL.md", true, true)
     table.sort(skills)
 
+    ---@type string[]
+    local commands = vim.fn.globpath(".claude/commands", "*.md", true, true)
+    table.sort(commands)
+
+    ---@type string[]
+    local agents = vim.fn.globpath(".claude/agents", "*.md", true, true)
+    table.sort(agents)
+
+    -- Every asset carrying frontmatter. All three kinds are checked, not
+    -- the skills alone: a command or an agent whose description drifted
+    -- back to a bare `description:` would break only once somebody later
+    -- wrote a colon-space into it, which is the quietest possible failure.
+    ---@type string[]
+    local described = {}
+    for _, group in ipairs({ skills, commands, agents }) do
+        for _, path in ipairs(group) do
+            table.insert(described, path)
+        end
+    end
+    table.sort(described)
+
     it("finds the asset files", function()
-        -- The generated cases below cannot fail over an empty list
-        eq({ #files > 8, #skills > 0 }, { true, true })
+        -- The generated cases below cannot fail over an empty list, and
+        -- each kind is counted separately so a glob that stopped matching
+        -- one of them cannot hide behind the other two
+        eq({
+            #files > 8,
+            #skills > 0,
+            #commands > 0,
+            #agents > 0,
+        }, { true, true, true, true })
     end)
 
     for _, path in ipairs(files) do
@@ -233,17 +274,19 @@ describe("claude assets", function()
         eq(orphaned, {})
     end)
 
-    for _, path in ipairs(skills) do
-        local dir = path:match("^%.claude/skills/([^/]+)/SKILL%.md$")
+    for _, path in ipairs(described) do
+        local name = declares(path)
 
-        it(path .. " declares the name of its directory", function()
-            ---@type string?
-            local declared
-            for _, line in ipairs(frontmatter(path)) do
-                declared = declared or line:match("^name:%s*(%S+)%s*$")
-            end
-            eq({ path, declared }, { path, dir })
-        end)
+        if name then
+            it(path .. " declares the name it is filed under", function()
+                ---@type string?
+                local declared
+                for _, line in ipairs(frontmatter(path)) do
+                    declared = declared or line:match("^name:%s*(%S+)%s*$")
+                end
+                eq({ path, declared }, { path, name })
+            end)
+        end
 
         it(path .. " folds its description with >-", function()
             -- A bare `description:` is what the reflow hook turns into a
@@ -268,18 +311,18 @@ describe("claude assets", function()
         local hooks = settings.hooks
 
         ---@type string[]
-        local commands = {}
+        local wired = {}
         for _, matchers in pairs(hooks) do
             for _, matcher in ipairs(matchers) do
                 for _, hook in ipairs(matcher.hooks) do
-                    table.insert(commands, hook.command)
+                    table.insert(wired, hook.command)
                 end
             end
         end
 
         ---@type string[]
         local broken = {}
-        for _, command in ipairs(commands) do
+        for _, command in ipairs(wired) do
             local path = command:gsub("%${CLAUDE_PROJECT_DIR}", vim.fn.getcwd())
             if vim.fn.executable(path) ~= 1 then
                 table.insert(broken, command)
@@ -290,7 +333,7 @@ describe("claude assets", function()
         -- Asserted together so an empty hook table cannot pass as "nothing
         -- broken", which is how this check would quietly stop meaning
         -- anything if the settings shape ever changed
-        eq({ #commands > 0, broken }, { true, {} })
+        eq({ #wired > 0, broken }, { true, {} })
     end)
 
     it("points at every skill, and at no skill that is gone", function()
