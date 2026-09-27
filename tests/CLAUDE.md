@@ -68,3 +68,37 @@ half the suite's runtime.
 The runner fails closed, and deliberately: `mini.test` ends a run with `cquit 0`
 whenever nothing failed, so a run that collected nothing exits 0 and reports
 success. Keep it that way.
+
+Several files here are about a whole directory rather than one module, and a
+change to what they police is a change to a registry rather than to an
+assertion. `test_spec.lua` is the smoke test over `lua/spec/` and `lsp/`,
+including that every slug in `lua/plugin.lua`'s `elide` and `condemn` lists
+names a plugin some spec declares and that `mason-lspconfig`'s
+`ensure_installed` holds exactly the servers `lsp/` configures.
+`test_coverage.lua` is the coverage registry described above.
+`test_filetype_modules.lua` drives the specialised filetype modules through
+`filetype.config`, the real dispatcher. `test_queries.lua` validates `queries/`
+at three depths, `test_lockfile.lua` checks `lazy-lock.json` against the spec
+directory, `test_lazy_integration.lua` resolves the specs through a real
+lazy.nvim, and `test_claude_assets.lua` checks `.claude/` against the tree its
+prose names.
+
+**Two files run a second Neovim, for different reasons, and neither should be
+turned into an in-process test.** `test_init.lua` is the one that uses
+`MiniTest.new_child_neovim()`, because `init.lua`'s load order cannot be
+asserted in a process that has already required half of those modules; the child
+starts on `scripts/minimal_init.lua` and has `package.loaded["plugin"]` stubbed
+before `init.lua` is sourced, since `plugin.setup()` is the lazy.nvim bootstrap
+and would otherwise clone from the network. `test_lazy_integration.lua` instead
+spawns `scripts/lazy_merge.lua` through `vim.system` with `XDG_DATA_HOME`,
+`XDG_STATE_HOME` and `XDG_CACHE_HOME` pointed at a throwaway profile, because
+`stdpath` is fixed at startup and a real lazy.nvim run writes `state.json` and
+the lockfile into whichever profile it finds; lazy.nvim and mini.test are
+symlinked into that profile rather than cloned.
+
+That second file's own header records what it does and does not catch,
+established by mutation: it catches the `M.import()` wiring coming apart and any
+change in what lazy.nvim means by `ignore_installed`, and it cannot catch a slug
+moved between `elide` and `condemn`, since it reads those lists from the same
+module that drove the resolution. Do not read a pass there as covering the
+distinction.

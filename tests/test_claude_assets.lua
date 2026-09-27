@@ -52,9 +52,6 @@ local not_a_path = {
         .. "the passage explaining that there is no indirection layer",
     ["lua/spec/lazy.nvim.lua"] = "the spec that would pin lazy.nvim's own "
         .. "branch, considered and deliberately not written",
-    ["lua/util/X.lua"] = "the placeholder in the test-naming derivation, "
-        .. "ie. lua/util/X.lua -> tests/test_util_X.lua",
-    ["tests/test_util_X.lua"] = "the other half of that same placeholder",
 }
 
 --- Every Markdown asset under `.claude/`.

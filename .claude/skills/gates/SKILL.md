@@ -46,7 +46,16 @@ installed and never reach the network. `selene` is the one tool the prefix does
 not redirect, since its install directory is not among the printed bin paths;
 use `mise which selene` where the exact version matters.
 
-## Two rules that are easy to get wrong
+## Three rules that are easy to get wrong
+
+**Do not chase a `luafmt` diff that explodes a whole call.** When it proposes
+turning `it("...", function()` into `it(`, a string, a `function()` and a
+closing `)`, one argument per line, the cause is almost never the call itself.
+It is one over-long line somewhere inside the body, and `luafmt` reformats the
+nearest enclosing call rather than the offending line. Shorten that line,
+usually by binding a long expression to a local, and the compact layout comes
+back. Taking the proposed diff instead produces an ugly reformat that is also,
+briefly, idempotent, which is what makes it look correct.
 
 **Never trust `lua-language-server`'s exit code.** Some releases leave it at 0
 with problems found. `.husky/pre-commit` and the `LuaCATS` CI job both read the

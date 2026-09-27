@@ -304,89 +304,12 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   each delegating to a feature module (`lua/usercmd/*.lua` or `lua/util/*.lua`)
   rather than inlining logic.
 - `tests/`: the mini.test suite, one `test_<module>.lua` per module under test,
-  plus eight files that are not about one module. `test_spec.lua` is a smoke
-  test over whole directories: every `lua/spec/*.lua` and `lsp/*.lua` parses,
-  evaluates to a table and names the plugin its filename claims, every slug in
-  `lua/plugin.lua`'s `elide`/`condemn` lists names a plugin some spec declares,
-  and `mason-lspconfig`'s `ensure_installed` holds exactly the servers `lsp/`
-  configures. `test_coverage.lua` is the registry: every module under `lua/`
-  (bar `lua/spec/`) plus `init.lua` either has a test file named there or is
-  exempt with a stated reason, and every `tests/*.lua` is matched by the
-  collection glob, so a misnamed test file cannot sit in the directory looking
-  collected; it derives `lua/util/X.lua` -> `tests/test_util_X.lua`, so a
-  conventionally named test needs no registry entry. `test_filetype_modules.lua`
-  drives the specialised filetype modules through `filetype.config`, the
-  dispatcher that applies their `local_opts`/`hlgroup_defs`. `test_queries.lua`
-  validates `queries/` (see below). `test_lockfile.lua` checks `lazy-lock.json`
-  against the spec directory. `test_lazy_integration.lua` resolves the specs
-  through a real lazy.nvim (see below). `test_claude_assets.lua` checks
-  `.claude/` against the tree it describes: every rooted path its prose names
-  still exists, every skill, command and agent folds its description with `>-`,
-  every skill and agent declares the name it is filed under, every hook in
-  `.claude/settings.json` points at something executable, and every skill is
-  pointed at from this file. It cannot check that any of the prose is _true_,
-  only that what it names is there. `helpers.lua` holds the shared git fixtures
-  and is deliberately named so the `test_*.lua` glob does not collect it; test
-  files load it with `dofile("tests/helpers.lua")`, since `tests/` is not on the
-  Lua module path.
-
-  Six conventions hold throughout. Modules that shell out to git are tested
-  against real repositories built under `vim.fn.tempname()` by `helpers.repo()`
-  and deleted in `after_each` (`test_util_git.lua`, `test_util_wip.lua`,
-  `test_util_header.lua`, `test_util_statusline.lua`); that helper pins
-  everything git would otherwise take from the machine, ie. the branch (`branch`
-  is a required argument, not a default) since `init.defaultBranch` is not
-  something a test should inherit, and `user.name`/`user.email` per repository
-  since a CI runner has no global identity and `git commit` fails outright
-  without one. `helpers.git` raises on a non-zero exit rather than returning
-  `""`, because a swallowed setup failure resurfaces later as a puzzling
-  assertion about something else. The whole suite shares one Neovim process, so
-  anything that mutates session state (global options in `test_option.lua`,
-  global keymaps in `test_keymap.lua`, augroups in `test_autocmd.lua`, highlight
-  groups in `test_highlight.lua`) captures and restores it, since files run in
-  alphabetical order and whatever is left set is inherited by every file after.
-  Those same four files assert the _whole_ set they write and not merely that
-  the documented entries were applied, by watching the writes (`vim.keymap.set`,
-  `nvim_set_option_value`, `nvim_set_hl`, `nvim_create_augroup` are stubbed for
-  the duration of one `setup()` call): the documented list doubles as the
-  restore list, so an entry missing from it is an entry nothing puts back, which
-  is how a visual-mode `gF` override once leaked into every later file. A stub
-  of that kind is written with the real arity, since a narrower one retypes the
-  field for the whole workspace and makes every real call site report
-  `redundant-parameter`. And a case about something _not_ happening waits for a
-  fence rather than sleeping: `util.wip`'s `report` argument makes it announce
-  the no-op it reached, which replaced three fixed `vim.wait(2000, ...)` sleeps
-  that were half the suite's runtime.
-
-  Two files run a second Neovim, for different reasons. `test_init.lua` is the
-  one that uses `MiniTest.new_child_neovim()`, because `init.lua`'s load order
-  cannot be asserted in a process that has already required half of those
-  modules; the child is started on `scripts/minimal_init.lua` and has
-  `package.loaded["plugin"]` stubbed before `init.lua` is sourced, since
-  `plugin.setup()` is the lazy.nvim bootstrap and would clone from the network.
-  `test_lazy_integration.lua` instead spawns `scripts/lazy_merge.lua` through
-  `vim.system` with `XDG_DATA_HOME`/`XDG_STATE_HOME`/`XDG_CACHE_HOME` pointed at
-  a throwaway profile, because `stdpath` is fixed at startup and a real
-  lazy.nvim run writes `state.json` and the lockfile into whichever profile it
-  finds; lazy.nvim and mini.test are symlinked into that profile rather than
-  cloned. Its own header records what it does and does not catch, established by
-  mutation: it catches the `M.import()` wiring coming apart and any change in
-  what lazy.nvim means by `ignore_installed`, and it cannot catch a slug moved
-  between `elide` and `condemn`, since it reads those lists from the same module
-  that drove the resolution.
-
-  `test_queries.lua` validates `queries/` at three depths, because the grammars
-  these queries target are not all available. Every file is parsed as the _query
-  language_ using the `query` grammar Neovim bundles, which needs none of the
-  target parsers and so covers all eight files; every `#predicate?` and
-  `#directive!` has to resolve after `util.treesitter.setup()` has run, which is
-  the parity gate against `lua/util/treesitter.lua`; and
-  `vim.treesitter.query.parse` compiles a file against its own grammar, which
-  reaches only the languages Neovim ships a parser for. Which those are is
-  registered rather than discovered, so a parser arriving or leaving is a
-  failure to read. Note `vim.treesitter.query.list_predicates()` and
-  `list_directives()` return names already carrying their `?`/`!`, so appending
-  one yields `eq??` and reports every core predicate as missing.
+  plus several files that police a whole directory instead. Everything about
+  writing one is in `tests/CLAUDE.md`, and it all follows from the suite sharing
+  a single Neovim process. Two of those registry files reach back into this one:
+  `test_coverage.lua` requires every module under `lua/` to have a test or a
+  stated exemption, and `test_claude_assets.lua` requires every rooted path
+  named anywhere under `.claude/` to exist.
 
 - `scripts/`: `minimal_init.lua` and `minitest.lua`, the headless test bootstrap
   and runner; `luals_untyped.lua` and `typecheck_sensitive.lua`, the
@@ -485,14 +408,6 @@ The **`wip` skill** has the mechanism, the debounce and eligibility rules, the
   is right to flag but that cannot be written around, e.g. `duplicate-set-field`
   when a test stubs `vim.notify`, or `missing-fields` on a synthetic
   `command_args` table built to exercise a user command callback directly.
-- **Reading a `luafmt` diff**: when it proposes exploding a whole call into the
-  one-argument-per-line form, ie. turning `it("...", function()` into `it(`, a
-  string, a `function()` and a closing `)`, the cause is almost never the call
-  itself. It is one over-long line somewhere inside the body, and `luafmt`
-  reformats the nearest enclosing call rather than the offending line. Shorten
-  that line, usually by binding a long expression to a local, and the compact
-  layout comes back. Chasing the proposed diff instead produces an ugly reformat
-  that is also, briefly, idempotent, which makes it look correct.
 - **Commit messages**: Conventional Commits, enforced by commitlint + husky.
   Scopes must come from this repo's fixed `scope.enum` (`hl`, `opt`, `ft`,
   `key`, `ucmd`, `acmd`, `lsp`, `spec`, `util`, `asset`, `claude`); do not
