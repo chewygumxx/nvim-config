@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- vim: foldlevel=3:foldmethod=expr:
+-- vim:set expandtab shiftwidth=4 filetype=lua foldlevel=3 foldmethod=expr:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
