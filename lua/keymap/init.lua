@@ -80,11 +80,10 @@ M.blink_linenumber = function(lhs, desc)
         vim.wo[win].relativenumber = false
 
         vim.defer_fn(function()
-            vim.api.nvim_set_hl(
-                0,
-                "LineNr",
-                old_hl_linenr --[[@as vim.api.keyset.highlight]]
-            )
+            -- What `nvim_get_hl` returns is what `nvim_set_hl` takes back,
+            -- but LuaLS declares the two keysets apart
+            ---@diagnostic disable-next-line: param-type-mismatch
+            vim.api.nvim_set_hl(0, "LineNr", old_hl_linenr)
             if vim.api.nvim_win_is_valid(win) then
                 vim.wo[win].number         = old_o_number
                 vim.wo[win].relativenumber = old_o_relativenumber
