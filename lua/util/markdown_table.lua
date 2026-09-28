@@ -475,8 +475,9 @@ end
 --- Extent of the table containing `row`, as 0-indexed inclusive rows.
 ---
 --- Tree-sitter first: it already excludes tables inside code fences, keeps
---- `\|` and `` `a|b` `` as cell content, and handles tables indented in a
---- list or quoted in a blockquote.
+--- `\|` as cell content, and handles tables indented in a list or quoted
+--- in a blockquote. A pipe inside a code span is a cell boundary to it, as
+--- GFM says it is, so `` `a|b` `` needs `\|` there too.
 ---
 --- It has two blind spots, both straight from GFM's own rules: a table
 --- with no delimiter row yet, and one whose header and delimiter cell
