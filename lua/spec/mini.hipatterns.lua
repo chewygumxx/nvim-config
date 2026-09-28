@@ -16,15 +16,21 @@ local M = {
     "nvim-mini/mini.hipatterns",
     lazy = false,
 
+    -- The table `setup` receives, so the annotation checks what the plugin
+    -- is actually given rather than a wrapper around it
     ---@type MiniHipatterns.Config
     opts = {
-        hipatterns = {
-            highlighters = {},
-        },
+        highlighters = {},
     },
 }
 
-M.config = function()
+--- Adds the hex colour highlighter, which needs the plugin loaded to
+--- build, then applies the options. A `config` of our own means lazy.nvim
+--- no longer calls `setup(opts)`, so it is called here.
+---@param _    LazyPlugin
+---@param opts MiniHipatterns.Config
+---@return nil
+M.config = function(_, opts)
     ---@type mini.hipatterns
     local hipatterns = require("mini.hipatterns")
     local gen_hex    = hipatterns.gen_highlighter.hex_color({
@@ -36,9 +42,10 @@ M.config = function()
         nil,
     })
 
-    M.opts.hipatterns.highlighters.hex_color = gen_hex
+    opts.highlighters           = opts.highlighters or {}
+    opts.highlighters.hex_color = gen_hex
 
-    hipatterns.setup(M.opts.hipatterns)
+    hipatterns.setup(opts)
 end
 
 return M
