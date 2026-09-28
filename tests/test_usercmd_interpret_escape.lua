@@ -122,3 +122,40 @@ describe("usercmd.interpret_escape.command", function()
         eq(vim.fn.glob(log_dir .. "*", false, true), before)
     end)
 end)
+
+describe("usercmd.interpret_escape copy", function()
+    it("creates its cache directory before writing the copy", function()
+        -- A second Neovim, since `stdpath` is fixed at startup and only a
+        -- fresh process can be pointed at a throwaway cache. The check
+        -- this guards was `not vim.fn.isdirectory(...)`, which is never
+        -- true in Lua, so a missing directory was never made.
+        local cache = vim.fn.tempname()
+
+        ---@type string[]
+        local command = {
+            vim.v.progpath,
+            "--headless",
+            "-u",
+            "scripts/minimal_init.lua",
+            "-c",
+            "file sample.log",
+            "-c",
+            "call setline(1, 'text')",
+            "-c",
+            "lua require('usercmd.interpret_escape')"
+                .. ".command({ bang = false, fargs = {} })",
+            "-c",
+            "qa!",
+        }
+
+        ---@type vim.SystemOpts
+        local opts = { text = true, env = { XDG_CACHE_HOME = cache } }
+        vim.system(command, opts):wait(30000)
+
+        local log_dir = vim.fs.joinpath(cache, "nvim", "log-ansi")
+        local written = vim.fn.readdir(log_dir)
+        vim.fn.delete(cache, "rf")
+
+        eq(written, { "sample.ansi" })
+    end)
+end)
