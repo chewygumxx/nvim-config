@@ -20,6 +20,7 @@ local source_dirs = {
 
     "~/.config/hypr",
     "~/.config/nvim/lua",
+    "~/.config/nvim/types",
     "~/.config/luarocks",
     "~/.config/wezterm",
     "~/.config/yay",
@@ -59,8 +60,8 @@ M.get = function(file, buf, opt)
 
     -- `vim.fn.expand()` is declared `string|string[]` (the `list` arg
     -- form), even though this single-arg call always returns `string`;
-    -- casting the *parameter* at its reassignment above doesn't narrow
-    -- it the way a fresh `local` would, so cast the result here instead.
+    -- annotating the *parameter* at its reassignment above doesn't narrow
+    -- it the way a fresh `local` would, so the result is annotated here.
     ---@type string
     local path = vim.fn.fnamemodify(file, ":~:h")
     for _, dir in ipairs(source_dirs) do
