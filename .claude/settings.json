@@ -3,7 +3,7 @@
     "attribution": {
         "commit": "",
         "pr": "",
-        "sessionUrl": false
+        "sessionUrl": true
     },
     "enabledPlugins": {
         "claude-code-setup@claude-plugins-official": true,
