@@ -82,8 +82,13 @@ node      = "24"
 # `emmylua_doc_cli` is not a gate: it renders the LuaCATS annotations this
 # repository already maintains into browsable documentation.
 #
+# `selene` is taken through `aqua:` rather than `github:`. Its release zip
+# stores the binary as mode 644, and the `github:` backend installs it that
+# way: not executable, and so absent from `mise bin-paths` too. The aqua
+# registry entry sets the mode.
+#
 "aqua:LuaLS/lua-language-server" = "3.19.1"
-"github:Kampfkarren/selene"      = "0.31.0"
+"aqua:Kampfkarren/selene"        = "0.31.0"
 luafmt                           = { version = "0.25.1", matching = "luafmt" }
 emmylua_check                    = { version = "0.25.1", matching = "emmylua_check" }
 emmylua_doc_cli                  = { version = "0.25.1", matching = "emmylua_doc_cli" }
