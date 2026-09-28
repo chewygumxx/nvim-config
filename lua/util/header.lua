@@ -257,10 +257,6 @@ end
 ---@param opt?  util.HeaderInsertOpt
 ---@return nil
 M.insert = function(file, buf, opt)
-    if not (util_modeline and util_shebang and util_git) then
-        return
-    end
-
     file                = file or vim.fn.expand("%")
     buf                 = buf or 0
     opt                 = opt or {}
