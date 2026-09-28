@@ -56,4 +56,11 @@ describe("util.shebang.get", function()
             )
         end
     )
+
+    it("returns #!/bin/false for a type stub", function()
+        -- `types/` holds `---@meta` stubs that only LuaLS reads, so they
+        -- are never executed any more than a module under `lua/` is
+        local stub = vim.fn.expand("~") .. "/.config/nvim/types/foo.d.lua"
+        eq(shebang.get(stub, 0, { ft = "lua" }), "#!/bin/false")
+    end)
 end)
