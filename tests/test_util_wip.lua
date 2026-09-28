@@ -538,6 +538,33 @@ describe("util.wip.autocmd", function()
         eq(lookups, 0)
     end)
 
+    it("forgets a renamed buffer's location", function()
+        -- Renamed to a file git has never seen, so a stale location would
+        -- keep snapshotting the new text under the old tracked path. The
+        -- first snapshot is waited out, since it would otherwise land
+        -- after `after_each` has deleted the repository.
+        eq(
+            helpers.announced(function()
+                wip.snapshot(buf, true)
+            end),
+            "WIP: no change since last snapshot"
+        )
+        eq(type(vim.b[buf].cgxx_wip_location), "table")
+
+        local renamed = vim.fn.fnameescape(dir .. "/untracked.lua")
+        vim.api.nvim_buf_call(buf, function()
+            vim.cmd("silent file " .. renamed)
+        end)
+
+        eq(vim.b[buf].cgxx_wip_location, nil)
+        eq(
+            helpers.announced(function()
+                wip.snapshot(buf, true)
+            end),
+            "WIP: buffer is not a tracked file"
+        )
+    end)
+
     it("bounds every snapshot with a timeout", function()
         -- Stubbed rather than raced: a real timeout would need a git slow
         -- enough to lose to it, which a test cannot arrange reliably
