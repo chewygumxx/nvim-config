@@ -35,7 +35,7 @@ local redirect = function(vimcmd, args, bang)
     vim.bo.bufhidden = "wipe"
     vim.bo.swapfile  = false
     vim.keymap.set("n", "q", "<cmd>bwipeout!<CR>", {
-        buffer = true,
+        buf = 0,
         desc = "Quit temp redirect buffer",
     })
 

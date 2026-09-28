@@ -115,7 +115,7 @@ local interpret_escape = function(bang)
         vim.api.nvim_open_term(bufnr, {}),
         table.concat(lines, "\r\n")
     )
-    vim.keymap.set("n", "q", "<cmd>qa!<cr>", { buffer = bufnr, silent = true })
+    vim.keymap.set("n", "q", "<cmd>qa!<cr>", { buf = bufnr, silent = true })
     vim.api.nvim_create_autocmd("TextChanged", {
         buffer = bufnr,
         command = "normal! G$",
