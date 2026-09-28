@@ -30,7 +30,7 @@ function M.setup(opts: vim.api.keyset.create_autocmd.callback_args {
 
 Markdown's own `setup()`, unchanged: the table keymaps are as welcome in
 a note as in any other Markdown buffer, and a note gets them only
-because it asks — `lua/filetype/init.lua` runs one module per filetype.
+because it asks: `lua/filetype/init.lua` runs one module per filetype.
 
 
 
