@@ -387,6 +387,16 @@ M.autocmd = function()
         end,
     })
 
+    -- A rename keeps the buffer number, so nothing else would notice that
+    -- the root and path cached for the old name may no longer apply
+    vim.api.nvim_create_autocmd("BufFilePost", {
+        desc     = "Forget a renamed buffer's WIP location",
+        group    = group,
+        callback = function(event)
+            vim.b[event.buf].cgxx_wip_location = nil
+        end,
+    })
+
     vim.api.nvim_create_autocmd({ "BufDelete", "BufWipeout" }, {
         desc     = "Release the buffer's WIP debounce timer",
         group    = group,

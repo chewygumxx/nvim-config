@@ -210,6 +210,7 @@ Autocommands this configuration registers, by event.
 
 BufDelete,BufWipeout    Release the buffer's WIP debounce timer
 BufDelete,BufWipeout    Release the buffer's statusline resolve marker
+BufFilePost             Forget a renamed buffer's WIP location
 BufFilePost,BufWritePost
                         Invalidate the buffer's cached statusline git segment
 BufNewFile              Designates new file buffer for pending header
