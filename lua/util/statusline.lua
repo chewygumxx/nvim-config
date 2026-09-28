@@ -256,6 +256,12 @@ M.segment = function(bufnr)
         return value
     end
 
+    -- A cached `false` is an answer, "no segment applies", and not a miss:
+    -- rescheduling it would re-resolve every such window on every redraw
+    if vim.b[bufnr].cgxx_statusline == false then
+        return ""
+    end
+
     if not pending[bufnr] then
         pending[bufnr] = true
         vim.schedule(function()
