@@ -316,7 +316,8 @@ M.config = function()
     -- crate misdetects the host toolchain as a cross-compiler and looks for
     -- a nonexistent `aarch64-linux-android-gcc` instead.
     if vim.env.TERMUX_VERSION then
-        local prefix = vim.env.PREFIX                          --[[@as string]]
+        ---@type string
+        local prefix = vim.env.PREFIX
         vim.env.CC   = vim.env.CC or prefix .. "/bin/clang"
         vim.env.CXX  = vim.env.CXX or prefix .. "/bin/clang++"
     end
@@ -324,7 +325,8 @@ M.config = function()
     vim.treesitter.language.register("ini", "conf")
     vim.treesitter.language.register("gotmpl", "template")
 
-    local ts = require("nvim-treesitter") --[[@as nvim-treesitter]]
+    ---@type nvim-treesitter
+    local ts = require("nvim-treesitter")
     -- Install core parsers after lazy.nvim finishes loading all plugins
     vim.api.nvim_create_autocmd("User", {
         pattern  = "LazyDone",

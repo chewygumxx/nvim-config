@@ -25,19 +25,20 @@ local M = {
 }
 
 M.config = function()
-    local gen_hex                            = require("mini.hipatterns") --[[@as mini.hipatterns]]
-        .gen_highlighter
-        .hex_color({
-            "line",                   -- <style>
-            200,                      -- <priority>
-            function()
-                return true
-            end, -- <filter>
-            nil,
-        })
+    ---@type mini.hipatterns
+    local hipatterns = require("mini.hipatterns")
+    local gen_hex    = hipatterns.gen_highlighter.hex_color({
+        "line",                   -- <style>
+        200,                      -- <priority>
+        function()
+            return true
+        end, -- <filter>
+        nil,
+    })
+
     M.opts.hipatterns.highlighters.hex_color = gen_hex
 
-    require("mini.hipatterns").setup(M.opts.hipatterns)
+    hipatterns.setup(M.opts.hipatterns)
 end
 
 return M

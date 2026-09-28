@@ -63,7 +63,8 @@ M.cmd = cmds
 M.config = function()
     require("util.minitest").setup()
 
-    local MiniTest = require("mini.test") --[[@as mini.test]]
+    ---@type mini.test
+    local MiniTest = require("mini.test")
     for _, usercmd in ipairs(usercmds) do
         vim.api.nvim_create_user_command(
             "MiniTest" .. usercmd.cmd,
