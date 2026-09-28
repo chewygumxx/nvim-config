@@ -145,6 +145,29 @@ describe("util.statusline.segment", function()
         eq(statusline.fallback(bufnr), "%f")
     end)
 
+    it("does not re-resolve a buffer with no segment", function()
+        -- The cached `false` is an answer, not a miss. Read as a miss, every
+        -- redraw of a help, terminal or quickfix window scheduled a fresh
+        -- resolve that reached the same answer again.
+        local bufnr = vim.api.nvim_create_buf(true, false)
+        statusline.segment(bufnr)
+        await(bufnr)
+
+        local scheduled = 0
+        local schedule  = vim.schedule
+        ---@diagnostic disable-next-line: duplicate-set-field
+        vim.schedule  = function(fn)
+            scheduled = scheduled + 1
+            return schedule(fn)
+        end
+        local ok, err = pcall(statusline.segment, bufnr)
+        vim.schedule  = schedule
+        assert(ok, err)
+
+        eq(scheduled, 0)
+        vim.api.nvim_buf_delete(bufnr, { force = true })
+    end)
+
     it("suppresses the %f fallback once a segment resolves", function()
         local _, file = track(fixture())
         local bufnr   = resolved(file)
