@@ -94,10 +94,10 @@ spawns `scripts/lazy_merge.lua` through `vim.system` with `XDG_DATA_HOME`,
 `XDG_STATE_HOME` and `XDG_CACHE_HOME` pointed at a throwaway profile, because
 `stdpath` is fixed at startup and a real lazy.nvim run writes `state.json` and
 the lockfile into whichever profile it finds; lazy.nvim and mini.test are
-symlinked into that profile rather than cloned. `test_usercmd_interpret_escape.lua`
-does the same with `XDG_CACHE_HOME` alone, for the one case that must write the
-pre-interpretation copy, since the real cache directory is no place for a test
-to leave files.
+symlinked into that profile rather than cloned.
+`test_usercmd_interpret_escape.lua` does the same with `XDG_CACHE_HOME` alone,
+for the one case that must write the pre-interpretation copy, since the real
+cache directory is no place for a test to leave files.
 
 That second file's own header records what it does and does not catch,
 established by mutation: it catches the `M.import()` wiring coming apart and any
