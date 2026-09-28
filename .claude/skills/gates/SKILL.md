@@ -204,6 +204,7 @@ only that its install has not been run, and a `cargo install` of the same
 project puts all three in `~/.local/share/cargo/bin`, which shadows mise on
 `PATH` and agrees with the pin only until somebody bumps one of them.
 
-CI reads every pin through `.github/scripts/tool_version.py` rather than
-restating it, so a workflow cannot silently fall back to whatever the runner
-happened to have.
+CI installs every pin through `jdx/mise-action`, narrowed per job by
+`install_args`, rather than restating it, so a workflow cannot silently fall
+back to whatever the runner happened to have. The one exception is the nightly
+canary in `.github/workflows/test.yaml`, which is not a pin.
