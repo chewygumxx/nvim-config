@@ -16,6 +16,7 @@
         "@commitlint/cz-commitlint": "^21.2.2",
         "commitizen": "^4.3.2",
         "husky": "^9.1.7",
+        "patch-package": "^8.0.1",
         "prettier": "^3.9.7",
         "remark-frontmatter": "^5.0.0",
         "remark-preset-lint-consistent": "^6.0.1",
@@ -24,6 +25,7 @@
     },
     "scripts": {
         "commit": "cz",
+        "postinstall": "patch-package",
         "prepare": "test -d node_modules/husky && husky || true",
         "typecheck": "tsc"
     },
@@ -31,9 +33,6 @@
         "commitizen": {
             "path": "@commitlint/cz-commitlint"
         }
-    },
-    "patchedDependencies": {
-        "@commitlint/cz-commitlint@21.2.2": "patches/@commitlint/cz-commitlint@21.2.2.patch"
     },
     "remarkConfig": {
         "settings": {
