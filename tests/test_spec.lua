@@ -27,7 +27,6 @@
 -- and forty-odd files collapsed into a single dot in the reporter.
 --
 
-local shebang = require("util.shebang")
 ---@type mini.test
 local MiniTest = require("mini.test")
 local eq       = MiniTest.expect.equality
@@ -91,16 +90,6 @@ describe("spec", function()
             end
 
             eq({ path, id:find(name, 1, true) ~= nil }, { path, true })
-        end)
-
-        it("opens " .. file .. " with the shebang its header gets", function()
-            -- Judged by `util.shebang` at the deployed path, so the tree and
-            -- what `XXInsertHeader` writes cannot drift apart: a spec is
-            -- loaded by lazy.nvim, never executed, and a third of them once
-            -- said `#!/usr/bin/env lua` regardless
-            local deployed = vim.fn.expand("~") .. "/.config/nvim/" .. path
-            local want     = shebang.get(deployed, 0, { ft = "lua" })
-            eq({ path, vim.fn.readfile(path, "", 1)[1] }, { path, want })
         end)
     end
 end)

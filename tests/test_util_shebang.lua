@@ -57,6 +57,30 @@ describe("util.shebang.get", function()
         end
     )
 
+    it("agrees with the first line of every module under lua/", function()
+        -- Judged at the deployed path, so the tree and what `XXInsertHeader`
+        -- writes cannot drift apart: a module under `lua/` is required,
+        -- never executed, and twenty once said `#!/usr/bin/env lua`
+        local home = vim.fn.expand("~")
+
+        ---@type string[]
+        local modules = vim.fn.globpath("lua", "**/*.lua", true, true)
+        eq(#modules > 0, true)
+
+        ---@type string[]
+        local wrong = {}
+        for _, path in ipairs(modules) do
+            local want = shebang.get(home .. "/.config/nvim/" .. path, 0, {
+                ft = "lua",
+            })
+            if vim.fn.readfile(path, "", 1)[1] ~= want then
+                table.insert(wrong, path)
+            end
+        end
+        table.sort(wrong)
+        eq(wrong, {})
+    end)
+
     it("returns #!/bin/false for a type stub", function()
         -- `types/` holds `---@meta` stubs that only LuaLS reads, so they
         -- are never executed any more than a module under `lua/` is
