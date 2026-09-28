@@ -67,9 +67,9 @@
 -- it matters most.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 local joinpath = vim.fs.joinpath
 

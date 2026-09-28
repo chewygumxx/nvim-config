@@ -12,9 +12,9 @@
 ---@type cgxx.test.helpers
 local helpers = dofile("tests/helpers.lua")
 local nex     = require("util.nex")
-local eq      = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Runs git in dir and returns its trimmed stdout, "" on failure.
 ---@param dir string Repository to run in

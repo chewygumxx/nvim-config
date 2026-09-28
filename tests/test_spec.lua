@@ -27,9 +27,9 @@
 -- and forty-odd files collapsed into a single dot in the reporter.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Loads path as a plain Lua chunk and returns what it evaluates to.
 ---

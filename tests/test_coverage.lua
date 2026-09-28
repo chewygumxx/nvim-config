@@ -24,9 +24,9 @@
 -- quietest way a suite can lose coverage.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Where each module's coverage lives, for the modules whose test file
 --- cannot be derived from their path.

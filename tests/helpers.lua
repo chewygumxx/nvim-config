@@ -28,6 +28,9 @@
 ---@class cgxx.test.helpers
 local M = {}
 
+---@type mini.test
+local MiniTest = require("mini.test")
+
 --- `MiniTest.expect.equality` with a label attached.
 ---
 --- `expect.equality` takes no message, so every case that asserts the same
@@ -41,29 +44,28 @@ local M = {}
 --- padded call sites are not wrong, and are worth migrating when they are
 --- next touched rather than in a sweep of their own.
 ---@type fun(label: string, left: any, right: any)
-M.labelled_equality = require("mini.test") --[[@as mini.test]]
-    .new_expectation(
-        "labelled equality",
-        ---@param _label string
+M.labelled_equality = MiniTest.new_expectation(
+    "labelled equality",
+    ---@param _label string
         ---@param left   any
         ---@param right  any
         ---@return boolean equal
-        function(_label, left, right)
-            return vim.deep_equal(left, right)
-        end,
-        ---@param label string
+    function(_label, left, right)
+        return vim.deep_equal(left, right)
+    end,
+    ---@param label string
         ---@param left  any
         ---@param right any
         ---@return string context
-        function(label, left, right)
-            return string.format(
-                "%s\nLeft:  %s\nRight: %s",
-                label,
-                vim.inspect(left),
-                vim.inspect(right)
-            )
-        end
-    )
+    function(label, left, right)
+        return string.format(
+            "%s\nLeft:  %s\nRight: %s",
+            label,
+            vim.inspect(left),
+            vim.inspect(right)
+        )
+    end
+)
 
 --- Runs git in dir and returns its trimmed stdout.
 ---

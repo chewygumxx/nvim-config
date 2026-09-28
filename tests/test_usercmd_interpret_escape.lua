@@ -27,9 +27,9 @@
 --
 
 local interpret_escape = require("usercmd.interpret_escape")
-local eq               = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("usercmd.interpret_escape.command", function()
     ---@type integer

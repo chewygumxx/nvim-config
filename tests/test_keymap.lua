@@ -30,9 +30,9 @@
 --
 
 local keymap = require("keymap")
-local eq     = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Every mapping `keymap.setup()` registers: mode, left-hand side and
 --- the description it carries.

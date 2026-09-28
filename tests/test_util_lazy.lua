@@ -19,9 +19,9 @@
 --
 
 local lazy = require("util.lazy")
-local eq   = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- `package.loaded` and `vim.env`, bound to typed locals.
 ---

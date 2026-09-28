@@ -19,9 +19,9 @@
 --
 
 local lsp = require("util.lsp")
-local eq  = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Every buffer-local mapping `M.on_attach` is expected to make, by the
 --- description it carries. The descriptions are what which-key and

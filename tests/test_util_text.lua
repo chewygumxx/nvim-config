@@ -10,9 +10,9 @@
 --
 
 local text = require("util.text")
-local eq   = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("util.text.wrap_comment", function()
     it(

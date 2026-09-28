@@ -17,9 +17,9 @@
 -- nothing at all until someone types the name and gets E492.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Every command `usercmd.setup()` registers, with the options that make
 --- each one usable: how many arguments it takes, whether it accepts a

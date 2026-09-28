@@ -46,9 +46,9 @@
 -- registry is what keeps it visible.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Every query file in the repository.
 ---

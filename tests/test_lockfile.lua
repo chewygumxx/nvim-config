@@ -34,9 +34,9 @@
 -- either returns to a known commit.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- The lockfile, relative to the repository root the suite runs from.
 local LOCKFILE = "lazy-lock.json"

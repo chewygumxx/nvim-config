@@ -10,9 +10,9 @@
 --
 
 local git = require("util.git")
-local eq  = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 ---@type cgxx.test.helpers
 local helpers = dofile("tests/helpers.lua")

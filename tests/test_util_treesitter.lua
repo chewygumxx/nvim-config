@@ -17,9 +17,9 @@
 --
 
 local treesitter = require("util.treesitter")
-local eq         = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Builds a chain of fake TSNode-like tables, one per spec.
 ---@param specs { row: integer, start_col: integer, end_col: integer } []

@@ -33,9 +33,9 @@
 --
 
 local filetype = require("filetype")
-local eq       = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- The module a filetype is mapped to. `cgxx.filetype.Module` is declared
 --- by `lua/filetype/init.lua`, which is why it is not restated here.

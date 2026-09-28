@@ -10,9 +10,9 @@
 --
 
 local mdtable = require("util.markdown_table")
-local eq      = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- `render(parse(lines))`, the round trip both halves are specified by.
 ---@param lines string[]

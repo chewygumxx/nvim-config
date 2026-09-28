@@ -11,9 +11,9 @@
 
 local nex_note = require("filetype.nex_note")
 local markdown = require("filetype.markdown")
-local eq       = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("filetype.nex_note", function()
     it("inherits every one of markdown's buffer-local options", function()
