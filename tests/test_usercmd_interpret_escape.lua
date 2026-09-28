@@ -14,11 +14,12 @@
 -- its own text, so that a captured log's escape codes are interpreted
 -- rather than displayed.
 --
--- Everything is asserted through a bang invocation. Without one the module
--- also writes a pre-interpretation copy under `stdpath("cache")`, which is
--- the machine's real cache directory: `stdpath` is fixed at startup and
--- cannot be redirected from here, and a test suite has no business leaving
--- files in it.
+-- Everything in this process is asserted through a bang invocation.
+-- Without one the module also writes a pre-interpretation copy under
+-- `stdpath("cache")`, which is the machine's real cache directory:
+-- `stdpath` is fixed at startup and cannot be redirected from here, and a
+-- test suite has no business leaving files in it. The one case about that
+-- copy runs in a second Neovim with its own `XDG_CACHE_HOME`.
 --
 -- What is asserted is the structure the module installs, not the rendered
 -- text. `nvim_chan_send` hands bytes to a terminal that draws them when it
