@@ -33,13 +33,12 @@ local M = {
 M.config = function(_, opts)
     ---@type mini.hipatterns
     local hipatterns = require("mini.hipatterns")
-    local gen_hex    = hipatterns.gen_highlighter.hex_color({
-        "line",                   -- <style>
-        200,                      -- <priority>
-        function()
-            return true
-        end, -- <filter>
-        nil,
+    -- Named fields: `hex_color` merges a table of options over its own
+    -- defaults, so the positional `{ "line", 200, filter }` this once
+    -- passed was ignored whole and the style fell back to "full". 200 and
+    -- an always-true filter are the defaults, so only the style is stated.
+    local gen_hex = hipatterns.gen_highlighter.hex_color({
+        style = "line",
     })
 
     opts.highlighters           = opts.highlighters or {}
