@@ -181,6 +181,39 @@ local contents = function(path)
     return table.concat(lines, "\n")
 end
 
+--- Whether a query's text carries the `; extends` modeline, read the way
+--- `vim.treesitter.query.get` reads it: only from the leading run of lines
+--- that begin with `;`, so a blank line or the first pattern ends the
+--- search, and with nothing before the `;` on its line.
+---@param text string
+---@return boolean
+local extends = function(text)
+    for line in (text .. "\n"):gmatch("([^\n]*)\n") do
+        if line:sub(1, 1) ~= ";" then
+            return false
+        end
+        if line:match("^;+%s*extends%s*$") then
+            return true
+        end
+    end
+    return false
+end
+
+describe("the extends reading", function()
+    -- Every file here currently declares `extends = false`, so without
+    -- these the positive branch would never have been exercised at all
+    it("finds the marker anywhere in the leading comments", function()
+        eq(extends("; extends"), true)
+        eq(extends(";; vim:set ft=query:\n;;  extends  \n(x) @y"), true)
+    end)
+
+    it("stops where Neovim stops looking", function()
+        eq(extends(";; header\n\n; extends"), false)
+        eq(extends("(x) @y\n; extends"), false)
+        eq(extends(" ; extends"), false)
+    end)
+end)
+
 describe("queries", function()
     ---@type string[]
     local found = vim.fn.globpath("queries", "*/*.scm", true, true)
@@ -367,11 +400,10 @@ describe("queries", function()
         end)
 
         it("declares whether " .. file .. " extends the runtime", function()
-            -- Neovim accepts `; extends` with any number of leading
-            -- semicolons and surrounding space
-            local carries = contents(path):match("\n?%s*;+%s*extends%s*\n")
-                ~= nil
-            eq({ path, carries }, { path, expected[path].extends })
+            eq(
+                { path, extends(contents(path)) },
+                { path, expected[path].extends }
+            )
         end)
 
         if expected[path] ~= nil and expected[path].bundled then
