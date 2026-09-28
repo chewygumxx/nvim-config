@@ -29,11 +29,6 @@ function M.split_cells(line: string)
 
 Splits a table row into trimmed cell text, discarding the outer pipes.
 
-Scans character by character rather than matching a pattern: a cell may
-legally contain an escaped pipe, and Lua patterns have no way to say
-"a | not preceded by a backslash". Tree-sitter agrees with this reading
-and keeps `\|` as cell content.
-
 Outer pipes are optional in GFM (`a | b` is a table row), so a leading
 or trailing empty cell is dropped only when the line actually has the
 pipe that produced it.
@@ -382,7 +377,7 @@ Tree-sitter first: it already excludes tables inside code fences, keeps
 `\|` and `` `a|b` `` as cell content, and handles tables indented in a
 list or quoted in a blockquote.
 
-It has two blind spots, both straight from GFM's own rules — a table
+It has two blind spots, both straight from GFM's own rules: a table
 with no delimiter row yet, and one whose header and delimiter cell
 counts disagree, are simply not `pipe_table` nodes. Both are states you
 pass through while editing, which is exactly when you want to format.
