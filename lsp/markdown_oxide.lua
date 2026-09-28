@@ -33,22 +33,4 @@ M.capabilities = vim.tbl_deep_extend(
     extra_capabilities
 )
 
--- Placeholder for the inevitable overwrites later
----@type { [string]: vim.api.keyset.highlight }
-local hlgroup_defs = {
-    ["@lsp.sample.highlight.group"] = { link = "Sample" },
-}
-
----@return nil
-local highlights = function()
-    for hlgroup, defmap in pairs(hlgroup_defs) do
-        vim.api.nvim_set_hl(0, hlgroup, defmap)
-    end
-end
-
----@return nil
-M.on_attach = function()
-    highlights()
-end
-
 return M
