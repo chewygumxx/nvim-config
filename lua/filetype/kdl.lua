@@ -22,10 +22,15 @@ local hlgroup_defs = {
     ["kdlNode"]                = { link = "@property" },
 }
 
+--- Tree-sitter captures are scoped to `.kdl`, as `filetype.markdown` scopes
+--- its own: `nvim_set_hl` is global, so a bare `@type` would recolour every
+--- language. `kdlNode` is a syntax group and already KDL's alone.
 ---@type { [string]: vim.api.keyset.highlight }
 M.hlgroup_defs = {}
 for hlgroup, defmap in pairs(hlgroup_defs) do
-    M.hlgroup_defs[hlgroup] = defmap
+    local scoped           = hlgroup:sub(1, 1) == "@" and hlgroup .. ".kdl"
+        or hlgroup
+    M.hlgroup_defs[scoped] = defmap
 end
 
 return M
