@@ -20,6 +20,8 @@ local M = {
         "L3MON4D3/LuaSnip",
         "MeanderingProgrammer/render-markdown.nvim",
         "OXY2DEV/markview.nvim",
+        -- An extension of the elided telescope.nvim, so off with it
+        "debugloop/telescope-undo.nvim",
         "folke/lazydev.nvim",
         "folke/noice.nvim",
         "jakewvincent/mkdnflow.nvim",

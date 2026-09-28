@@ -95,7 +95,6 @@ Plugins switched off in lua/plugin.lua are omitted.
 <leader>dt              DAP: Terminate (nvim-dap)
 <leader>du              DAP: Toggle UI (nvim-dap-ui)
 <leader>ha              Harpoon: add file (harpoon)
-<leader>u               undo history (telescope-undo.nvim)
 [n                      Herdr: previous annotation (herdr-nvim)
 [r                      Herdr: previous agent edit (herdr-nvim)
 ]n                      Herdr: next annotation (herdr-nvim)
