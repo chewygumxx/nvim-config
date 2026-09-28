@@ -217,14 +217,24 @@ that policy. Fixing it, if it needs fixing, is an environment setting, not a
 `.claude/` change; the gate binaries `mise` would otherwise supply stay
 whatever they were before this hook ran.
 
-It runs `npm ci`, never `npm install`, and this one is not interchangeable
-with the general advice to prefer `install` for its caching. `package.json`
-carries a `patchedDependencies` entry for `@commitlint/cz-commitlint`, and the
-committed `package-lock.json` records it as a `patched` block on that
-package's entry. `npm install` re-resolves the tree and drops that block
-silently; `npm ci` installs from the lockfile exactly as committed. Established
-by probe, by running each in turn and diffing `package-lock.json` afterwards:
-`npm install` left a `patched` block missing and nothing said so.
+It runs `npm install`, not `npm ci`, for the general reason: this hook fires
+on every session start, and `install` reuses container-cached `node_modules`
+instead of deleting and rebuilding it from nothing each time. That was not
+always safe here. `package.json` once carried a pnpm-only `patchedDependencies`
+entry for `@commitlint/cz-commitlint`, inert under npm (nothing in this
+project's scripts ever applied `patches/`), and `npm install`'s re-resolution
+silently dropped the matching `patched` block from `package-lock.json` on
+every run while `npm ci` left it alone, which made `install` unsafe for a
+hook that should leave the tree clean. `patch-package` now owns applying that
+patch for real, through `package.json`'s `postinstall`, so nothing in
+dependency resolution depends on a field only pnpm understands any more.
+Verified by probe: a clean `npm install` now reproduces `package-lock.json`
+byte-for-byte against what is committed, both from nothing and repeated on
+top of itself. One thing worth knowing if that patch ever needs updating:
+`npx patch-package @commitlint/cz-commitlint` regenerates
+`patches/@commitlint+cz-commitlint+21.2.2.patch` from scratch, which means it
+overwrites this repository's header block too; re-add it same as any other
+tracked file.
 
 ## `hooks/lib/tools.sh`
 

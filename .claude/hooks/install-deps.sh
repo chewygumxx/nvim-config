@@ -24,17 +24,16 @@
 # re-running this on every editor-attached session would only add latency
 # for no benefit.
 #
-# `npm ci`, not `npm install`: this repository's package.json carries a
-# `patchedDependencies` entry for `@commitlint/cz-commitlint`, and the
-# committed `package-lock.json` records it as a `patched` block on that
-# package's entry. `npm install` re-resolves the tree and silently drops
-# that block; `npm ci` installs from the lockfile exactly as committed and
-# leaves it untouched. Established by probe: running each in turn and
-# diffing `package-lock.json` afterwards. The cost is that `npm ci` always
-# deletes and rebuilds `node_modules` from nothing rather than reusing what
-# container caching already has, which is a few seconds against this
-# repository's devDependencies; that cost buys not silently rewriting a
-# committed, patch-tracking lockfile, which is worth more.
+# `npm install`, not `npm ci`: this hook runs on every session start
+# (`startup`, `resume`, `clear` and `compact` alike), and `npm install` is
+# the one that reuses container-cached `node_modules` instead of deleting
+# and rebuilding it from nothing every time. It is genuinely idempotent
+# here: `package.json`'s `postinstall` (`patch-package`) is what actually
+# applies `patches/@commitlint+cz-commitlint+21.2.2.patch` now, so nothing
+# about dependency resolution depends on pnpm-only lockfile fields the way
+# it briefly did. Verified by probe: a clean `npm install` reproduces
+# `package-lock.json` byte-for-byte against what is committed, both from
+# nothing and repeated on top of itself.
 #
 # Scoped to npm on purpose. `mise install` cannot run here: this
 # environment's network policy blocks mise's own download hosts, so the
@@ -54,4 +53,4 @@ root=${CLAUDE_PROJECT_DIR:-}
 command -v npm >/dev/null 2>&1 || exit 0
 
 cd "$root" || exit 0
-npm ci
+npm install
