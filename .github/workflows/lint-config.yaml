@@ -29,55 +29,16 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
-            # Pinned rather than resolved, to avoid an unauthenticated
-            # releases-API lookup on every run, but read from `mise.toml`
-            # rather than restated here: a version named in both places is
-            # a version that can disagree with itself, and the one a
-            # contributor's `PATH` supplies is the one that matters.
-            # Exported into `$GITHUB_ENV` so the cache keys below can key
-            # on it.
-            - name: Read the tool pins
-              run: |
-                  python3 .github/scripts/tool_version.py \
-                      LUAFMT_VERSION=luafmt \
-                      SELENE_VERSION=github:Kampfkarren/selene \
-                      >> "$GITHUB_ENV"
-
-            - name: Cache luafmt
-              id: cache-luafmt
-              uses: actions/cache@v6
+            # Every tool below is pinned in `mise.toml` and installed from
+            # there, so no version is named in this file. `install_args`
+            # narrows `mise install` to the keys this job runs; without it
+            # the whole editor toolchain would be installed too. The action
+            # caches on those keys and on a hash of `mise.toml`, so a bump
+            # there is a cache miss rather than a stale binary.
+            - name: Setup mise
+              uses: jdx/mise-action@v4
               with:
-                  path: ${{ runner.temp }}/luafmt
-                  key: luafmt-${{ env.LUAFMT_VERSION }}
-
-            - name: Install luafmt
-              if: steps.cache-luafmt.outputs.cache-hit != 'true'
-              run: |
-                  mkdir -p "$RUNNER_TEMP/luafmt"
-                  curl -sL "https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases/download/${LUAFMT_VERSION}/luafmt-linux-x64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/luafmt"
-                  chmod +x "$RUNNER_TEMP/luafmt/luafmt"
-
-            - name: Add luafmt to PATH
-              run: echo "$RUNNER_TEMP/luafmt" >> "$GITHUB_PATH"
-
-            - name: Cache selene
-              id: cache-selene
-              uses: actions/cache@v6
-              with:
-                  path: ${{ runner.temp }}/selene
-                  key: selene-${{ env.SELENE_VERSION }}
-
-            # "light" build: no Roblox standard library, unneeded here.
-            - name: Install selene
-              if: steps.cache-selene.outputs.cache-hit != 'true'
-              run: |
-                  mkdir -p "$RUNNER_TEMP/selene"
-                  curl -sL "https://github.com/Kampfkarren/selene/releases/download/${SELENE_VERSION}/selene-light-${SELENE_VERSION}-linux.zip" -o "$RUNNER_TEMP/selene/selene.zip"
-                  unzip -oq "$RUNNER_TEMP/selene/selene.zip" -d "$RUNNER_TEMP/selene"
-                  chmod +x "$RUNNER_TEMP/selene/selene"
-
-            - name: Add selene to PATH
-              run: echo "$RUNNER_TEMP/selene" >> "$GITHUB_PATH"
+                  install_args: luafmt github:Kampfkarren/selene
 
             - name: Check formatting
               run: git ls-files -- '*.lua' ':!**/symlink_*' | xargs -d '\n' luafmt --check --verify
@@ -97,18 +58,15 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
-            # As in the `lua` job: pinned, but named only in `mise.toml`.
-            # Neovim's pin lives there too and is read by
-            # `.github/actions/setup-neovim`, which the test workflow
-            # shares. https://github.com/LuaLS/lua-language-server/releases
-            - name: Read the tool pins
-              run: |
-                  python3 .github/scripts/tool_version.py \
-                      LUA_LS_VERSION=aqua:LuaLS/lua-language-server \
-                      >> "$GITHUB_ENV"
-
-            - name: Setup Neovim
-              uses: ./.github/actions/setup-neovim
+            # As in the `lua` job. Neovim is installed here rather than by a
+            # composite action so that one `mise install` covers both
+            # tools and one cache entry holds them.
+            - name: Setup mise
+              uses: jdx/mise-action@v4
+              with:
+                  install_args: >-
+                      github:neovim/neovim
+                      aqua:LuaLS/lua-language-server
 
             # `Check annotation coverage` below runs under
             # `scripts/minimal_init.lua`, which raises when mini.test is
@@ -121,23 +79,6 @@ jobs:
             # it is what makes that step mean something.
             - name: Install mini.test
               uses: ./.github/actions/install-mini-test
-
-            - name: Cache lua-language-server
-              id: cache-lua-ls
-              uses: actions/cache@v6
-              with:
-                  path: ${{ runner.temp }}/lua-language-server
-                  key: lua-language-server-${{ env.LUA_LS_VERSION }}
-
-            - name: Install lua-language-server
-              if: steps.cache-lua-ls.outputs.cache-hit != 'true'
-              run: |
-                  mkdir -p "$RUNNER_TEMP/lua-language-server"
-                  curl -sL "https://github.com/LuaLS/lua-language-server/releases/download/${LUA_LS_VERSION}/lua-language-server-${LUA_LS_VERSION}-linux-x64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/lua-language-server"
-                  chmod +x "$RUNNER_TEMP/lua-language-server/bin/lua-language-server"
-
-            - name: Add lua-language-server to PATH
-              run: echo "$RUNNER_TEMP/lua-language-server/bin" >> "$GITHUB_PATH"
 
             # The same whole-repo check `.husky/pre-commit` runs, repeated
             # here because that hook is skippable (`--no-verify`) and
@@ -183,32 +124,11 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
-            # As in the `lua` job: pinned, but named only in `mise.toml`.
-            # That names the bare version, so the `v` the release tag
-            # carries is added at the URL below rather than stored here.
-            # https://github.com/tombi-toml/tombi/releases
-            - name: Read the tool pins
-              run: |
-                  python3 .github/scripts/tool_version.py \
-                      TOMBI_VERSION=aqua:tombi-toml/tombi \
-                      >> "$GITHUB_ENV"
-
-            - name: Cache tombi
-              id: cache-tombi
-              uses: actions/cache@v6
+            # As in the `lua` job.
+            - name: Setup mise
+              uses: jdx/mise-action@v4
               with:
-                  path: ${{ runner.temp }}/tombi
-                  key: tombi-${{ env.TOMBI_VERSION }}
-
-            - name: Install tombi
-              if: steps.cache-tombi.outputs.cache-hit != 'true'
-              run: |
-                  mkdir -p "$RUNNER_TEMP/tombi"
-                  curl -sL "https://github.com/tombi-toml/tombi/releases/download/v${TOMBI_VERSION}/tombi-cli-${TOMBI_VERSION}-x86_64-unknown-linux-musl.tar.gz" | tar xzf - -C "$RUNNER_TEMP/tombi" --strip-components=1
-                  chmod +x "$RUNNER_TEMP/tombi/tombi"
-
-            - name: Add tombi to PATH
-              run: echo "$RUNNER_TEMP/tombi" >> "$GITHUB_PATH"
+                  install_args: aqua:tombi-toml/tombi
 
             - name: Check Formatting
               run: git ls-files -- '*.toml' ':!**/symlink_*' | xargs -d '\n' tombi format --check --offline
@@ -224,10 +144,13 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
-            - name: Setup Node
-              uses: actions/setup-node@v5
+            # Node is pinned in `mise.toml` like every other tool, so it is
+            # installed from there rather than restated to `setup-node`.
+            # prettier itself is a `devDependency`, installed by `npm ci`.
+            - name: Setup mise
+              uses: jdx/mise-action@v4
               with:
-                  node-version: 24
+                  install_args: node
 
             - name: NPM Clean Install
               run: npm ci
@@ -246,32 +169,11 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
-            # As in the `lua` job: pinned, but named only in `mise.toml`.
-            # https://github.com/ribru17/ts_query_ls/releases
-            - name: Read the tool pins
-              run: |
-                  python3 .github/scripts/tool_version.py \
-                      TS_QUERY_LS_VERSION=github:ribru17/ts_query_ls \
-                      >> "$GITHUB_ENV"
-
-            - name: Cache ts_query_ls
-              id: cache-ts-query-ls
-              uses: actions/cache@v6
+            # As in the `lua` job.
+            - name: Setup mise
+              uses: jdx/mise-action@v4
               with:
-                  path: ${{ runner.temp }}/ts_query_ls
-                  key: ts_query_ls-${{ env.TS_QUERY_LS_VERSION }}
-
-            # This project's tags carry a leading `v`, unlike the EmmyLua
-            # releases the `lua` and `docs` jobs fetch from.
-            - name: Install ts_query_ls
-              if: steps.cache-ts-query-ls.outputs.cache-hit != 'true'
-              run: |
-                  mkdir -p "$RUNNER_TEMP/ts_query_ls"
-                  curl -sL "https://github.com/ribru17/ts_query_ls/releases/download/v${TS_QUERY_LS_VERSION}/ts_query_ls-x86_64-unknown-linux-gnu.tar.gz" | tar xzf - -C "$RUNNER_TEMP/ts_query_ls"
-                  chmod +x "$RUNNER_TEMP/ts_query_ls/ts_query_ls"
-
-            - name: Add ts_query_ls to PATH
-              run: echo "$RUNNER_TEMP/ts_query_ls" >> "$GITHUB_PATH"
+                  install_args: github:ribru17/ts_query_ls
 
             # `--check` only, never a write: the committed tree is already
             # the formatter's fixed point, so this asserts it stayed there.
@@ -306,52 +208,23 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
-            # As in the `lua` job: pinned, but named only in `mise.toml`.
-            # The key is the bare alias rather than the backend string,
-            # since that is what the `[tools]` table holds, and
-            # `tool_version.py` exits non-zero on a key it does not know
-            # rather than letting this fall back to whatever the runner
-            # happens to have.
-            # https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases
-            - name: Read the tool pins
-              run: |
-                  python3 .github/scripts/tool_version.py \
-                      EMMYLUA_DOC_CLI_VERSION=emmylua_doc_cli \
-                      >> "$GITHUB_ENV"
-
             # Neovim is not incidental here. `emmylua_doc_cli` discovers
             # `.luarc.json` on its own, and that file's `workspace.library`
             # names `$VIMRUNTIME/lua`, so the generator has to run as a
             # child of Neovim to resolve it. `scripts/gendoc.lua` says so
             # at more length.
-            - name: Setup Neovim
-              uses: ./.github/actions/setup-neovim
+            # The key is the bare alias rather than the backend string,
+            # since that is what the `[tools]` table holds.
+            - name: Setup mise
+              uses: jdx/mise-action@v4
+              with:
+                  install_args: github:neovim/neovim emmylua_doc_cli
 
             # Required for the same reason as in the `luacats` job:
             # `scripts/minimal_init.lua` raises without mini.test, and as a
             # `-u` init that raise does not stop the run.
             - name: Install mini.test
               uses: ./.github/actions/install-mini-test
-
-            - name: Cache emmylua_doc_cli
-              id: cache-emmylua-doc-cli
-              uses: actions/cache@v6
-              with:
-                  path: ${{ runner.temp }}/emmylua_doc_cli
-                  key: emmylua_doc_cli-${{ env.EMMYLUA_DOC_CLI_VERSION }}
-
-            # The same release the `lua` job takes `luafmt` from, laid out
-            # the same way, ie. the bare binary at the archive root. Note
-            # this project's tags carry no leading `v`, unlike tombi's.
-            - name: Install emmylua_doc_cli
-              if: steps.cache-emmylua-doc-cli.outputs.cache-hit != 'true'
-              run: |
-                  mkdir -p "$RUNNER_TEMP/emmylua_doc_cli"
-                  curl -sL "https://github.com/EmmyLuaLs/emmylua-analyzer-rust/releases/download/${EMMYLUA_DOC_CLI_VERSION}/emmylua_doc_cli-linux-x64.tar.gz" | tar xzf - -C "$RUNNER_TEMP/emmylua_doc_cli"
-                  chmod +x "$RUNNER_TEMP/emmylua_doc_cli/emmylua_doc_cli"
-
-            - name: Add emmylua_doc_cli to PATH
-              run: echo "$RUNNER_TEMP/emmylua_doc_cli" >> "$GITHUB_PATH"
 
             - name: Regenerate
               run: nvim --headless -u scripts/minimal_init.lua -l scripts/gendoc.lua
@@ -381,13 +254,16 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
-            # Unlike the `Docs` job this needs no third-party generator and
-            # so reads no pin: `scripts/genhelp.lua` renders the help out of
-            # the configuration itself, through `lua/util/vimdoc.lua`.
-            # Neovim is still the host rather than a bare Lua, since the
-            # script calls `helptags` and the `vim.fn` layer throughout.
-            - name: Setup Neovim
-              uses: ./.github/actions/setup-neovim
+            # Unlike the `Docs` job this needs no third-party generator, so
+            # Neovim is the only tool installed: `scripts/genhelp.lua`
+            # renders the help out of the configuration itself, through
+            # `lua/util/vimdoc.lua`. Neovim is still the host rather than a
+            # bare Lua, since the script calls `helptags` and the `vim.fn`
+            # layer throughout.
+            - name: Setup mise
+              uses: jdx/mise-action@v4
+              with:
+                  install_args: github:neovim/neovim
 
             # Required for the same reason as in the `luacats` job:
             # `scripts/minimal_init.lua` raises without mini.test, and as a
