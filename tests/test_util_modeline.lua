@@ -10,9 +10,9 @@
 --
 
 local modeline = require("util.modeline")
-local eq       = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("util.modeline.base", function()
     it("builds a modeline from explicit options", function()

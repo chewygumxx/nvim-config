@@ -10,16 +10,17 @@
 --
 
 --
--- `M.adjacent`/`M.header_line` only ever call `:range()`/`:prev_sibling()`/
--- `:next_sibling()` on nodes, and accept a raw source string in place of a
--- bufnr, so a real parsed buffer isn't needed: a chain of duck-typed fake
--- nodes exercises the same code paths.
+-- The predicates only ever call `:range()`/`:prev_sibling()`/
+-- `:next_sibling()` on nodes, plus the `:start()`/`:end_()` that
+-- `vim.treesitter.get_node_text` needs for `M.last_matching`, and accept a
+-- raw source string in place of a bufnr, so a real parsed buffer isn't
+-- needed: a chain of duck-typed fake nodes exercises the same code paths.
 --
 
 local treesitter = require("util.treesitter")
-local eq         = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Builds a chain of fake TSNode-like tables, one per spec.
 ---@param specs { row: integer, start_col: integer, end_col: integer } []
@@ -28,9 +29,18 @@ local function fake_chain(specs)
     ---@type table[]
     local nodes = {}
     for i, s in ipairs(specs) do
+        -- `start`/`end_` answer the byte offset as well, which is what
+        -- `vim.treesitter.get_node_text` slices a string source by. The
+        -- column doubles as the offset, since every fixture is one line.
         nodes[i] = {
             range = function()
                 return s.row, s.start_col, s.row, s.end_col
+            end,
+            start = function()
+                return s.row, s.start_col, s.start_col
+            end,
+            end_ = function()
+                return s.row, s.end_col, s.end_col
             end,
         }
     end
@@ -125,6 +135,56 @@ describe("util.treesitter.adjacent", function()
                 0,
                 "ab  cd",
                 { "adjacent?", "@a", "@b" }
+            ),
+            true
+        )
+    end)
+end)
+
+describe("util.treesitter.last_matching", function()
+    -- `queries/comment/highlights.scm` uses this to find the extension of
+    -- a header's path: a word is the extension only if no later sibling
+    -- is a word as well. "a.lua" is three nodes, "a", "." and "lua".
+    local source = "a.lua"
+    local words  = "^[%w_]+$"
+
+    ---@return table[] nodes
+    local path = function()
+        return fake_chain({
+            { row = 0, start_col = 0, end_col = 1 },
+            { row = 0, start_col = 1, end_col = 2 },
+            { row = 0, start_col = 2, end_col = 5 },
+        })
+    end
+
+    --- Runs the predicate over one captured node.
+    ---@param node table
+    ---@return boolean
+    local last = function(node)
+        return treesitter.last_matching(
+            { ["@a"] = { node } },
+            0,
+            source,
+            { "last-matching?", "@a", words }
+        )
+    end
+
+    it("is true for the last node whose siblings match", function()
+        eq(last(path()[3]), true)
+    end)
+
+    it("is false when a later sibling matches too", function()
+        -- "." does not match, but "lua" after it does
+        eq(last(path()[1]), false)
+    end)
+
+    it("is true when the capture is absent", function()
+        eq(
+            treesitter.last_matching(
+                {},
+                0,
+                source,
+                { "last-matching?", "@a", words }
             ),
             true
         )

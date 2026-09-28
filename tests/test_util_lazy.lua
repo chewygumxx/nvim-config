@@ -19,9 +19,9 @@
 --
 
 local lazy = require("util.lazy")
-local eq   = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- `package.loaded` and `vim.env`, bound to typed locals.
 ---
@@ -184,6 +184,12 @@ describe("util.lazy.install", function()
         local dest = root .. "/clone"
         eq(lazy.install(source, dest, "cloneme"), 0)
         eq(vim.fn.isdirectory(dest .. "/.git"), 1)
+        eq(vim.fn.filereadable(dest .. "/init.lua"), 1)
+    end)
+
+    it("clones the default branch when none is named", function()
+        local dest = root .. "/default"
+        eq(lazy.install(source, dest), 0)
         eq(vim.fn.filereadable(dest .. "/init.lua"), 1)
     end)
 

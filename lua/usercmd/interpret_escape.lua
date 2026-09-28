@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- vim: foldlevel=3:foldmethod=expr:
+-- vim:set expandtab shiftwidth=4 filetype=lua foldlevel=3 foldmethod=expr:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -22,7 +22,7 @@ local M = {}
 local save_preinterpreted_copy = function(lines)
     -- Save Directory
     local log_dir = vim.fn.stdpath("cache") .. "/log-ansi/"
-    if not vim.fn.isdirectory(log_dir) then
+    if vim.fn.isdirectory(log_dir) == 0 then
         vim.fn.mkdir(log_dir, "p")
     end
 
@@ -115,7 +115,7 @@ local interpret_escape = function(bang)
         vim.api.nvim_open_term(bufnr, {}),
         table.concat(lines, "\r\n")
     )
-    vim.keymap.set("n", "q", "<cmd>qa!<cr>", { buffer = bufnr, silent = true })
+    vim.keymap.set("n", "q", "<cmd>qa!<cr>", { buf = bufnr, silent = true })
     vim.api.nvim_create_autocmd("TextChanged", {
         buffer = bufnr,
         command = "normal! G$",

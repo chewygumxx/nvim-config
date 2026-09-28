@@ -19,9 +19,9 @@
 --
 
 local redirect = require("usercmd.redirect_awkward_pager")
-local eq       = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("usercmd.redirect_awkward_pager", function()
     before_each(function()

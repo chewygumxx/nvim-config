@@ -29,6 +29,10 @@ Lives here rather than beside either caller: `util.header.frontmatter`
 and `util.nex` both write `title:` and tag keys, and a second copy of
 this would be a second opinion on what YAML needs quoting.
 
+"Ambiguous" includes a plain scalar that is valid but would not read
+back as a string: YAML 1.1's booleans and null (which 1.2 narrowed, but
+plenty of readers still apply), numbers in any base, and timestamps.
+
 
 
 
@@ -53,7 +57,9 @@ function M.wrap_comment(
 
 
 Wraps text into a list of comment lines no wider than width, each
-formatted through commentstring.
+formatted through commentstring. Width is counted in display columns,
+as `util.markdown_table` counts it, so multibyte text is not wrapped
+early for being more bytes than it is columns.
 
 
 

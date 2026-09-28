@@ -76,9 +76,11 @@ M.config = function()
     -- sqlfluff refuses to run without a dialect and nvim-lint's built-in
     -- definition doesn't set one; default to sqlite, same as the
     -- conform.nvim formatter override.
-    lint.linters.sqlfluff = vim.tbl_extend("force", lint.linters.sqlfluff, {
+    ---@type lint.Linter
+    local sqlfluff        = vim.tbl_extend("force", lint.linters.sqlfluff, {
         args = { "lint", "--format=json", "-", "--dialect", "sqlite" },
-    }) --[[@as lint.Linter]]
+    })
+    lint.linters.sqlfluff = sqlfluff
 
     -- Not bundled with nvim-lint. One of XXLuaChecker's two options:
     -- lua-language-server's own --check mode, run headless against the

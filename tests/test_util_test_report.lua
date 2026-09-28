@@ -21,9 +21,9 @@
 --
 
 local report = require("util.test_report")
-local eq     = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- A `Timed` with the fields a case needs and nothing more.
 ---@param file   string

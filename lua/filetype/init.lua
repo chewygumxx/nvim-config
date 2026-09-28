@@ -1,5 +1,6 @@
 #!/bin/false
 -- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -96,7 +97,8 @@ M.config = function(opts)
     ---@cast module cgxx.filetype.Module
 
     if type(module.local_opts) == "table" then
-        local set_local = vim.opt_local --[[@as table<string, boolean | number | string>]]
+        ---@type table<string, boolean | number | string>
+        local set_local = vim.opt_local
         for opt, val in pairs(module.local_opts) do
             set_local[opt] = val
         end

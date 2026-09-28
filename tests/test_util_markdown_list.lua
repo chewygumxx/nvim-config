@@ -23,9 +23,9 @@
 -- otherwise hand the next file a process sitting in insert.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 local list = require("util.markdown_list")
 

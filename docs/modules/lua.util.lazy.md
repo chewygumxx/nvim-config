@@ -18,14 +18,14 @@
 function M.install(
   url: string,
   path: string,
-  branch: string
+  branch: string?
 ) -> syscall_code number
 ```
 @param `url` - Repository URL
 
 @param `path` - Clone destination
 
-@param `branch` - Repository branch
+@param `branch` - Repository branch (default: the remote's HEAD)
 
 
 @return `syscall_code` - Exit code of git clone

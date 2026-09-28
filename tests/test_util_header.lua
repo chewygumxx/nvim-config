@@ -18,9 +18,9 @@
 --
 
 local header = require("util.header")
-local eq     = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 ---@type cgxx.test.helpers
 local helpers = dofile("tests/helpers.lua")
@@ -194,6 +194,36 @@ describe("util.header.insert", function()
         eq(lines[7], "-- ~upstream-owner/upstream-repo.git")
         eq(lines[8], "-- └─> ~example-owner/example-repo.git")
         eq(lines[9], "-- ::: :/sub/file.lua")
+    end)
+
+    it("marks a fork's licence unknown when the lookup fails", function()
+        helpers.git(
+            dir,
+            "remote",
+            "add",
+            "upstream",
+            "git@github.com:upstream-owner/upstream-repo.git"
+        )
+
+        -- A missing `gh`, a failed login or a timeout all answer nil. The
+        -- header used to read that as "GPL-3.0-only", which is this
+        -- repository's licence and not necessarily the fork's.
+        local util_git = require("util.git")
+        local real     = util_git.license
+        ---@diagnostic disable-next-line: duplicate-set-field
+        util_git.license = function()
+            return nil
+        end
+
+        local bufnr      = opened(file, "lua")
+        local ok, said   = pcall(helpers.announced, function()
+            header.insert(file, bufnr)
+        end)
+        util_git.license = real
+        assert(ok, said)
+
+        eq(lines_of(bufnr)[3], "-- SPDX-License-Identifier: NOASSERTION")
+        eq(said:find("upstream-owner/upstream-repo", 1, true) ~= nil, true)
     end)
 
     it("honours a commentstring override", function()

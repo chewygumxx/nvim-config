@@ -28,9 +28,9 @@
 -- list to have named them all.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Every global option value `option.general` documents.
 ---@type table<string, string | boolean | integer>

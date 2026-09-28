@@ -17,9 +17,9 @@
 --
 
 local vimdoc = require("util.vimdoc")
-local eq     = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("util.vimdoc.flush_right", function()
     it("ends the line exactly at the help width", function()

@@ -83,7 +83,7 @@ directory, `test_lazy_integration.lua` resolves the specs through a real
 lazy.nvim, and `test_claude_assets.lua` checks `.claude/` against the tree its
 prose names.
 
-**Two files run a second Neovim, for different reasons, and neither should be
+**Three files run a second Neovim, for different reasons, and none should be
 turned into an in-process test.** `test_init.lua` is the one that uses
 `MiniTest.new_child_neovim()`, because `init.lua`'s load order cannot be
 asserted in a process that has already required half of those modules; the child
@@ -95,6 +95,9 @@ spawns `scripts/lazy_merge.lua` through `vim.system` with `XDG_DATA_HOME`,
 `stdpath` is fixed at startup and a real lazy.nvim run writes `state.json` and
 the lockfile into whichever profile it finds; lazy.nvim and mini.test are
 symlinked into that profile rather than cloned.
+`test_usercmd_interpret_escape.lua` does the same with `XDG_CACHE_HOME` alone,
+for the one case that must write the pre-interpretation copy, since the real
+cache directory is no place for a test to leave files.
 
 That second file's own header records what it does and does not catch,
 established by mutation: it catches the `M.import()` wiring coming apart and any

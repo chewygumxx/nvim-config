@@ -28,6 +28,9 @@
 ---@class cgxx.test.helpers
 local M = {}
 
+---@type mini.test
+local MiniTest = require("mini.test")
+
 --- `MiniTest.expect.equality` with a label attached.
 ---
 --- `expect.equality` takes no message, so every case that asserts the same
@@ -41,29 +44,28 @@ local M = {}
 --- padded call sites are not wrong, and are worth migrating when they are
 --- next touched rather than in a sweep of their own.
 ---@type fun(label: string, left: any, right: any)
-M.labelled_equality = require("mini.test") --[[@as mini.test]]
-    .new_expectation(
-        "labelled equality",
-        ---@param _label string
+M.labelled_equality = MiniTest.new_expectation(
+    "labelled equality",
+    ---@param _label string
         ---@param left   any
         ---@param right  any
         ---@return boolean equal
-        function(_label, left, right)
-            return vim.deep_equal(left, right)
-        end,
-        ---@param label string
+    function(_label, left, right)
+        return vim.deep_equal(left, right)
+    end,
+    ---@param label string
         ---@param left  any
         ---@param right any
         ---@return string context
-        function(label, left, right)
-            return string.format(
-                "%s\nLeft:  %s\nRight: %s",
-                label,
-                vim.inspect(left),
-                vim.inspect(right)
-            )
-        end
-    )
+    function(label, left, right)
+        return string.format(
+            "%s\nLeft:  %s\nRight: %s",
+            label,
+            vim.inspect(left),
+            vim.inspect(right)
+        )
+    end
+)
 
 --- Runs git in dir and returns its trimmed stdout.
 ---
@@ -179,6 +181,45 @@ M.repo = function(opt)
     end
 
     return dir, file
+end
+
+--- Runs act and returns the message it caused `vim.notify` to be given.
+---
+--- The fence for a case about something _not_ happening. An absence cannot
+--- be waited for, but a module that announces the no-op it reached (the
+--- `report` argument of `util.wip.snapshot` and `util.nex.commit`) turns
+--- "nothing happened" into a positive answer, where the alternative is a
+--- fixed `vim.wait(2000, function() return false end)`, ie. a sleep.
+--- `util.wip`'s tests replaced three of those, against a whole suite that
+--- ran in twelve seconds.
+---@param act fun(): nil
+---@return string message
+M.announced = function(act)
+    ---@type string?
+    local said  = nil
+    local outer = vim.notify
+
+    ---@param msg    string
+    ---@param _level integer?
+    ---@param _opts  table?
+    ---@return nil
+    ---@diagnostic disable-next-line: duplicate-set-field
+    vim.notify = function(msg, _level, _opts)
+        said = msg
+    end
+
+    local ok, err = pcall(act)
+    local arrived = vim.wait(10000, function()
+        return said ~= nil
+    end, 20
+    )
+
+    -- Restored before either assert, so a raising `act` cannot leave the
+    -- capture installed for every case after this one
+    vim.notify = outer
+    assert(ok, err)
+    assert(arrived and said, "no notification arrived")
+    return said
 end
 
 return M

@@ -10,9 +10,9 @@
 --
 
 local nex = require("util.nex")
-local eq  = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Index of the first line in lines equal to needle, if any.
 ---@param lines  string[]

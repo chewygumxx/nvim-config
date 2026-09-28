@@ -26,7 +26,8 @@ local M = {
 }
 
 M.config = function()
-    local dap = require("dap") --[[@as dap]]
+    ---@type dap
+    local dap = require("dap")
 
     dap.adapters.nlua = function(callback, config)
         callback({

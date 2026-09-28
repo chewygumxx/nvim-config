@@ -17,7 +17,6 @@ local M = {
 
     dependencies = {
         "nvim-tree/nvim-web-devicons",
-        "nvim-treesitter/nvim-treesitter-context",
     },
 
     ---@type fzf-lua.Config

@@ -67,9 +67,9 @@
 -- it matters most.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 local joinpath = vim.fs.joinpath
 
@@ -326,5 +326,46 @@ describe("lazy.nvim spec merge", function()
         end
         table.sort(absent)
         eq(absent, {})
+    end)
+
+    it("strands no plugin on a disabled dependency", function()
+        -- Read from the spec files rather than from the resolution:
+        -- lazy.nvim deletes a disabled plugin's fragments and rebuilds its
+        -- dependents without it, so the resolved `dependencies` never
+        -- shows the gap. The dependent still loads, and its own `require`
+        -- of the missing plugin is the first thing to fail, which is how
+        -- `telescope-undo.nvim` outlived an elided `telescope.nvim`.
+        local enabled  = set_of(merged.plugins)
+        local disabled = set_of(merged.disabled)
+
+        ---@type string[]
+        local specs = vim.fn.globpath("lua/spec", "*.lua", true, true)
+
+        ---@type string[]
+        local stranded = {}
+        for _, path in ipairs(specs) do
+            local chunk = assert(loadfile(path), path .. " does not parse")
+            ---@type table<string | integer, any>
+            local spec = chunk()
+            ---@type (string | table)[]
+            local dependencies = spec.dependencies or {}
+
+            local slug = spec[1]
+            if type(slug) == "string" and enabled[named(slug)] then
+                for _, dependency in ipairs(dependencies) do
+                    ---@type any
+                    local dep = type(dependency) == "table" and dependency[1]
+                        or dependency
+                    if type(dep) == "string" and disabled[named(dep)] then
+                        table.insert(
+                            stranded,
+                            named(slug) .. " -> " .. named(dep)
+                        )
+                    end
+                end
+            end
+        end
+        table.sort(stranded)
+        eq(stranded, {})
     end)
 end)

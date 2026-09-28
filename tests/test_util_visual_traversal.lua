@@ -10,9 +10,9 @@
 --
 
 local visual_traversal = require("util.visual_traversal")
-local eq               = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("util.visual_traversal.command", function()
     it("resolves a callback for each known action", function()

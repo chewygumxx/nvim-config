@@ -18,7 +18,10 @@
 ---@type LazyPluginSpec
 local M = {
     "DrKJeff16/wezterm-types",
-    ft      = "lua",
+    -- Types only, read by lazydev.nvim's `library` entry through the
+    -- plugin's directory. lazydev lists it as a dependency, which is all
+    -- the loading it needs; `ft = "lua"` loaded it into every Lua buffer.
+    lazy    = true,
     version = false,
 }
 

@@ -78,7 +78,7 @@ Configures and arranges spec order for lazy.nvim
 ### M.elide
 ---
 ```lua
-M.elide : ("L3MON4D3/LuaSnip","MeanderingProgrammer/render-markdown.nvim","OXY2DEV/markview.nvim","folke/lazydev.nvim","folke/noice.nvim","jakewvincent/mkdnflow.nvim","kndndrj/nvim-dbee","m4xshen/hardtime.nvim","mikavilpas/yazi.nvim","nvim-telescope/telescope.nvim"...)
+M.elide : ("L3MON4D3/LuaSnip","MeanderingProgrammer/render-markdown.nvim","OXY2DEV/markview.nvim","debugloop/telescope-undo.nvim","folke/lazydev.nvim","folke/noice.nvim","jakewvincent/mkdnflow.nvim","kndndrj/nvim-dbee","m4xshen/hardtime.nvim","mikavilpas/yazi.nvim"...)
 ```
 
 

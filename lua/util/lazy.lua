@@ -257,20 +257,22 @@ M.defaults = {
 }
 
 --- Clones remote repository of lazy.nvim
----@param url    string Repository URL
----@param path   string Clone destination
----@param branch string Repository branch
+---@param url     string Repository URL
+---@param path    string Clone destination
+---@param branch? string Repository branch (default: the remote's HEAD)
 ---@return number syscall_code Exit code of git clone
 function M.install(url, path, branch)
     vim.notify("Installing lazy.nvim package manager", vim.log.levels.INFO)
-    local syscall = vim.system({
-        "git",
-        "clone",
-        "--filter=blob:none",
-        type(branch) == "string" and "--branch=" .. branch or nil,
-        url,
-        path,
-    }, { text = true }):wait()
+    -- Built up rather than written as one literal with an `and ... or nil`
+    -- element: a `nil` there leaves a hole mid-list, which works only for
+    -- as long as the length operator happens to see past it
+    local cmd = { "git", "clone", "--filter=blob:none" }
+    if type(branch) == "string" then
+        table.insert(cmd, "--branch=" .. branch)
+    end
+    vim.list_extend(cmd, { url, path })
+
+    local syscall = vim.system(cmd, { text = true }):wait()
     if syscall.code ~= 0 then
         vim.notify("Failed to clone lazy.nvim", vim.log.levels.ERROR)
         vim.notify(

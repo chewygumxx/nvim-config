@@ -11,7 +11,7 @@
 
 --
 -- Prints every location where `lua-language-server` can't infer anything
--- more specific than any/unknown.--
+-- more specific than any/unknown.
 --
 -- Usage: `nvim --headless -u scripts/minimal_init.lua
 --         -l scripts/luals_untyped.lua`

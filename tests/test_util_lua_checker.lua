@@ -18,9 +18,9 @@
 --
 
 local checker = require("util.lua_checker")
-local eq      = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("util.lua_checker", function()
     ---@type string

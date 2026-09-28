@@ -14,11 +14,12 @@
 -- its own text, so that a captured log's escape codes are interpreted
 -- rather than displayed.
 --
--- Everything is asserted through a bang invocation. Without one the module
--- also writes a pre-interpretation copy under `stdpath("cache")`, which is
--- the machine's real cache directory: `stdpath` is fixed at startup and
--- cannot be redirected from here, and a test suite has no business leaving
--- files in it.
+-- Everything in this process is asserted through a bang invocation.
+-- Without one the module also writes a pre-interpretation copy under
+-- `stdpath("cache")`, which is the machine's real cache directory:
+-- `stdpath` is fixed at startup and cannot be redirected from here, and a
+-- test suite has no business leaving files in it. The one case about that
+-- copy runs in a second Neovim with its own `XDG_CACHE_HOME`.
 --
 -- What is asserted is the structure the module installs, not the rendered
 -- text. `nvim_chan_send` hands bytes to a terminal that draws them when it
@@ -27,9 +28,9 @@
 --
 
 local interpret_escape = require("usercmd.interpret_escape")
-local eq               = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("usercmd.interpret_escape.command", function()
     ---@type integer
@@ -120,5 +121,42 @@ describe("usercmd.interpret_escape.command", function()
         interpret({ "text" })
 
         eq(vim.fn.glob(log_dir .. "*", false, true), before)
+    end)
+end)
+
+describe("usercmd.interpret_escape copy", function()
+    it("creates its cache directory before writing the copy", function()
+        -- A second Neovim, since `stdpath` is fixed at startup and only a
+        -- fresh process can be pointed at a throwaway cache. The check
+        -- this guards was `not vim.fn.isdirectory(...)`, which is never
+        -- true in Lua, so a missing directory was never made.
+        local cache = vim.fn.tempname()
+
+        ---@type string[]
+        local command = {
+            vim.v.progpath,
+            "--headless",
+            "-u",
+            "scripts/minimal_init.lua",
+            "-c",
+            "file sample.log",
+            "-c",
+            "call setline(1, 'text')",
+            "-c",
+            "lua require('usercmd.interpret_escape')"
+                .. ".command({ bang = false, fargs = {} })",
+            "-c",
+            "qa!",
+        }
+
+        ---@type vim.SystemOpts
+        local opts = { text = true, env = { XDG_CACHE_HOME = cache } }
+        vim.system(command, opts):wait(30000)
+
+        local log_dir = vim.fs.joinpath(cache, "nvim", "log-ansi")
+        local written = vim.fn.readdir(log_dir)
+        vim.fn.delete(cache, "rf")
+
+        eq(written, { "sample.ansi" })
     end)
 end)

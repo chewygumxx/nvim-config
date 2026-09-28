@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/bin/false
 -- vim:set expandtab shiftwidth=4 filetype=lua:
 -- SPDX-License-Identifier: GPL-3.0-only
 
@@ -20,6 +20,8 @@ local M = {
         "L3MON4D3/LuaSnip",
         "MeanderingProgrammer/render-markdown.nvim",
         "OXY2DEV/markview.nvim",
+        -- An extension of the elided telescope.nvim, so off with it
+        "debugloop/telescope-undo.nvim",
         "folke/lazydev.nvim",
         "folke/noice.nvim",
         "jakewvincent/mkdnflow.nvim",

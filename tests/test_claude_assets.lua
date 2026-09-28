@@ -23,7 +23,8 @@
 -- drift: they are bare basenames used in running prose (`statusline.lua`,
 -- `test_keymap.lua`) where the surrounding sentence already established
 -- the directory. Requiring a separator and a real top-level root cuts that
--- to 66 assertions with four false positives, which are registered below.
+-- to 66 assertions, and the few false positives it leaves are registered
+-- below.
 -- A checker built on the obvious rule would have cried wolf 53 times and
 -- been switched off within a week.
 --
@@ -35,9 +36,9 @@
 -- which is what catches a bad path introduced by a `.claude/`-only commit.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Tokens that look like repository paths, are rooted like repository
 --- paths, and deliberately name nothing.

@@ -1,5 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -14,16 +15,37 @@
 
 local M = {}
 
+--- Plain scalars YAML 1.1 resolves to a boolean or null, lowercased.
+---@type table<string, true>
+local typed_keywords = {
+    y         = true,
+    n         = true,
+    yes       = true,
+    no        = true,
+    on        = true,
+    off       = true,
+    ["true"]  = true,
+    ["false"] = true,
+    null      = true,
+}
+
 --- Renders text as a YAML flow scalar, double-quoting it only when a
 --- plain scalar would be ambiguous or invalid.
 ---
 --- Lives here rather than beside either caller: `util.header.frontmatter`
 --- and `util.nex` both write `title:` and tag keys, and a second copy of
 --- this would be a second opinion on what YAML needs quoting.
+---
+--- "Ambiguous" includes a plain scalar that is valid but would not read
+--- back as a string: YAML 1.1's booleans and null (which 1.2 narrowed, but
+--- plenty of readers still apply), numbers in any base, and timestamps.
 ---@param text string
 ---@return string scalar
 M.yaml_scalar = function(text)
-    if text ~= "" and text:match("^[%w][%w _.()/-]*$") and not text:match(" $") then
+    if text ~= "" and text:match("^[%w][%w _.()/-]*$")
+        and not text:match(" $") and not typed_keywords[text:lower()]
+        and not tonumber(text) and not text:match("^[-+]?[%d_]+$")
+        and not text:match("^%d%d%d%d%-%d%d?%-%d%d?") then
         return text
     end
     local escaped = text:gsub("\\", "\\\\")
@@ -36,7 +58,9 @@ end
 ---@field commentstring? string  printf-style wrapper (default: buffer's own)
 
 --- Wraps text into a list of comment lines no wider than width, each
---- formatted through commentstring.
+--- formatted through commentstring. Width is counted in display columns,
+--- as `util.markdown_table` counts it, so multibyte text is not wrapped
+--- early for being more bytes than it is columns.
 ---@param text   string
 ---@param width? integer             Default: 'textwidth', or 80 if unset
 ---@param opt?   util.WrapCommentOpt
@@ -50,13 +74,17 @@ M.wrap_comment = function(text, width, opt)
         or (vim.bo[buffer].commentstring ~= "" and vim.bo[buffer].commentstring)
         or "%s"
 
+    local columns = vim.fn.strdisplaywidth
+    -- What the commentstring adds around its "%s"
+    local overhead = columns(commentstring) - 2
+
     ---@type string[]
     local lines = {}
     ---@type string
     local current = ""
     for word in text:gmatch("%S+") do
         local candidate = current == "" and word or current .. " " .. word
-        if #candidate > (width - (#commentstring - 2)) then
+        if columns(candidate) > width - overhead then
             if current ~= "" then
                 lines[#lines + 1] = string.format(commentstring, current)
             end
@@ -70,7 +98,7 @@ M.wrap_comment = function(text, width, opt)
     -- If commentstring has a suffix after %s (<!-- block style comment -->)
     if not commentstring:match("%%s$") then
         -- Append right-side padding
-        local pad = width - #current - (#commentstring - 2)
+        local pad = width - columns(current) - overhead
         current   = current .. string.rep(" ", pad)
     end
 

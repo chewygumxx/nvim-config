@@ -10,9 +10,9 @@
 --
 
 local wip = require("util.wip")
-local eq  = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 ---@type cgxx.test.helpers
 local helpers = dofile("tests/helpers.lua")
@@ -90,46 +90,6 @@ describe("util.wip.snapshot", function()
         return vim.api.nvim_get_current_buf()
     end
 
-    --- Runs act and returns the message it caused `vim.notify` to be given.
-    ---
-    --- This is the fence that the cases below used to approximate with
-    --- `vim.wait(2000, function() return false end)`, ie. a sleep. An
-    --- absence cannot be waited for, but `M.snapshot`'s `report` argument
-    --- makes it announce whichever outcome it reached, the two that write
-    --- nothing included, so "nothing happened" can be established by
-    --- waiting for a positive answer rather than by guessing how long
-    --- nothing takes. Three of those sleeps were 2000 ms each, against a
-    --- whole suite that runs in twelve seconds.
-    ---@param act fun(): nil
-    ---@return string message
-    local announced = function(act)
-        ---@type string?
-        local said  = nil
-        local outer = vim.notify
-
-        ---@param msg    string
-        ---@param _level integer?
-        ---@param _opts  table?
-        ---@return nil
-        ---@diagnostic disable-next-line: duplicate-set-field
-        vim.notify = function(msg, _level, _opts)
-            said = msg
-        end
-
-        local ok, err = pcall(act)
-        local arrived = vim.wait(10000, function()
-            return said ~= nil
-        end, 20
-        )
-
-        -- Restored before either assert, so a raising `act` cannot leave
-        -- the capture installed for every case after this one
-        vim.notify = outer
-        assert(ok, err)
-        assert(arrived and said, "no WIP notification arrived")
-        return said
-    end
-
     before_each(function()
         notify    = quieten()
         dir, file = helpers.repo({
@@ -199,7 +159,7 @@ describe("util.wip.snapshot", function()
         -- this case makes. The commit count below still proves nothing was
         -- written.
         eq(
-            announced(function()
+            helpers.announced(function()
                 wip.snapshot(buf, true)
             end),
             "WIP: no change since last snapshot"
@@ -276,7 +236,7 @@ describe("util.wip.snapshot", function()
         -- Reported rather than slept through: ineligibility is decided
         -- before any async work starts, so the answer is already there
         eq(
-            announced(function()
+            helpers.announced(function()
                 wip.snapshot(scratch, true)
             end),
             "WIP: buffer is not a tracked file"
@@ -293,7 +253,7 @@ describe("util.wip.snapshot", function()
         local loose = open(outside)
 
         eq(
-            announced(function()
+            helpers.announced(function()
                 wip.snapshot(loose, true)
             end),
             "WIP: buffer is not a tracked file"
@@ -548,6 +508,85 @@ describe("util.wip.autocmd", function()
         end)
 
         eq(snapshotted() ~= "", true)
+    end)
+
+    it("does not re-resolve a tracked buffer on write", function()
+        -- `locate` blocks on two `git` calls, so running it on every
+        -- `:write` stalled every save. The first snapshot resolves the
+        -- location; it matches the fixture commit, so it records nothing
+        -- and the write below is the one that creates the ref.
+        wip.snapshot(buf)
+
+        local lookups = 0
+        local system  = vim.system
+        ---@diagnostic disable-next-line: duplicate-set-field
+        vim.system = function(cmd, opts, on_exit)
+            if vim.list_contains(cmd, "--show-toplevel") then
+                lookups = lookups + 1
+            end
+            return system(cmd, opts, on_exit)
+        end
+
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "saved" })
+        local ok, err = pcall(vim.api.nvim_buf_call, buf, function()
+            vim.cmd("silent write")
+        end)
+        vim.system    = system
+        assert(ok, err)
+
+        eq(snapshotted() ~= "", true)
+        eq(lookups, 0)
+    end)
+
+    it("forgets a renamed buffer's location", function()
+        -- Renamed to a file git has never seen, so a stale location would
+        -- keep snapshotting the new text under the old tracked path. The
+        -- first snapshot is waited out, since it would otherwise land
+        -- after `after_each` has deleted the repository.
+        eq(
+            helpers.announced(function()
+                wip.snapshot(buf, true)
+            end),
+            "WIP: no change since last snapshot"
+        )
+        eq(type(vim.b[buf].cgxx_wip_location), "table")
+
+        local renamed = vim.fn.fnameescape(dir .. "/untracked.lua")
+        vim.api.nvim_buf_call(buf, function()
+            vim.cmd("silent file " .. renamed)
+        end)
+
+        eq(vim.b[buf].cgxx_wip_location, nil)
+        eq(
+            helpers.announced(function()
+                wip.snapshot(buf, true)
+            end),
+            "WIP: buffer is not a tracked file"
+        )
+    end)
+
+    it("bounds every snapshot with a timeout", function()
+        -- Stubbed rather than raced: a real timeout would need a git slow
+        -- enough to lose to it, which a test cannot arrange reliably
+        ---@type vim.SystemOpts?
+        local seen
+        local system = vim.system
+        ---@diagnostic disable-next-line: duplicate-set-field
+        vim.system     = function(cmd, opts, on_exit)
+            if cmd[1] == "sh" then
+                seen = opts
+            end
+            return system(cmd, opts, on_exit)
+        end
+        local ok, said = pcall(helpers.announced, function()
+            wip.snapshot(buf, true)
+        end)
+        vim.system     = system
+        assert(ok, said)
+
+        eq(said, "WIP: no change since last snapshot")
+        eq(type(seen and seen.timeout), "number")
+        eq(seen and seen.timeout, wip.timeout)
     end)
 
     it("snapshots when focus is lost", function()

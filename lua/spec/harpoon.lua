@@ -39,7 +39,8 @@ M.keys = {
     {
         "<C-e>",
         function()
-            local harpoon = require("harpoon") --[[@as Harpoon]]
+            ---@type Harpoon
+            local harpoon = require("harpoon")
             harpoon.ui:toggle_quick_menu(harpoon:list())
         end,
         desc = "Harpoon: toggle quick menu",
