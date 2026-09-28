@@ -187,6 +187,12 @@ describe("util.lazy.install", function()
         eq(vim.fn.filereadable(dest .. "/init.lua"), 1)
     end)
 
+    it("clones the default branch when none is named", function()
+        local dest = root .. "/default"
+        eq(lazy.install(source, dest), 0)
+        eq(vim.fn.filereadable(dest .. "/init.lua"), 1)
+    end)
+
     it("reports a failed clone rather than raising", function()
         -- A startup that cannot install lazy.nvim has to say so and carry
         -- on, since erroring out of `init.lua` leaves no usable session
