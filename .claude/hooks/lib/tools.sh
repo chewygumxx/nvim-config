@@ -28,11 +28,10 @@
 #     starts installing all 22 tools before it answers. `bin-paths` and
 #     `which` read what is already installed and never reach the network.
 #
-#   - `selene` is the one tool `mise_path` does not redirect: its install
-#     directory is not among the paths `mise bin-paths` prints, so the
-#     copy found stays whatever the ambient PATH holds. That copy agrees
-#     with the pin today by luck. Use `mise which selene` where the exact
-#     version matters.
+#   - `selene` was once the one tool `mise_path` did not redirect. Under
+#     the `github:` backend its binary installed as mode 644, so mise did
+#     not count its directory as a bin path. It is `aqua:` now, which sets
+#     the mode, and its directory is printed like any other.
 #
 # Every function returns 0 on a machine with no mise, since a hook that
 # fails there would block work rather than protect it. `require_tools` is

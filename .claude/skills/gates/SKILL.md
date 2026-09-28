@@ -42,9 +42,10 @@ running anything:
 `mise exec` is not the way to do this: `mise.toml` pins the editor toolchain
 beside the gates, so `mise exec -- ts_query_ls --version` starts installing all
 22 tools before it answers. `mise bin-paths` and `mise which` read what is
-installed and never reach the network. `selene` is the one tool the prefix does
-not redirect, since its install directory is not among the printed bin paths;
-use `mise which selene` where the exact version matters.
+installed and never reach the network. `selene` is installed through `aqua:`
+rather than `github:` because its release zip stores the binary as mode 644,
+which the `github:` backend kept: not executable, so it was absent from the
+printed bin paths locally and `Permission denied` in CI.
 
 ## Three rules that are easy to get wrong
 
@@ -204,6 +205,7 @@ only that its install has not been run, and a `cargo install` of the same
 project puts all three in `~/.local/share/cargo/bin`, which shadows mise on
 `PATH` and agrees with the pin only until somebody bumps one of them.
 
-CI reads every pin through `.github/scripts/tool_version.py` rather than
-restating it, so a workflow cannot silently fall back to whatever the runner
-happened to have.
+CI installs every pin through `jdx/mise-action`, narrowed per job by
+`install_args`, rather than restating it, so a workflow cannot silently fall
+back to whatever the runner happened to have. The one exception is the nightly
+canary in `.github/workflows/test.yaml`, which is not a pin.

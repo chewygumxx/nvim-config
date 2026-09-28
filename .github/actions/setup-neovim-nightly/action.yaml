@@ -1,0 +1,42 @@
+# vim:set expandtab shiftwidth=4 filetype=yaml:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/.github/actions/setup-neovim-nightly/action.yaml
+#
+#
+
+name: Setup Neovim nightly
+description: Install the current Neovim nightly build and put it on PATH.
+
+#
+# The canary leg of `workflows/test.yaml`, and nothing else. The pinned
+# release every other job runs is installed by `jdx/mise-action` from
+# `mise.toml`, which is the one place a tool version is named; nightly is
+# not a pin at all, so it has no entry there and is fetched here instead.
+#
+# Never cached: the `nightly` tag moves daily, so a cache hit would pin the
+# canary to whichever build it first downloaded, which is the opposite of
+# what a canary is for.
+# https://github.com/neovim/neovim/releases/tag/nightly
+#
+
+runs:
+    using: composite
+
+    steps:
+        - name: Install Neovim
+          shell: bash
+          run: |
+              mkdir -p "$RUNNER_TEMP/nvim"
+              curl -sL https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz | tar xzf - -C "$RUNNER_TEMP/nvim" --strip-components=1
+
+        - name: Add Neovim to PATH
+          shell: bash
+          run: echo "$RUNNER_TEMP/nvim/bin" >> "$GITHUB_PATH"
+
+        - name: Report the version installed
+          shell: bash
+          run: nvim --version | head -n 1

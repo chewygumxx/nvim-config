@@ -37,17 +37,17 @@ jobs:
         # reason, and `fail-fast` is off so a red canary never cancels the
         # leg that counts.
         #
-        # An empty `version` means the pin inside `setup-neovim`, so this
-        # matrix names no Neovim version of its own.
+        # The matrix names no Neovim version of its own: the pinned leg
+        # takes the release `mise.toml` pins, and nightly is not a version.
         strategy:
             fail-fast: false
             matrix:
                 include:
                     - label: pinned
-                      version: ""
+                      nightly: false
                       required: true
                     - label: nightly
-                      version: nightly
+                      nightly: true
                       required: false
 
         continue-on-error: ${{ !matrix.required }}
@@ -56,10 +56,17 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
-            - name: Setup Neovim
-              uses: ./.github/actions/setup-neovim
+            # Only the pinned leg sets up mise, so on the nightly leg no
+            # shim for the pinned Neovim is on PATH to outrank the canary.
+            - name: Setup mise
+              if: ${{ !matrix.nightly }}
+              uses: jdx/mise-action@v4
               with:
-                  version: ${{ matrix.version }}
+                  install_args: github:neovim/neovim
+
+            - name: Setup Neovim nightly
+              if: ${{ matrix.nightly }}
+              uses: ./.github/actions/setup-neovim-nightly
 
             - name: Install mini.test
               uses: ./.github/actions/install-mini-test
