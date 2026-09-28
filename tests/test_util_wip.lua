@@ -550,6 +550,34 @@ describe("util.wip.autocmd", function()
         eq(snapshotted() ~= "", true)
     end)
 
+    it("does not re-resolve a tracked buffer on write", function()
+        -- `locate` blocks on two `git` calls, so running it on every
+        -- `:write` stalled every save. The first snapshot resolves the
+        -- location; it matches the fixture commit, so it records nothing
+        -- and the write below is the one that creates the ref.
+        wip.snapshot(buf)
+
+        local lookups = 0
+        local system  = vim.system
+        ---@diagnostic disable-next-line: duplicate-set-field
+        vim.system = function(cmd, opts, on_exit)
+            if vim.list_contains(cmd, "--show-toplevel") then
+                lookups = lookups + 1
+            end
+            return system(cmd, opts, on_exit)
+        end
+
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "saved" })
+        local ok, err = pcall(vim.api.nvim_buf_call, buf, function()
+            vim.cmd("silent write")
+        end)
+        vim.system    = system
+        assert(ok, err)
+
+        eq(snapshotted() ~= "", true)
+        eq(lookups, 0)
+    end)
+
     it("snapshots when focus is lost", function()
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "unfocused" })
         vim.api.nvim_exec_autocmds("FocusLost", { buffer = buf })
