@@ -189,6 +189,60 @@ describe("util.nex.commit", function()
         )
         eq(git(root, "rev-list", "--count", "HEAD"), "")
     end)
+
+    describe("through its autocmd", function()
+        ---@type integer
+        local buf
+
+        before_each(function()
+            nex.autocmd()
+            vim.cmd.edit(vim.fn.fnameescape(path))
+            buf = vim.api.nvim_get_current_buf()
+        end)
+
+        after_each(function()
+            -- Cleared rather than deleted, as the wip tests do, so the
+            -- autocmd stops firing during every later test file
+            vim.api.nvim_create_augroup("cgxx.nex", { clear = true })
+            vim.api.nvim_buf_delete(buf, { force = true })
+        end)
+
+        --- Replaces the note's text and writes it the way a session does.
+        ---@param lines string[]
+        ---@return nil
+        local write = function(lines)
+            vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+            vim.api.nvim_buf_call(buf, function()
+                vim.cmd("silent write")
+            end)
+        end
+
+        it("commits a note when it is written", function()
+            write({ "# A Note", "", "Written." })
+            eq(commits(1), 1)
+        end)
+
+        it("leaves a note alone while commit-on-write is off", function()
+            -- Counted at the call rather than in the repository: the
+            -- commit reads the file when it runs, so a later write's text
+            -- would land in it either way. Whether to call is decided
+            -- synchronously in the autocmd, so the count is final at once.
+            nex.disable(buf)
+
+            local calls = 0
+            local real  = nex.commit
+            ---@diagnostic disable-next-line: duplicate-set-field
+            nex.commit    = function(note, report)
+                calls = calls + 1
+                return real(note, report)
+            end
+            local ok, err = pcall(write, { "# A Note", "", "Ignored." })
+            nex.commit    = real
+            assert(ok, err)
+
+            eq(calls, 0)
+        end)
+    end)
 end)
 
 describe("util.nex commit-on-write toggles", function()
@@ -225,6 +279,49 @@ describe("util.nex commit-on-write toggles", function()
         eq(vim.b[buf].cgxx_nex_commit, false)
         nex.enable(buf)
         eq(vim.b[buf].cgxx_nex_commit, true)
+    end)
+
+    --- Runs `XXNexNote` with fargs, from buf.
+    ---@param fargs string[]
+    ---@return nil
+    local command = function(fargs)
+        ---@type vim.api.keyset.create_user_command.command_args
+        ---@diagnostic disable-next-line: missing-fields
+        local args = { fargs = fargs }
+        vim.api.nvim_buf_call(buf, function()
+            nex.command(args)
+        end)
+    end
+
+    it("dispatches a named action to the current buffer", function()
+        command({ "disable" })
+        eq(vim.b[buf].cgxx_nex_commit, false)
+        command({ "toggle" })
+        eq(vim.b[buf].cgxx_nex_commit, true)
+    end)
+
+    it("defaults to a new note with no argument", function()
+        local calls = 0
+        local real  = nex.new_note
+        ---@diagnostic disable-next-line: duplicate-set-field
+        nex.new_note  = function(...)
+            calls = calls + 1
+            return ...
+        end
+        local ok, err = pcall(command, {})
+        nex.new_note  = real
+        assert(ok, err)
+
+        eq(calls, 1)
+    end)
+
+    it("reports an unknown action rather than raising", function()
+        eq(
+            helpers.announced(function()
+                command({ "bogus" })
+            end),
+            "XXNexNote: unknown action bogus"
+        )
     end)
 
     it("offers every action as a completion", function()
