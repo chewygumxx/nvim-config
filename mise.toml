@@ -68,8 +68,8 @@ node      = "24"
 "npm:npm" = "12"
 
 #
-# Neovim. This is the pin `.github/actions/setup-neovim` reads, so it is
-# named here and nowhere else. https://github.com/neovim/neovim/releases
+# Neovim. This is the release CI installs through `jdx/mise-action`, so it
+# is named here and nowhere else. https://github.com/neovim/neovim/releases
 #
 "github:neovim/neovim" = "0.12.5"
 
