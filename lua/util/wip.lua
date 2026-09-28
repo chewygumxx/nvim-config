@@ -354,8 +354,13 @@ M.autocmd = function()
         desc     = "Take a WIP snapshot at an editing checkpoint",
         group    = group,
         callback = function(event)
-            -- A write can make a previously untracked file eligible
-            if event.event == "BufWritePost" then
+            -- A write can make a previously untracked file eligible, so an
+            -- ineligible answer is dropped and asked again. An eligible
+            -- one is kept: a write cannot move a tracked file's root or
+            -- path, and `locate` blocks on two `git` calls, which would
+            -- otherwise stall every save
+            if event.event == "BufWritePost"
+                and vim.b[event.buf].cgxx_wip_location == false then
                 vim.b[event.buf].cgxx_wip_location = nil
             end
             if eligible(event.buf) then
