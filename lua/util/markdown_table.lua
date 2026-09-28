@@ -412,7 +412,7 @@ local FENCE_NODES = {
 ---
 --- Deliberately not `vim.treesitter.get_node`: that returns nil until
 --- something has already parsed the buffer, so on a buffer nothing has
---- highlighted yet — a scratch buffer, or any buffer under `--headless` —
+--- highlighted yet (a scratch buffer, or any buffer under `--headless`),
 --- it silently reports "no node" for every position. Asking for the parser
 --- and parsing it here makes the answer independent of whether anything
 --- else happened to attach first.
@@ -478,7 +478,7 @@ end
 --- `\|` and `` `a|b` `` as cell content, and handles tables indented in a
 --- list or quoted in a blockquote.
 ---
---- It has two blind spots, both straight from GFM's own rules — a table
+--- It has two blind spots, both straight from GFM's own rules: a table
 --- with no delimiter row yet, and one whose header and delimiter cell
 --- counts disagree, are simply not `pipe_table` nodes. Both are states you
 --- pass through while editing, which is exactly when you want to format.
