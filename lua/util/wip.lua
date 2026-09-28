@@ -32,6 +32,13 @@ local M = {}
 ---@type integer
 M.debounce = 2000
 
+--- Milliseconds any one `git` call may take. `util.git.info` bounds its
+--- own for the same reason: a hung git on a network filesystem would
+--- otherwise never call back, or, for the two `locate` lookups that
+--- block, never return.
+---@type integer
+M.timeout = 10000
+
 --- Builds one commit onto `refs/wip/<branch>` from the buffer text on
 --- stdin. `GIT_INDEX_FILE` is only exported once the real index has been
 --- read for the blob's file mode, so every subsequent plumbing call
@@ -143,7 +150,7 @@ local locate = function(bufnr)
         dir,
         "rev-parse",
         "--show-toplevel",
-    }, { text = true }):wait()
+    }, { text = true }):wait(M.timeout)
 
     -- `--error-unmatch` is the tracked-file test: it exits nonzero for a
     -- path git has never seen, so untracked scratch files never leak
@@ -157,7 +164,13 @@ local locate = function(bufnr)
         "--error-unmatch",
         "--",
         name,
-    }, { text = true }):wait()
+    }, { text = true }):wait(M.timeout)
+
+    -- A timeout (124, as `vim.system` reports one) is no answer at all, so
+    -- it is left uncached for the next event to ask again
+    if root.code == 124 or tracked.code == 124 then
+        return
+    end
 
     if root.code ~= 0 or tracked.code ~= 0
         or not root.stdout or not tracked.stdout
@@ -208,13 +221,17 @@ M.snapshot = function(bufnr, report)
     vim.system(
         { "sh", "-c", snapshot_sh, "sh", path },
         {
-            cwd   = root,
-            stdin = buffer_text(bufnr),
-            text  = true,
+            cwd     = root,
+            stdin   = buffer_text(bufnr),
+            text    = true,
+            timeout = M.timeout,
         },
         function(result)
             local out = (result.stdout or ""):gsub("%s+$", "")
             local err = (result.stderr or ""):gsub("%s+$", "")
+            if result.code == 124 then
+                err = ("timed out after %d ms"):format(M.timeout)
+            end
             vim.schedule(function()
                 if result.code ~= 0 then
                     vim.notify(
@@ -316,8 +333,9 @@ M.drop = function()
     vim.system(
         { "sh", "-c", drop_sh, "sh" },
         {
-            cwd  = root,
-            text = true,
+            cwd     = root,
+            text    = true,
+            timeout = M.timeout,
         },
         function(result)
             local out = (result.stdout or ""):gsub("%s+$", "")
