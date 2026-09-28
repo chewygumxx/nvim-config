@@ -61,3 +61,4 @@
 ---@field bigfile?      table
 ---@field dashboard?    table
 ---@field explorer?     table
+---@field scratch?      table
