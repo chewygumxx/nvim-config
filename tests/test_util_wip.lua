@@ -538,6 +538,30 @@ describe("util.wip.autocmd", function()
         eq(lookups, 0)
     end)
 
+    it("bounds every snapshot with a timeout", function()
+        -- Stubbed rather than raced: a real timeout would need a git slow
+        -- enough to lose to it, which a test cannot arrange reliably
+        ---@type vim.SystemOpts?
+        local seen
+        local system = vim.system
+        ---@diagnostic disable-next-line: duplicate-set-field
+        vim.system     = function(cmd, opts, on_exit)
+            if cmd[1] == "sh" then
+                seen = opts
+            end
+            return system(cmd, opts, on_exit)
+        end
+        local ok, said = pcall(helpers.announced, function()
+            wip.snapshot(buf, true)
+        end)
+        vim.system     = system
+        assert(ok, said)
+
+        eq(said, "WIP: no change since last snapshot")
+        eq(type(seen and seen.timeout), "number")
+        eq(seen and seen.timeout, wip.timeout)
+    end)
+
     it("snapshots when focus is lost", function()
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "unfocused" })
         vim.api.nvim_exec_autocmds("FocusLost", { buffer = buf })
