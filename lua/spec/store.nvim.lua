@@ -18,8 +18,9 @@ local M = {
     lazy = true,
     cmd = "Store",
 
+    -- No markview.nvim: it would render the previews, but it is elided in
+    -- lua/plugin.lua, so a dependency on it loads nothing
     dependencies = {
-        { "OXY2DEV/markview.nvim", opts = {} },
         --{ "3rd/image.nvim", opts = {} },
     },
 
