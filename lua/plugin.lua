@@ -24,6 +24,7 @@ local M = {
         "folke/noice.nvim",
         "jakewvincent/mkdnflow.nvim",
         "kndndrj/nvim-dbee",
+        "m4xshen/hardtime.nvim",
         "mikavilpas/yazi.nvim",
         "nvim-telescope/telescope.nvim",
         "nvim-treesitter/nvim-treesitter-context",
