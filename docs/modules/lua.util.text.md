@@ -57,7 +57,9 @@ function M.wrap_comment(
 
 
 Wraps text into a list of comment lines no wider than width, each
-formatted through commentstring.
+formatted through commentstring. Width is counted in display columns,
+as `util.markdown_table` counts it, so multibyte text is not wrapped
+early for being more bytes than it is columns.
 
 
 

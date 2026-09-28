@@ -58,7 +58,9 @@ end
 ---@field commentstring? string  printf-style wrapper (default: buffer's own)
 
 --- Wraps text into a list of comment lines no wider than width, each
---- formatted through commentstring.
+--- formatted through commentstring. Width is counted in display columns,
+--- as `util.markdown_table` counts it, so multibyte text is not wrapped
+--- early for being more bytes than it is columns.
 ---@param text   string
 ---@param width? integer             Default: 'textwidth', or 80 if unset
 ---@param opt?   util.WrapCommentOpt
@@ -72,13 +74,17 @@ M.wrap_comment = function(text, width, opt)
         or (vim.bo[buffer].commentstring ~= "" and vim.bo[buffer].commentstring)
         or "%s"
 
+    local columns = vim.fn.strdisplaywidth
+    -- What the commentstring adds around its "%s"
+    local overhead = columns(commentstring) - 2
+
     ---@type string[]
     local lines = {}
     ---@type string
     local current = ""
     for word in text:gmatch("%S+") do
         local candidate = current == "" and word or current .. " " .. word
-        if #candidate > (width - (#commentstring - 2)) then
+        if columns(candidate) > width - overhead then
             if current ~= "" then
                 lines[#lines + 1] = string.format(commentstring, current)
             end
@@ -92,7 +98,7 @@ M.wrap_comment = function(text, width, opt)
     -- If commentstring has a suffix after %s (<!-- block style comment -->)
     if not commentstring:match("%%s$") then
         -- Append right-side padding
-        local pad = width - #current - (#commentstring - 2)
+        local pad = width - columns(current) - overhead
         current   = current .. string.rep(" ", pad)
     end
 
