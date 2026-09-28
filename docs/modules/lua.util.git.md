@@ -149,36 +149,6 @@ abbreviated SHA, leaving the substitution to the caller.
 
 
 
-### M.gh
----
-```lua
-function M.gh(
-  slug: string,
-  opts: cgxx.git.gh.opts {
-    fmt = cgxx.git.gh.opts.fmt,
-}
-) -> url string
-```
-@param `slug` - owner/repo
-
-@param `opts` - Additional options ie. fmt = "ssh"|"https"
-
-
-@return `url` - Repository GitHub URL
-
-
-
-
-
-Returns the repository GitHub URL of the provided slug
-
-
-
-
-
-
-
-
 
 
 
