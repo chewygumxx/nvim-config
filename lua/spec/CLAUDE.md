@@ -68,4 +68,5 @@ Where a plugin merges `opts` with `vim.tbl_deep_extend("force", ...)`, an entry
 cannot be switched off by emptying or shortening its table: the merge recurses
 whenever both sides are tables and arrays merge by index, so `{}` leaves the
 default intact. `false` is what replaces a value. `lua/spec/hardtime.nvim.lua`
-is the worked example, and the arrow keys depend on it.
+is the worked example, and the arrow keys depend on it whenever it is loaded; it
+is elided at present, so what it protects is re-enabling it.
