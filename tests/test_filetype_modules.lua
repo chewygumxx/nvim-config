@@ -56,6 +56,16 @@ for ft in pairs(filetype.modmap) do
 end
 table.sort(mapped)
 
+--- Tree-sitter languages a capture may be scoped to: each mapped
+--- filetype's own, plus the two its parsers answer to under another name.
+--- `markdown` injects `markdown_inline`, and nvim-treesitter registers the
+--- `gitrebase` filetype's parser as `git_rebase`.
+---@type table<string, true>
+local languages = { markdown_inline = true, git_rebase = true }
+for _, ft in ipairs(mapped) do
+    languages[vim.treesitter.language.get_lang(ft) or ft] = true
+end
+
 --- A highlight attribute in the terms `nvim_get_hl` answers in.
 ---
 --- Two conversions, both of them asymmetries of that API rather than of
@@ -235,6 +245,23 @@ describe("filetype.config", function()
 
             table.sort(wrong)
             eq({ ft, wrong }, { ft, {} })
+        end)
+
+        it("scopes " .. ft .. "'s captures to a language", function()
+            -- `nvim_set_hl(0, ...)` is global, so an unsuffixed capture
+            -- such as `@type` recolours every language for the rest of
+            -- the session. `filetype.kdl` shipped three of them.
+            ---@type string[]
+            local unscoped = {}
+            for name in pairs(module_of(ft).hlgroup_defs or {}) do
+                local lang = name:match("^@.*%.([%w_]+)$")
+                if name:sub(1, 1) == "@" and not languages[lang] then
+                    table.insert(unscoped, name)
+                end
+            end
+
+            table.sort(unscoped)
+            eq({ ft, unscoped }, { ft, {} })
         end)
     end
 
