@@ -22,7 +22,7 @@ local M = {}
 local save_preinterpreted_copy = function(lines)
     -- Save Directory
     local log_dir = vim.fn.stdpath("cache") .. "/log-ansi/"
-    if not vim.fn.isdirectory(log_dir) then
+    if vim.fn.isdirectory(log_dir) == 0 then
         vim.fn.mkdir(log_dir, "p")
     end
 
