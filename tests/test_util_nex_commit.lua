@@ -304,9 +304,8 @@ describe("util.nex commit-on-write toggles", function()
         local calls = 0
         local real  = nex.new_note
         ---@diagnostic disable-next-line: duplicate-set-field
-        nex.new_note  = function(...)
+        nex.new_note  = function()
             calls = calls + 1
-            return ...
         end
         local ok, err = pcall(command, {})
         nex.new_note  = real
