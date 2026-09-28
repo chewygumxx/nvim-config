@@ -296,6 +296,10 @@ describe("util.markdown_table buffer operations", function()
     end)
 
     after_each(function()
+        -- Cleared rather than deleted, as the wip and statusline tests do:
+        -- two cases below call `mdtable.autocmd()`, and an augroup left
+        -- populated fires during every later test file
+        vim.api.nvim_create_augroup("cgxx.mdtable", { clear = true })
         vim.api.nvim_buf_delete(bufnr, { force = true })
     end)
 
