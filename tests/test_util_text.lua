@@ -44,6 +44,21 @@ describe("util.text.wrap_comment", function()
         end
     )
 
+    it("measures width in display columns, not bytes", function()
+        -- 11 columns but 13 bytes: measured in bytes, the pair wrapped at
+        -- a width they fit in
+        eq(
+            text.wrap_comment("héllo wörld", 14, { commentstring = "-- %s" }),
+            { "-- héllo wörld" }
+        )
+
+        -- And the padding of a suffixed commentstring counts columns too
+        local lines = text.wrap_comment("é", 10, {
+            commentstring = "/* %s */",
+        })
+        eq(vim.fn.strdisplaywidth(lines[1]), 10)
+    end)
+
     it("never splits a single word, even past width", function()
         local lines = text.wrap_comment("supercalifragilistic", 10, {
             commentstring = "-- %s",
