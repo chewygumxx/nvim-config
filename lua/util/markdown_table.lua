@@ -42,12 +42,47 @@ local MIN_WIDTH = 3
 -- Pure: parsing
 --
 
---- Splits a table row into trimmed cell text, discarding the outer pipes.
+--- Separates a row's indent and blockquote marker from the table itself.
 ---
---- Scans character by character rather than matching a pattern: a cell may
---- legally contain an escaped pipe, and Lua patterns have no way to say
---- "a | not preceded by a backslash". Tree-sitter agrees with this reading
---- and keeps `\|` as cell content.
+--- One definition for everything below, since `M.split_cells` replays the
+--- prefix while `M.cell_at` and `M.cell_col` discount it, and a cursor
+--- carried across a reformat lands in the wrong cell if they disagree.
+---@param line string
+---@return string prefix
+---@return string body
+local strip_prefix = function(line)
+    local prefix = line:match("^[%s>]*") or ""
+    return prefix, line:sub(#prefix + 1)
+end
+
+--- Byte positions of every unescaped pipe in `text`, ie. its cell
+--- boundaries.
+---
+--- Scans byte by byte rather than matching a pattern: a cell may legally
+--- contain an escaped pipe, and Lua patterns have no way to say "a | not
+--- preceded by a backslash". Tree-sitter agrees with this reading and
+--- keeps `\|` as cell content.
+---@param text string
+---@return integer[] positions 1-indexed, ascending
+local pipes = function(text)
+    ---@type integer[]
+    local positions = {}
+    local i         = 1
+    while i <= #text do
+        local char = text:sub(i, i)
+        if char == "\\" then
+            i = i + 2
+        elseif char == "|" then
+            positions[#positions + 1] = i
+            i                         = i + 1
+        else
+            i = i + 1
+        end
+    end
+    return positions
+end
+
+--- Splits a table row into trimmed cell text, discarding the outer pipes.
 ---
 --- Outer pipes are optional in GFM (`a | b` is a table row), so a leading
 --- or trailing empty cell is dropped only when the line actually has the
@@ -56,30 +91,16 @@ local MIN_WIDTH = 3
 ---@return string[] cells
 ---@return string prefix  Indent and/or blockquote marker, to be replayed
 M.split_cells = function(line)
-    local prefix = line:match("^[%s>]*") or ""
-    local body   = line:sub(#prefix + 1)
+    local prefix, body = strip_prefix(line)
 
     ---@type string[]
     local cells = {}
-    ---@type string
-    local current = ""
-    local i       = 1
-    while i <= #body do
-        local char = body:sub(i, i)
-        if char == "\\" and i < #body then
-            -- Keep the escape intact: it is part of the cell's source text
-            current = current .. body:sub(i, i + 1)
-            i       = i + 2
-        elseif char == "|" then
-            cells[#cells + 1] = vim.trim(current)
-            current           = ""
-            i                 = i + 1
-        else
-            current = current .. char
-            i       = i + 1
-        end
+    local start = 1
+    for _, pipe in ipairs(pipes(body)) do
+        cells[#cells + 1] = vim.trim(body:sub(start, pipe - 1))
+        start             = pipe + 1
     end
-    cells[#cells + 1] = vim.trim(current)
+    cells[#cells + 1] = vim.trim(body:sub(start))
 
     -- A leading "|" yields an empty first cell, a trailing one an empty
     -- last cell. Both are artefacts of the outer pipes, not real columns.
@@ -316,26 +337,19 @@ end
 ---@return integer column 1-indexed; clamped into range
 ---@return integer offset 0-indexed byte offset into the trimmed cell
 M.cell_at = function(line, col)
-    local prefix = line:match("^[%s>]*") or ""
-    local body   = line:sub(#prefix + 1)
-    local at     = math.max(col - #prefix, 0)
+    local prefix, body = strip_prefix(line)
+    local at           = math.max(col - #prefix, 0)
 
     ---@type integer
     local column = body:match("^|") and 0 or 1
     ---@type integer
     local start = 0
-    local i     = 1
-    while i <= #body and i <= at do
-        local char = body:sub(i, i)
-        if char == "\\" and i < #body then
-            i = i + 2
-        elseif char == "|" then
-            column = column + 1
-            start  = i
-            i      = i + 1
-        else
-            i = i + 1
+    for _, pipe in ipairs(pipes(body)) do
+        if pipe > at then
+            break
         end
+        column = column + 1
+        start  = pipe
     end
 
     -- Offset is measured from the trimmed text, since that is the only
@@ -353,34 +367,27 @@ end
 ---@param offset integer 0-indexed byte offset into the trimmed cell
 ---@return integer col 0-indexed byte column
 M.cell_col = function(line, column, offset)
-    local prefix = line:match("^[%s>]*") or ""
-    local body   = line:sub(#prefix + 1)
+    local prefix, body = strip_prefix(line)
 
     ---@type integer
     local seen = body:match("^|") and 0 or 1
     ---@type integer
     local start = 0
-    local i     = 1
-    while i <= #body do
-        local char = body:sub(i, i)
-        if char == "\\" and i < #body then
-            i = i + 2
-        elseif char == "|" then
-            if seen == column then
-                break
-            end
-            seen  = seen + 1
-            start = i
-            i     = i + 1
-        else
-            i = i + 1
+    ---@type integer
+    local stop = #body + 1
+    for _, pipe in ipairs(pipes(body)) do
+        if seen == column then
+            stop = pipe
+            break
         end
+        seen  = seen + 1
+        start = pipe
     end
     if seen ~= column then
         return #prefix + #body
     end
 
-    local cell = body:sub(start + 1, i - 1)
+    local cell = body:sub(start + 1, stop - 1)
     local lead = cell:match("^%s*") or ""
     local at   = start + #lead + math.min(offset, #vim.trim(cell))
 
@@ -405,7 +412,7 @@ local FENCE_NODES = {
 ---
 --- Deliberately not `vim.treesitter.get_node`: that returns nil until
 --- something has already parsed the buffer, so on a buffer nothing has
---- highlighted yet — a scratch buffer, or any buffer under `--headless` —
+--- highlighted yet (a scratch buffer, or any buffer under `--headless`),
 --- it silently reports "no node" for every position. Asking for the parser
 --- and parsing it here makes the answer independent of whether anything
 --- else happened to attach first.
@@ -462,21 +469,7 @@ end
 ---@param line string
 ---@return boolean
 M.is_table_line = function(line)
-    if not line:match("%S") then
-        return false
-    end
-    local i = 1
-    while i <= #line do
-        local char = line:sub(i, i)
-        if char == "\\" then
-            i = i + 2
-        elseif char == "|" then
-            return true
-        else
-            i = i + 1
-        end
-    end
-    return false
+    return line:match("%S") ~= nil and #pipes(line) > 0
 end
 
 --- Extent of the table containing `row`, as 0-indexed inclusive rows.
@@ -485,7 +478,7 @@ end
 --- `\|` and `` `a|b` `` as cell content, and handles tables indented in a
 --- list or quoted in a blockquote.
 ---
---- It has two blind spots, both straight from GFM's own rules — a table
+--- It has two blind spots, both straight from GFM's own rules: a table
 --- with no delimiter row yet, and one whose header and delimiter cell
 --- counts disagree, are simply not `pipe_table` nodes. Both are states you
 --- pass through while editing, which is exactly when you want to format.
