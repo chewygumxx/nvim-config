@@ -14,16 +14,37 @@
 
 local M = {}
 
+--- Plain scalars YAML 1.1 resolves to a boolean or null, lowercased.
+---@type table<string, true>
+local typed_keywords = {
+    y         = true,
+    n         = true,
+    yes       = true,
+    no        = true,
+    on        = true,
+    off       = true,
+    ["true"]  = true,
+    ["false"] = true,
+    null      = true,
+}
+
 --- Renders text as a YAML flow scalar, double-quoting it only when a
 --- plain scalar would be ambiguous or invalid.
 ---
 --- Lives here rather than beside either caller: `util.header.frontmatter`
 --- and `util.nex` both write `title:` and tag keys, and a second copy of
 --- this would be a second opinion on what YAML needs quoting.
+---
+--- "Ambiguous" includes a plain scalar that is valid but would not read
+--- back as a string: YAML 1.1's booleans and null (which 1.2 narrowed, but
+--- plenty of readers still apply), numbers in any base, and timestamps.
 ---@param text string
 ---@return string scalar
 M.yaml_scalar = function(text)
-    if text ~= "" and text:match("^[%w][%w _.()/-]*$") and not text:match(" $") then
+    if text ~= "" and text:match("^[%w][%w _.()/-]*$")
+        and not text:match(" $") and not typed_keywords[text:lower()]
+        and not tonumber(text) and not text:match("^[-+]?[%d_]+$")
+        and not text:match("^%d%d%d%d%-%d%d?%-%d%d?") then
         return text
     end
     local escaped = text:gsub("\\", "\\\\")
