@@ -66,7 +66,8 @@ M.adjacent = function(match, _, source, predicate)
     ---@type TSNode[]
     local nodes = {}
     for i = 2, #predicate do
-        local list = match[predicate[i]] --[[@as TSNode[]?]]
+        ---@type TSNode[]?
+        local list = match[predicate[i]]
         if list then
             vim.list_extend(nodes, list)
         end
@@ -98,7 +99,8 @@ end
 ---@param predicate string[]                 `{ "last-matching?", "@a", pat }`
 ---@return boolean
 M.last_matching = function(match, _, source, predicate)
-    local nodes   = match[predicate[2]] --[[@as TSNode[]?]]
+    ---@type TSNode[]?
+    local nodes   = match[predicate[2]]
     local pattern = predicate[3]
     if not nodes then
         return true
@@ -161,7 +163,8 @@ local HEADER_LINE_PATTERNS = {
 ---@param predicate string[]                 `{ "header-line?", "@a", shape }`
 ---@return boolean
 M.header_line = function(match, _, source, predicate)
-    local nodes = match[predicate[2]] --[[@as TSNode[]?]]
+    ---@type TSNode[]?
+    local nodes = match[predicate[2]]
     if not nodes then
         return true
     end

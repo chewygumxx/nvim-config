@@ -415,8 +415,9 @@ M.items = "%<"
 M.value = function()
     local info = vim.api.nvim_get_option_info2("statusline", {})
     -- `nvim_get_option_info2` types `default` as any option's value type,
-    -- ie. `string|integer|boolean`; 'statusline' is always a string
-    local default = info.default --[[@as string]]
+    -- ie. `string|integer|boolean`; 'statusline' is always a string, so
+    -- `tostring` narrows it without a cast and changes nothing at runtime
+    local default = tostring(info.default)
     local leader  = "%<%f"
 
     -- Plain `find`, and concatenation rather than `gsub`: the leader is a

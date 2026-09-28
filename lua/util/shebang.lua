@@ -60,7 +60,8 @@ M.get = function(file, buf, opt)
     -- form), even though this single-arg call always returns `string`;
     -- casting the *parameter* at its reassignment above doesn't narrow
     -- it the way a fresh `local` would, so cast the result here instead.
-    local path = vim.fn.fnamemodify(file, ":~:h") --[[@as string]]
+    ---@type string
+    local path = vim.fn.fnamemodify(file, ":~:h")
     for _, dir in ipairs(source_dirs) do
         if path == dir or path:find(dir .. "/", 1, true) == 1 then
             return "#!/bin/false"
