@@ -41,7 +41,12 @@ every session, a rule costs nothing until something in its scope is read.
 `hooks/` is what makes five rules mechanical rather than advisory: refusing a
 write into a generated tree, refusing a commit while a gate binary is absent,
 refusing a whole-file read of the wordlists and the compiled spell file, linting
-Lua at write time, and reporting that the generated help has gone stale.
+Lua at write time, and reporting that the generated help has gone stale. A sixth
+hook, `install-deps.sh`, is not one of these: it fires on `SessionStart` rather
+than `PreToolUse`/`PostToolUse`, and it bootstraps a cloud session's
+`node_modules` rather than making an advisory rule mechanical. See
+`install-deps.sh` below for why it exists and what it deliberately leaves
+alone.
 
 **A newly added agent is not selectable as a `subagent_type` until the session
 restarts**, so the session that writes one cannot use it. A skill is not like
@@ -190,6 +195,36 @@ local before the edit that consumes it therefore reports `unused_variable` on
 the intermediate state, twice in a row if the consumer takes two edits. Read a
 failure there as a description of the file as it stands, not as an edit that was
 rejected.
+
+## `install-deps.sh`
+
+The one `SessionStart` hook here, and the answer to "why does a cloud session
+need `npm ci` run by hand": a cloud session starts from a bare clone, and
+`core.hooksPath` stays unset, husky's git hooks stay unwired, and
+`commit-msg`/`.husky/pre-commit` never fire, until something runs `npm ci` or
+`npm install`. Nothing about that is specific to this repository; it is true
+of any project that gates commits through husky. Established by doing exactly
+this by hand mid-session, more than once, before the hook existed: a commit
+went through with no `Claude-Session:` trailer question or gate failure
+reported at all, because nothing was wired to ask either question.
+
+It runs only when `$CLAUDE_CODE_REMOTE` is `true`, and it deliberately does
+not attempt `mise install`. Both are the same fact stated from two directions:
+a cloud environment's network policy can block the hosts `mise` downloads
+from (established by probe, in a session where `mise install` hung against
+exactly those hosts), and a hook committed to this repository cannot change
+that policy. Fixing it, if it needs fixing, is an environment setting, not a
+`.claude/` change; the gate binaries `mise` would otherwise supply stay
+whatever they were before this hook ran.
+
+It runs `npm ci`, never `npm install`, and this one is not interchangeable
+with the general advice to prefer `install` for its caching. `package.json`
+carries a `patchedDependencies` entry for `@commitlint/cz-commitlint`, and the
+committed `package-lock.json` records it as a `patched` block on that
+package's entry. `npm install` re-resolves the tree and drops that block
+silently; `npm ci` installs from the lockfile exactly as committed. Established
+by probe, by running each in turn and diffing `package-lock.json` afterwards:
+`npm install` left a `patched` block missing and nothing said so.
 
 ## `hooks/lib/tools.sh`
 
