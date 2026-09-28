@@ -251,9 +251,22 @@ describe("keymap.setup", function()
         -- `M.fallback` forever
         local gx = require("keymap.gx")
         keymap.setup()
-        vim.wait(1000, function()
-            return false
-        end, 50
+
+        -- A fence rather than a sleep: `vim.schedule` runs callbacks in
+        -- the order they were queued, so once this marker has run, the
+        -- callback `keymap.gx` deferred during `setup()` has run too. The
+        -- description cannot serve, since it already matches from the
+        -- first `setup()` in `before_each`.
+        local flushed = false
+        vim.schedule(function()
+            flushed = true
+        end)
+        assert(
+            vim.wait(1000, function()
+                return flushed
+            end, 5
+            ),
+            "the scheduled queue never drained"
         )
 
         local fallback = gx.fallback
