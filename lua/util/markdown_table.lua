@@ -824,9 +824,9 @@ M.keymap = function(bufnr)
 
     for _, map in ipairs(maps) do
         vim.keymap.set("n", map[1], map[2], {
-            buffer = bufnr,
-            desc   = map[3],
-            remap  = false,
+            buf   = bufnr,
+            desc  = map[3],
+            remap = false,
         })
     end
 end
