@@ -9,8 +9,10 @@
 --
 --
 
-local nex = require("util.nex")
-local eq  = require("mini.test") --[[@as mini.test]]
+---@type cgxx.test.helpers
+local helpers = dofile("tests/helpers.lua")
+local nex     = require("util.nex")
+local eq      = require("mini.test") --[[@as mini.test]]
     .expect
     .equality
 
@@ -144,11 +146,13 @@ describe("util.nex.commit", function()
         nex.commit(path)
         eq(commits(1), 1)
 
-        nex.commit(path)
-        -- Nothing to wait for, so give the no-op call room to land
-        vim.wait(1500, function()
-            return false
-        end, 50
+        -- Announced rather than slept through: `report` makes the no-op
+        -- say so, which is the fence `tests/CLAUDE.md` asks for
+        eq(
+            helpers.announced(function()
+                nex.commit(path, true)
+            end),
+            "Nex: no change since last commit"
         )
         eq(tonumber(git(root, "rev-list", "--count", "HEAD")), 1)
     end)
@@ -175,10 +179,13 @@ describe("util.nex.commit", function()
     it("ignores a path outside the note directory", function()
         local outside = root .. "/README.md"
         vim.fn.writefile({ "# Readme" }, outside)
-        nex.commit(outside)
-        vim.wait(1500, function()
-            return false
-        end, 50
+        -- Refused before any async work starts, so the answer is there
+        -- at once and there is nothing to wait for
+        eq(
+            helpers.announced(function()
+                nex.commit(outside, true)
+            end),
+            "Nex: buffer is not a note under " .. root
         )
         eq(git(root, "rev-list", "--count", "HEAD"), "")
     end)
