@@ -21,9 +21,7 @@
 - [class Total](types/cgxx.test_report.Total.md)
 - [class WrapCommentOpt](types/util.WrapCommentOpt.md)
 - [class info](types/cgxx.git.info.md)
-- [class opts](types/cgxx.git.gh.opts.md)
 - [class pattern_map](types/cgxx.keymap.gx.pattern_map.md)
-- [enum fmt](types/cgxx.git.gh.opts.fmt.md)
 
 
 
