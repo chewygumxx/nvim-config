@@ -194,13 +194,20 @@ describe("util.lsp.setup", function()
     ---@type vim.diagnostic.Opts?
     local original
 
+    ---@type vim.lsp.Config
+    local defaults
+
     before_each(function()
         original = vim.diagnostic.config()
+        defaults = vim.deepcopy(vim.lsp.config["*"]) or {}
     end)
 
     after_each(function()
         vim.diagnostic.config(original)
         vim.api.nvim_create_augroup("UtilLspAttach", { clear = true })
+        -- Assigned rather than passed to `vim.lsp.config("*", ...)`, which
+        -- deep-merges and so could never take a key back out
+        vim.lsp.config["*"] = defaults
     end)
 
     it("wires on_attach up to LspAttach", function()
@@ -216,5 +223,11 @@ describe("util.lsp.setup", function()
         -- without repeating them
         lsp.setup()
         eq(vim.lsp.config["*"].capabilities ~= nil, true)
+    end)
+
+    it("leaves the \"*\" defaults as it found them", function()
+        -- Guards the restore above: `setup` writes a global that every
+        -- later file's servers would otherwise inherit
+        eq(vim.lsp.config["*"].capabilities, nil)
     end)
 end)
