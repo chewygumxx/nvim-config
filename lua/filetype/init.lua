@@ -34,9 +34,10 @@ M.filetypes = {
     },
 
     filename = {
-        ["ignore"]         = "gitignore",
-        [".chezmoiignore"] = "gitignore",
-        [".assetsignore"]  = "gitignore", -- CloudFlare Worker wrangler config
+        ["ignore"]           = "gitignore",
+        [".assetsignore"]    = "gitignore", -- CloudFlare Worker wrangler config
+        [".chezmoiignore"]   = "gitignore",
+        [".worktreeinclude"] = "gitignore",
     },
 
     pattern = {
