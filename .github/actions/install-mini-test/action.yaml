@@ -41,7 +41,7 @@ description: Fetch the commit the mini.test tag this config pins resolves to.
 #
 # The install path is asked of Neovim rather than assumed, since
 # `stdpath("data")` moves with `XDG_DATA_HOME`; `.husky/pre-commit` looks it
-# up the same way. Requires Neovim on PATH, ie. `setup-neovim` first.
+# up the same way. Requires Neovim on PATH, ie. `jdx/mise-action` first.
 #
 
 runs:

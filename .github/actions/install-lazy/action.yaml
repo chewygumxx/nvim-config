@@ -26,8 +26,8 @@ description: Clone the lazy.nvim commit lazy-lock.json pins.
 # itself from `origin/HEAD` afterwards, which is what the locked commit
 # records.
 #
-# Requires Neovim on PATH already, for `stdpath("data")`: use
-# `./.github/actions/setup-neovim` first.
+# Requires Neovim on PATH already, for `stdpath("data")`: install it with
+# `jdx/mise-action` or `./.github/actions/setup-neovim-nightly` first.
 #
 
 runs:

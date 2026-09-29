@@ -29,7 +29,8 @@
 -- that the stub reports just as well.
 --
 
-local MiniTest = require("mini.test")     --[[@as mini.test]]
+---@type mini.test
+local MiniTest = require("mini.test")
 local eq       = MiniTest.expect.equality
 
 --- The order `init.lua` documents, in the terms its comments use: option

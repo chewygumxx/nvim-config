@@ -40,6 +40,11 @@ local nudge_library_rescan = function(client)
         if not vim.lsp.get_client_by_id(client.id) then
             return
         end
+        -- Private methods, on purpose: the public `vim.lsp.buf` pair calls
+        -- these same two for every client of whichever buffer is current
+        -- when this fires, and `remove_workspace_folder` notifies "is not
+        -- currently part of the workspace" even on success. A Neovim bump
+        -- that renames them fails here, loudly, rather than elsewhere.
         client:_remove_workspace_folder(client.root_dir)
         client:_add_workspace_folder(client.root_dir)
     end, 500)

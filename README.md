@@ -30,7 +30,7 @@ and CI setup, and no chezmoi involvement.
 Plugins are managed by [lazy.nvim](https://lazy.folke.io), language servers by
 Neovim's native `vim.lsp.config`, and every tool version by
 [mise](https://mise.jdx.dev). The test suite is
-[mini.test](https://github.com/nvim-mini/mini.test), currently 628 cases.
+[mini.test](https://github.com/nvim-mini/mini.test), currently 743 cases.
 
 ## Requirements
 

@@ -78,11 +78,27 @@ M.opts = {
     },
 }
 
-M.config = function()
+--- A `config` of our own means lazy.nvim no longer calls `setup(opts)`, so
+--- it is called here. `open` is wrapped rather than passed directly, since
+--- a command callback's argument is the command's table, not a path.
+---@param _    LazyPlugin
+---@param opts MiniFiles.Config
+---@return nil
+M.config = function(_, opts)
+    ---@type mini.files
+    local files = require("mini.files")
+    files.setup(opts)
+
     vim.api.nvim_create_user_command(
         M.cmd[1],
-        require("mini.files").open,
-        { desc = "Open MiniFiles" }
+        function(args)
+            files.open(args.args ~= "" and args.args or nil)
+        end,
+        {
+            desc     = "Open MiniFiles",
+            nargs    = "?",
+            complete = "dir",
+        }
     )
 end
 

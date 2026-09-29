@@ -214,4 +214,24 @@ Idle time in milliseconds, after a change, before a snapshot is taken.
 
 
 
+### M.timeout
+---
+```lua
+M.timeout : integer
+```
+
+
+
+Milliseconds any one `git` call may take. `util.git.info` bounds its
+own for the same reason: a hung git on a network filesystem would
+otherwise never call back, or, for the two `locate` lookups that
+block, never return.
+
+
+
+
+
+
+
+
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/bin/false
 -- vim:set expandtab shiftwidth=4 filetype=lua:
 -- SPDX-License-Identifier: GPL-3.0-only
 
@@ -34,8 +34,15 @@
 -- only the fields lua/spec/mini.hipatterns.lua actually touches.
 --
 
+---@class (exact) MiniHipatterns.HexColorOpts
+---@field style?       "full" | "#" | "line" | "inline"
+---@field priority?    integer
+---@field filter?      fun(buf_id: integer): boolean
+---@field inline_text? string
+---@field max_number?  integer
+
 ---@class mini.hipatterns.gen_highlighter
----@field hex_color fun(opts?: table): MiniHipatterns.HighlighterOpts
+---@field hex_color fun(opts?: MiniHipatterns.HexColorOpts): MiniHipatterns.HighlighterOpts
 
 ---@class mini.hipatterns
 ---@field gen_highlighter mini.hipatterns.gen_highlighter

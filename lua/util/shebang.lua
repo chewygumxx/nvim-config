@@ -1,5 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -19,6 +20,7 @@ local source_dirs = {
 
     "~/.config/hypr",
     "~/.config/nvim/lua",
+    "~/.config/nvim/types",
     "~/.config/luarocks",
     "~/.config/wezterm",
     "~/.config/yay",
@@ -58,9 +60,10 @@ M.get = function(file, buf, opt)
 
     -- `vim.fn.expand()` is declared `string|string[]` (the `list` arg
     -- form), even though this single-arg call always returns `string`;
-    -- casting the *parameter* at its reassignment above doesn't narrow
-    -- it the way a fresh `local` would, so cast the result here instead.
-    local path = vim.fn.fnamemodify(file, ":~:h") --[[@as string]]
+    -- annotating the *parameter* at its reassignment above doesn't narrow
+    -- it the way a fresh `local` would, so the result is annotated here.
+    ---@type string
+    local path = vim.fn.fnamemodify(file, ":~:h")
     for _, dir in ipairs(source_dirs) do
         if path == dir or path:find(dir .. "/", 1, true) == 1 then
             return "#!/bin/false"

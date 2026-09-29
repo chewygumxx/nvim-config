@@ -28,9 +28,9 @@
 -- list to have named them all.
 --
 
-local eq = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Every global option value `option.general` documents.
 ---@type table<string, string | boolean | integer>
@@ -137,6 +137,36 @@ local applied = function(want)
     eq(wrong, {})
 end
 
+--- Asserts every option in want is a real Neovim option and that its
+--- configured value has the type Neovim declares for it, catching a
+--- typo'd name or a wrong-typed value before `nvim_set_option_value` ever
+--- sees it.
+---@param want table<string, string | boolean | integer>
+---@return nil
+local valid = function(want)
+    ---@type string[]
+    local wrong = {}
+    for name, value in pairs(want) do
+        local ok, info = pcall(vim.api.nvim_get_option_info2, name, {})
+        if not ok then
+            table.insert(wrong, string.format("%s is not a real option", name))
+        elseif info.type ~= type(value) then
+            table.insert(
+                wrong,
+                string.format(
+                    "%s is %s, Neovim wants %s",
+                    name,
+                    type(value),
+                    info.type
+                )
+            )
+        end
+    end
+
+    table.sort(wrong)
+    eq(wrong, {})
+end
+
 --- The sorted names of every option in the given tables.
 ---@param ... table<string, string | boolean | integer> Option tables
 ---@return string[] names
@@ -205,6 +235,10 @@ describe("option.general.setup", function()
         applied(general)
     end)
 
+    it("documents only real options at their declared type", function()
+        valid(general)
+    end)
+
     it("writes no option it does not document", function()
         eq(written(require("option.general").setup), names(general))
     end)
@@ -231,6 +265,10 @@ describe("option.view.setup", function()
         eq(vim.o.statusline, require("util.statusline").value())
     end)
 
+    it("documents only real options at their declared type", function()
+        valid(view)
+    end)
+
     it("writes no option it does not document", function()
         -- 'statusline' included: `M.setup()` delegates it to
         -- `util.statusline`, so it is written here without appearing in
@@ -253,6 +291,10 @@ describe("option.fold.setup", function()
     it("applies its documented global option values", function()
         require("option.fold").setup()
         applied(fold)
+    end)
+
+    it("documents only real options at their declared type", function()
+        valid(fold)
     end)
 
     it("writes no option it does not document", function()
@@ -280,6 +322,12 @@ describe("option.setup", function()
         applied(general)
         applied(view)
         applied(fold)
+    end)
+
+    it("documents only real options at their declared type", function()
+        valid(general)
+        valid(view)
+        valid(fold)
     end)
 
     it("writes no option no sibling documents", function()

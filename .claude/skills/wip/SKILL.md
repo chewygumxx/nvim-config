@@ -54,8 +54,12 @@ ref tip exits before `commit-tree`, which is what makes those extra checkpoints
 nearly free.
 
 Eligibility is "inside a worktree and known to `git ls-files --error-unmatch`",
-cached per buffer in `vim.b.cgxx_wip_location` and invalidated on `BufWritePost`
-so a newly tracked file starts snapshotting.
+cached per buffer in `vim.b.cgxx_wip_location`. `BufWritePost` drops only an
+ineligible answer, so a newly tracked file starts snapshotting, while a tracked
+one keeps its answer: resolving it blocks on two `git` calls, which would
+otherwise stall every save. `BufFilePost` drops any answer, since a rename keeps
+the buffer number. Every `git` call is bounded by `M.timeout`, and a lookup that
+times out is left uncached rather than read as "not tracked".
 
 `vim.g.cgxx_wip` and `vim.b.cgxx_wip` are the off switches. `XXWip` takes
 `toggle`/`enable`/`disable`/`snapshot` plus a bang-only `drop`.

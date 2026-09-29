@@ -10,9 +10,9 @@
 --
 
 local statusline = require("util.statusline")
-local eq         = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 ---@type cgxx.test.helpers
 local helpers = dofile("tests/helpers.lua")
@@ -143,6 +143,29 @@ describe("util.statusline.segment", function()
         eq(vim.b[bufnr].cgxx_statusline, false)
         eq(statusline.segment(bufnr), "")
         eq(statusline.fallback(bufnr), "%f")
+    end)
+
+    it("does not re-resolve a buffer with no segment", function()
+        -- The cached `false` is an answer, not a miss. Read as a miss, every
+        -- redraw of a help, terminal or quickfix window scheduled a fresh
+        -- resolve that reached the same answer again.
+        local bufnr = vim.api.nvim_create_buf(true, false)
+        statusline.segment(bufnr)
+        await(bufnr)
+
+        local scheduled = 0
+        local schedule  = vim.schedule
+        ---@diagnostic disable-next-line: duplicate-set-field
+        vim.schedule  = function(fn)
+            scheduled = scheduled + 1
+            return schedule(fn)
+        end
+        local ok, err = pcall(statusline.segment, bufnr)
+        vim.schedule  = schedule
+        assert(ok, err)
+
+        eq(scheduled, 0)
+        vim.api.nvim_buf_delete(bufnr, { force = true })
     end)
 
     it("suppresses the %f fallback once a segment resolves", function()
@@ -451,14 +474,13 @@ describe("util.statusline.value", function()
         -- same claim on any release.
         local info = vim.api.nvim_get_option_info2("statusline", {})
 
-        -- Cast the way `M.value()` casts the same read, and for the same
-        -- reason: `nvim_get_option_info2` types `default` as any option's
-        -- value type, ie. `string|integer|boolean`, and 'statusline' is
-        -- always a string. A `---@type` annotation cannot narrow an
-        -- assignment this wide, and `luafmt` leaves an inline cast alone
-        -- here because this is a plain assignment rather than a call
-        -- argument
-        local default = info.default --[[@as string]]
+        -- Narrowed the way `M.value()` narrows the same read, and for the
+        -- same reason: `nvim_get_option_info2` types `default` as any
+        -- option's value type, ie. `string|integer|boolean`, and
+        -- 'statusline' is always a string. A `---@type` annotation cannot
+        -- narrow an assignment this wide, and `lua/util/CLAUDE.md` rules
+        -- out an inline cast, so `tostring` does it instead
+        local default = tostring(info.default)
         local leader  = "%<%f"
 
         local at = default:find(leader, 1, true)

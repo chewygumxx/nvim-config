@@ -18,9 +18,9 @@
 --
 
 local claude = require("util.claude")
-local eq     = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 describe("util.claude.is_prompt_buffer", function()
     ---@type integer

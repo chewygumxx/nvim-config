@@ -15,14 +15,16 @@
 local M = {
     "debugloop/telescope-undo.nvim",
 
-    dependencies = { -- note how they're inverted to above example
+    -- An extension of telescope.nvim, and elided with it in
+    -- lua/plugin.lua: loaded on its own it would `require` nothing
+    dependencies = {
         {
             "nvim-telescope/telescope.nvim",
             dependencies = { "nvim-lua/plenary.nvim" },
         },
     },
     keys = {
-        { -- lazy style key map
+        {
             "<leader>u",
             "<cmd>Telescope undo<cr>",
             desc = "undo history",
@@ -30,18 +32,15 @@ local M = {
     },
     ---@type cgxx.spec.telescope.Opts
     opts = {
-        -- don't use `defaults = { }` here, do this in the main telescope spec
+        -- Only this extension's own table: telescope's `defaults` belong to
+        -- lua/spec/telescope.nvim.lua, and each extension to its own spec
         extensions = {
-            undo = {
-                -- telescope-undo.nvim config, see below
-            },
-            -- no other extensions here, they can have their own spec too
+            undo = {},
         },
     },
     config = function(_, opts)
-        -- Calling telescope's setup from multiple specs does not hurt, it will happily merge the
-        -- configs for us. We won't use data, as everything is in it's own namespace (telescope
-        -- defaults, as well as each extension).
+        -- telescope's `setup` merges across calls, so each spec calling it
+        -- with only its own namespace is safe
         require("telescope").setup(opts)
         require("telescope").load_extension("undo")
     end,

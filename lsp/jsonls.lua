@@ -9,13 +9,14 @@
 --
 --
 
+---@type schemastore
+local schemastore = require("schemastore")
+
 ---@type vim.lsp.Config
 local M = {
     settings = {
         json = {
-            schemas = require("schemastore") --[[@as schemastore]]
-                .json
-                .schemas(),
+            schemas = schemastore.json.schemas(),
             validate = { enable = true },
         },
     },

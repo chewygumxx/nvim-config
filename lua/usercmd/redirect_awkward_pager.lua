@@ -1,6 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
--- vim: foldlevel=3:foldmethod=expr:
+-- vim:set expandtab shiftwidth=4 filetype=lua foldlevel=3 foldmethod=expr:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -35,7 +35,7 @@ local redirect = function(vimcmd, args, bang)
     vim.bo.bufhidden = "wipe"
     vim.bo.swapfile  = false
     vim.keymap.set("n", "q", "<cmd>bwipeout!<CR>", {
-        buffer = true,
+        buf = 0,
         desc = "Quit temp redirect buffer",
     })
 

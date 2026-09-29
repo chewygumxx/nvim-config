@@ -61,3 +61,13 @@
 ---@field mappings? MiniFiles.MappingsOpts
 ---@field options?  MiniFiles.OptionsOpts
 ---@field windows?  MiniFiles.WindowsOpts
+
+--
+-- Local stand-in for the `require("mini.files")` module itself (distinct
+-- from the MiniFiles.Config opts type above), covering only the fields
+-- lua/spec/mini.files.lua actually touches.
+--
+
+---@class mini.files
+---@field setup fun(config?: MiniFiles.Config)
+---@field open  fun(path?: string, use_latest?: boolean, opts?: table)

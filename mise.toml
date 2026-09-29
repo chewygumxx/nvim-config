@@ -68,8 +68,8 @@ node      = "24"
 "npm:npm" = "12"
 
 #
-# Neovim. This is the pin `.github/actions/setup-neovim` reads, so it is
-# named here and nowhere else. https://github.com/neovim/neovim/releases
+# Neovim. This is the release CI installs through `jdx/mise-action`, so it
+# is named here and nowhere else. https://github.com/neovim/neovim/releases
 #
 "github:neovim/neovim" = "0.12.5"
 
@@ -82,8 +82,13 @@ node      = "24"
 # `emmylua_doc_cli` is not a gate: it renders the LuaCATS annotations this
 # repository already maintains into browsable documentation.
 #
+# `selene` is taken through `aqua:` rather than `github:`. Its release zip
+# stores the binary as mode 644, and the `github:` backend installs it that
+# way: not executable, and so absent from `mise bin-paths` too. The aqua
+# registry entry sets the mode.
+#
 "aqua:LuaLS/lua-language-server" = "3.19.1"
-"github:Kampfkarren/selene"      = "0.31.0"
+"aqua:Kampfkarren/selene"        = "0.31.0"
 luafmt                           = { version = "0.25.1", matching = "luafmt" }
 emmylua_check                    = { version = "0.25.1", matching = "emmylua_check" }
 emmylua_doc_cli                  = { version = "0.25.1", matching = "emmylua_doc_cli" }

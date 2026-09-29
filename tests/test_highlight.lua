@@ -18,9 +18,9 @@
 --
 
 local highlight = require("highlight")
-local eq        = require("mini.test") --[[@as mini.test]]
-    .expect
-    .equality
+---@type mini.test
+local MiniTest = require("mini.test")
+local eq       = MiniTest.expect.equality
 
 --- Every group this module defines, with the attributes it sets. Absent
 --- keys are exactly as meaningful as present ones: "bg = none" is how a

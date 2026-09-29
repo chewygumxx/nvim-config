@@ -50,9 +50,9 @@ local unmodifiable_q_quit = function()
             local bufnr = event.buf or 0
             if vim.bo[bufnr].readonly or not vim.bo[bufnr].modifiable then
                 vim.keymap.set({ "n", "v" }, "q", "<cmd>q<CR>", {
-                    buffer = bufnr,
-                    desc   = "Quit read-only buffer",
-                    remap  = false,
+                    buf   = bufnr,
+                    desc  = "Quit read-only buffer",
+                    remap = false,
                 })
             end
         end,

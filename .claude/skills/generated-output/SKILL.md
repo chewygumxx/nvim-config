@@ -75,8 +75,9 @@ time.
 
 Neither generator belongs in `.husky/pre-commit`, which runs formatters, the
 LuaLS check and the suite. Both are gated CI-only, by the `Help` and `Docs` jobs
-in `.github/workflows/lint-config.yaml`. `Help` reads no tool pin, since nothing
-third-party is involved; `Docs` reads the `emmylua_doc_cli` pin.
+in `.github/workflows/lint-config.yaml`. `Help` installs only Neovim, since
+nothing third-party is involved; `Docs` installs the `emmylua_doc_cli` pin
+beside it.
 
 ## `doc/` and the vimdoc renderer
 

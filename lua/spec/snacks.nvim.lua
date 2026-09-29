@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/bin/false
 -- vim:set expandtab shiftwidth=4 filetype=lua:
 -- SPDX-License-Identifier: GPL-3.0-only
 
@@ -213,8 +213,10 @@ M.opts.dashboard = {
             if #fname > ctx.width then
                 -- `fname`'s reassignment above doesn't keep the cast on
                 -- its first declaration; cast these results instead.
-                local dir  = vim.fn.fnamemodify(fname, ":h") --[[@as string]]
-                local file = vim.fn.fnamemodify(fname, ":t") --[[@as string]]
+                ---@type string
+                local dir = vim.fn.fnamemodify(fname, ":h")
+                ---@type string
+                local file = vim.fn.fnamemodify(fname, ":t")
                 if dir and file then
                     file  = file:sub(-(ctx.width - #dir - 2))
                     fname = dir .. "/…" .. file

@@ -13,14 +13,15 @@
 - [class Module](types/cgxx.filetype.Module.md)
 - [class Note](types/cgxx.nex.Note.md)
 - [class Opt](types/cgxx.vimdoc.Opt.md)
+- [class Opts](types/cgxx.test_report.Opts.md)
 - [class PlainHeaderOpt](types/util.PlainHeaderOpt.md)
 - [class Section](types/cgxx.vimdoc.Section.md)
 - [class Table](types/cgxx.mdtable.Table.md)
+- [class Timed](types/cgxx.test_report.Timed.md)
+- [class Total](types/cgxx.test_report.Total.md)
 - [class WrapCommentOpt](types/util.WrapCommentOpt.md)
 - [class info](types/cgxx.git.info.md)
-- [class opts](types/cgxx.git.gh.opts.md)
 - [class pattern_map](types/cgxx.keymap.gx.pattern_map.md)
-- [enum fmt](types/cgxx.git.gh.opts.fmt.md)
 
 
 
@@ -76,6 +77,7 @@
 - [lua.util.shebang](modules/lua.util.shebang.md)
 - [lua.util.spec](modules/lua.util.spec.md)
 - [lua.util.statusline](modules/lua.util.statusline.md)
+- [lua.util.test_report](modules/lua.util.test_report.md)
 - [lua.util.text](modules/lua.util.text.md)
 - [lua.util.treesitter](modules/lua.util.treesitter.md)
 - [lua.util.vimdoc](modules/lua.util.vimdoc.md)

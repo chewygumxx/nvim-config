@@ -1,5 +1,6 @@
 #!/bin/false
--- vim: expandtab:shiftwidth=4:filetype=lua:
+-- vim:set expandtab shiftwidth=4 filetype=lua:
+-- SPDX-License-Identifier: GPL-3.0-only
 
 --
 --
@@ -256,10 +257,6 @@ end
 ---@param opt?  util.HeaderInsertOpt
 ---@return nil
 M.insert = function(file, buf, opt)
-    if not (util_modeline and util_shebang and util_git) then
-        return
-    end
-
     file                = file or vim.fn.expand("%")
     buf                 = buf or 0
     opt                 = opt or {}
@@ -284,9 +281,22 @@ M.insert = function(file, buf, opt)
         path = path:gsub("~/%.config", ":/dot_config")
     end
 
-    -- License
-    local spdx = upstream_slug and util_git.license(upstream_slug)
-        or "GPL-3.0-only"
+    -- License. This repository's own unless the file belongs to a fork, in
+    -- which case the upstream's; a lookup that fails says so rather than
+    -- falling back to ours. `NOASSERTION` is SPDX's own word for "not
+    -- determined", so the header stays valid and the gap stays visible.
+    local spdx = "GPL-3.0-only"
+    if upstream_slug then
+        local upstream_spdx = util_git.license(upstream_slug)
+        if not upstream_spdx then
+            vim.notify(
+                "Header: no licence found for " .. upstream_slug
+                    .. "; wrote NOASSERTION",
+                vim.log.levels.WARN
+            )
+        end
+        spdx = upstream_spdx or "NOASSERTION"
+    end
 
     --
     -- Markdown is a different document, not a differently commented one:
