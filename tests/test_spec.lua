@@ -236,18 +236,6 @@ describe("lsp", function()
     ---@type string[]
     local configs = vim.fn.globpath("lsp", "*.lua", true, true)
 
-    --- The only modules a server configuration may fail to find here.
-    ---
-    --- Named rather than accepted in the general case: "module '...' not
-    --- found" is also what a *typo* in a `require` produces, so a pattern
-    --- matching any missing module would pass a configuration that can
-    --- never work in a session either. These two exist only once lazy.nvim
-    --- has installed the plugin, which this suite deliberately has not.
-    ---@type table<string, boolean>
-    local installable = {
-        ["schemastore"] = true,
-    }
-
     it("finds the server configurations", function()
         eq(#configs > 0, true)
     end)
@@ -283,27 +271,50 @@ describe("lsp", function()
         local file = vim.fn.fnamemodify(path, ":t")
 
         it("evaluates " .. file .. " to a table", function()
+            -- With no module allowed to be missing: `util.lsp.setup`
+            -- evaluates every file here at startup, so one that cannot
+            -- load in this suite cannot load on a fresh machine either
             ---@type boolean, any
             local ok, config = pcall(evaluated, path)
-
-            if ok then
-                eq({ path, type(config) }, { path, "table" })
-                return
-            end
-
-            -- Bound first: `luafmt` splits a `tostring(x):match()`
-            -- chain across lines, which Lua then reads as a call
-            -- followed by a new statement
-            local err     = tostring(config)
-            local missing = err:match("module '([^']+)' not found")
-
-            -- The module it could not find is asserted by name, so the
-            -- failure message says which one rather than just "something
-            -- was missing"
             eq(
-                { path, missing, installable[missing or ""] or false },
-                { path, missing, true }
+                { path, ok and type(config) or tostring(config) },
+                { path, "table" }
             )
         end)
     end
+
+    it("gives every server a whole configuration of its own", function()
+        -- nvim-lspconfig is condemned, so nothing merges in what a file
+        -- here leaves out: a server with no `cmd` never starts, and one
+        -- with no `filetypes` would try every buffer
+        ---@type string[]
+        local incomplete = {}
+        for _, path in ipairs(configs) do
+            ---@type boolean, any
+            local ok, config = pcall(evaluated, path)
+            if not ok or config.cmd == nil or config.filetypes == nil
+                or (config.root_markers == nil and config.root_dir == nil) then
+                table.insert(incomplete, path)
+            end
+        end
+        eq(incomplete, {})
+    end)
+
+    it("never reaches for nvim-lspconfig", function()
+        -- A `require("lspconfig...")` would load nothing now it is
+        -- condemned, and the error would surface only in a session
+        ---@type string[]
+        local paths = vim.fn.globpath("lsp", "*.lua", true, true)
+        vim.list_extend(paths, vim.fn.globpath("lua", "**/*.lua", true, true))
+
+        ---@type string[]
+        local offenders = {}
+        for _, path in ipairs(paths) do
+            local text = table.concat(vim.fn.readfile(path), "\n")
+            if text:find("require%(?%s*[\"']lspconfig") then
+                table.insert(offenders, path)
+            end
+        end
+        eq(offenders, {})
+    end)
 end)

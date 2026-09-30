@@ -4,6 +4,7 @@
 ## Types
 
 - [alias Align](types/cgxx.mdtable.Align.md)
+- [alias Json](types/util.biome.Json.md)
 - [class Entry](types/cgxx.vimdoc.Entry.md)
 - [class FrontmatterOpt](types/util.FrontmatterOpt.md)
 - [class HeaderInsertOpt](types/util.HeaderInsertOpt.md)
@@ -18,6 +19,7 @@
 - [class Section](types/cgxx.vimdoc.Section.md)
 - [class Table](types/cgxx.mdtable.Table.md)
 - [class Timed](types/cgxx.test_report.Timed.md)
+- [class Tool](types/util.biome.Tool.md)
 - [class Total](types/cgxx.test_report.Total.md)
 - [class WrapCommentOpt](types/util.WrapCommentOpt.md)
 - [class info](types/cgxx.git.info.md)
@@ -27,6 +29,7 @@
 
 ## Modules
 - [lsp.bashls](modules/lsp.bashls.md)
+- [lsp.biome](modules/lsp.biome.md)
 - [lsp.eslint](modules/lsp.eslint.md)
 - [lsp.jsonls](modules/lsp.jsonls.md)
 - [lsp.lua_ls](modules/lsp.lua_ls.md)
@@ -63,6 +66,7 @@
 - [lua.usercmd.interpret_escape](modules/lua.usercmd.interpret_escape.md)
 - [lua.usercmd.lua_checker](modules/lua.usercmd.lua_checker.md)
 - [lua.usercmd.redirect_awkward_pager](modules/lua.usercmd.redirect_awkward_pager.md)
+- [lua.util.biome](modules/lua.util.biome.md)
 - [lua.util.claude](modules/lua.util.claude.md)
 - [lua.util.git](modules/lua.util.git.md)
 - [lua.util.header](modules/lua.util.header.md)
@@ -83,6 +87,7 @@
 - [lua.util.vimdoc](modules/lua.util.vimdoc.md)
 - [lua.util.visual_traversal](modules/lua.util.visual_traversal.md)
 - [lua.util.wip](modules/lua.util.wip.md)
+- [lua.util.yamllint](modules/lua.util.yamllint.md)
 
 
 

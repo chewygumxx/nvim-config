@@ -12,6 +12,123 @@
 ## methods
 ---
 
+### M.servers
+---
+```lua
+function M.servers() -> names string[]
+```
+
+
+
+
+
+The servers `lsp/` configures, by filename, sorted. This directory and
+nothing else decides what `M.setup` enables.
+
+
+
+
+
+
+
+
+### M.node_available
+---
+```lua
+function M.node_available(
+  exe: string,
+  root: string?
+) ->  boolean
+```
+
+
+
+
+
+Whether `M.node_cmd(exe, ...)` would find a binary for `root`. A server
+whose `cmd` is a function has to ask this from its `root_dir`, since
+Neovim only checks that a *table* `cmd` is executable, and a function
+that cannot start one raises an error on every buffer it matches.
+
+
+
+
+
+
+
+
+### M.node_cmd
+---
+```lua
+function M.node_cmd(
+  exe: string,
+  args: string[]
+) ->  fun(dispatchers: vim.lsp.rpc.Dispatchers, config: vim.lsp.ClientConfig) -> vim.lsp.rpc.PublicClient
+```
+
+
+
+
+
+A `cmd` for a server published on npm: the project's own
+`node_modules/.bin/<exe>` when the root has one, so the version the
+project pins wins, and `<exe>` from `PATH` otherwise. Pair it with
+`M.node_available` in the server's `root_dir`.
+
+
+
+
+
+
+
+
+### M.merge_settings
+---
+```lua
+function M.merge_settings(
+  holder: { settings: table? },
+  extra: table
+) ->  nil
+```
+
+
+
+
+
+Deep-merges `extra` over the `settings` of a client or its config. A
+server that learns a setting only once it knows its root has to write
+it this late, and `before_init` and a live client both hold it here.
+
+
+
+
+
+
+
+
+### M.js_root
+---
+```lua
+function M.js_root(buf: integer) -> root string?
+```
+
+
+
+
+
+The root a JavaScript server should start from: the nearest lockfile,
+then `.git`, then the working directory, so one server covers a whole
+monorepo rather than one per package. Nil for a Deno project whose
+`deno.json` or `deno.lock` is at least as close as any lockfile, since
+Node tooling has nothing to say about one.
+
+
+
+
+
+
+
+
 ### M.capabilities
 ---
 ```lua
@@ -723,10 +840,36 @@ function M.setup() ->  nil
 
 
 
-Applies global diagnostic config and capabilities, and wires
-`M.on_attach` up to `LspAttach`.
+Applies global diagnostic config and capabilities, wires `M.on_attach`
+up to `LspAttach`, and enables every server `lsp/` configures.
+
+Enabling is done here rather than by mason-lspconfig's
+`automatic_enable`, which only reaches what Mason installed and so
+enabled nothing under Termux, where mason is condemned. A server whose
+binary is absent costs a line in the LSP log and nothing else.
 
 
+
+
+
+
+
+
+
+
+
+## fields
+---
+
+### M.js_lockfiles
+---
+```lua
+M.js_lockfiles : string[]
+```
+
+
+
+Package-manager lockfiles, which mark a JavaScript project root.
 
 
 

@@ -11,12 +11,116 @@
 
 --
 -- Shared LSP setup: capabilities, diagnostic display, buffer-local
--- keymaps on LspAttach. Required from spec/nvim-lspconfig.lua.
+-- keymaps on LspAttach, and enabling every server `lsp/` configures.
+-- Called from `init.lua`.
+--
+-- There is no `nvim-lspconfig` underneath: each `lsp/<name>.lua` is the
+-- whole configuration for its server, so the pieces several of them need
+-- live here rather than in any one of them.
 --
 
 ---@module "blink.cmp"
 
 local M = {}
+
+--- This repository's root, found from this file rather than from
+--- `stdpath("config")`, which is a different checkout under the test
+--- runner and on a machine that deploys `~/.config/nvim` separately.
+---@type string
+local repo = vim.fs.dirname(
+    vim.fs.dirname(vim.fs.dirname(debug.getinfo(1, "S").source:sub(2)))
+)
+
+--- The servers `lsp/` configures, by filename, sorted. This directory and
+--- nothing else decides what `M.setup` enables.
+---@return string[] names
+M.servers = function()
+    ---@type string[]
+    local names = {}
+    for name, kind in vim.fs.dir(vim.fs.joinpath(repo, "lsp")) do
+        if kind == "file" and name:match("%.lua$") then
+            table.insert(names, (name:gsub("%.lua$", "")))
+        end
+    end
+    table.sort(names)
+    return names
+end
+
+--- The `node_modules/.bin/<exe>` under `root`, if `root` has one.
+---@param exe   string
+---@param root? string
+---@return string? path
+local local_bin = function(exe, root)
+    if not root then
+        return nil
+    end
+    local bin  = vim.fs.joinpath(root, "node_modules")
+    local path = vim.fs.joinpath(bin, ".bin", exe)
+    return vim.fn.executable(path) == 1 and path or nil
+end
+
+--- Whether `M.node_cmd(exe, ...)` would find a binary for `root`. A server
+--- whose `cmd` is a function has to ask this from its `root_dir`, since
+--- Neovim only checks that a *table* `cmd` is executable, and a function
+--- that cannot start one raises an error on every buffer it matches.
+---@param exe   string
+---@param root? string
+---@return boolean
+M.node_available = function(exe, root)
+    return local_bin(exe, root) ~= nil or vim.fn.executable(exe) == 1
+end
+
+--- A `cmd` for a server published on npm: the project's own
+--- `node_modules/.bin/<exe>` when the root has one, so the version the
+--- project pins wins, and `<exe>` from `PATH` otherwise. Pair it with
+--- `M.node_available` in the server's `root_dir`.
+---@param exe  string
+---@param args string[]
+---@return fun(dispatchers: vim.lsp.rpc.Dispatchers, config: vim.lsp.ClientConfig): vim.lsp.rpc.PublicClient
+M.node_cmd = function(exe, args)
+    return function(dispatchers, config)
+        ---@type string[]
+        local argv = { local_bin(exe, config and config.root_dir) or exe }
+        vim.list_extend(argv, args)
+        return vim.lsp.rpc.start(argv, dispatchers)
+    end
+end
+
+--- Deep-merges `extra` over the `settings` of a client or its config. A
+--- server that learns a setting only once it knows its root has to write
+--- it this late, and `before_init` and a live client both hold it here.
+---@param holder { settings?: table }
+---@param extra  table
+---@return nil
+M.merge_settings = function(holder, extra)
+    holder.settings = vim.tbl_deep_extend("force", holder.settings or {}, extra)
+end
+
+--- Package-manager lockfiles, which mark a JavaScript project root.
+---@type string[]
+M.js_lockfiles = {
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "bun.lockb",
+    "bun.lock",
+}
+
+--- The root a JavaScript server should start from: the nearest lockfile,
+--- then `.git`, then the working directory, so one server covers a whole
+--- monorepo rather than one per package. Nil for a Deno project whose
+--- `deno.json` or `deno.lock` is at least as close as any lockfile, since
+--- Node tooling has nothing to say about one.
+---@param buf integer
+---@return string? root
+M.js_root = function(buf)
+    local project = vim.fs.root(buf, { M.js_lockfiles, { ".git" } })
+    local deno    = vim.fs.root(buf, { "deno.json", "deno.jsonc", "deno.lock" })
+    if deno and (not project or #deno >= #project) then
+        return nil
+    end
+    return project or vim.fn.getcwd()
+end
 
 --- Client capabilities advertised to every LSP server: Neovim's own
 --- defaults merged with blink.cmp's completion-related capabilities.
@@ -359,8 +463,13 @@ M.on_attach = function(buf, client)
     M.workspace_symbols(buf)
 end
 
---- Applies global diagnostic config and capabilities, and wires
---- `M.on_attach` up to `LspAttach`.
+--- Applies global diagnostic config and capabilities, wires `M.on_attach`
+--- up to `LspAttach`, and enables every server `lsp/` configures.
+---
+--- Enabling is done here rather than by mason-lspconfig's
+--- `automatic_enable`, which only reaches what Mason installed and so
+--- enabled nothing under Termux, where mason is condemned. A server whose
+--- binary is absent costs a line in the LSP log and nothing else.
 ---@return nil
 M.setup = function()
     M.diagnostic()
@@ -368,6 +477,7 @@ M.setup = function()
     vim.lsp.config("*", {
         capabilities = M.capabilities(),
     })
+    vim.lsp.enable(M.servers())
 
     vim.api.nvim_create_autocmd("LspAttach", {
         group    = vim.api.nvim_create_augroup(

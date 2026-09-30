@@ -28,10 +28,10 @@
 # (`startup`, `resume`, `clear` and `compact` alike), and `npm install` is
 # the one that reuses container-cached `node_modules` instead of deleting
 # and rebuilding it from nothing every time. It is genuinely idempotent
-# here: `package.json`'s `postinstall` (`patch-package`) is what actually
-# applies `patches/@commitlint+cz-commitlint+21.2.2.patch` now, so nothing
-# about dependency resolution depends on pnpm-only lockfile fields the way
-# it briefly did. Verified by probe: a clean `npm install` reproduces
+# here: no dependency is patched and `package.json` has no `postinstall`
+# (the commitizen prompt's titles come from `@chewygumxx/cz-commitlint`), so
+# nothing about dependency resolution depends on pnpm-only lockfile fields
+# the way it briefly did. Verified by probe: a clean `npm install` reproduces
 # `package-lock.json` byte-for-byte against what is committed, both from
 # nothing and repeated on top of itself.
 #

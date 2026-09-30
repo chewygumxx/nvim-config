@@ -10,7 +10,11 @@
 --
 
 ---@type vim.lsp.Config
-local M = {}
+local M = {
+    cmd          = { "tombi", "lsp" },
+    filetypes    = { "toml" },
+    root_markers = { "tombi.toml", "pyproject.toml", ".git" },
+}
 
 ---@type { [string]: vim.api.keyset.highlight }
 local hlgroup_defs = {

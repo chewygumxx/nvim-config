@@ -11,10 +11,12 @@
 
 ---@type vim.lsp.Config
 local M = {
+    cmd = { "shuck", "server" },
     -- shuck's own default filetypes also cover bash/sh, but bashls
     -- already owns those here; scope shuck to zsh, the one dialect
     -- bashls doesn't support.
-    filetypes = { "zsh" },
+    filetypes    = { "zsh" },
+    root_markers = { ".shuck.toml", ".git" },
 }
 
 return M

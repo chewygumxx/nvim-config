@@ -11,9 +11,8 @@
 
 ---@type vim.lsp.Config
 local M = {
-    cmd = { "markdown_oxide" },
-
-    filetypes = { "markdown" },
+    cmd          = { "markdown-oxide" },
+    filetypes    = { "markdown" },
     root_markers = { ".moxide.toml", ".git", "README", "index.md" },
 }
 
@@ -32,5 +31,24 @@ M.capabilities = vim.tbl_deep_extend(
     require("util.lsp").capabilities(),
     extra_capabilities
 )
+
+--- `:LspToday`, `:LspTomorrow` and `:LspYesterday`, each opening that
+--- day's note through the server's own `jump` command.
+---@param client vim.lsp.Client
+---@param buf    integer
+---@return nil
+M.on_attach = function(client, buf)
+    for _, day in ipairs({ "today", "tomorrow", "yesterday" }) do
+        local name = "Lsp" .. day:sub(1, 1):upper() .. day:sub(2)
+        vim.api.nvim_buf_create_user_command(buf, name, function()
+            client:exec_cmd({
+                title     = "Markdown-Oxide-" .. day,
+                command   = "jump",
+                arguments = { day },
+            }, { bufnr = buf })
+        end, { desc = ("Open %s's daily note"):format(day) }
+        )
+    end
+end
 
 return M

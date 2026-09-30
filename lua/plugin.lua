@@ -34,6 +34,9 @@ local M = {
         "stevearc/oil.nvim",
     },
     condemn = {
+        -- Every server is configured whole from `lsp/`, and its
+        -- `lsp/<name>.lua` files would be merged over ours if it loaded
+        "neovim/nvim-lspconfig",
         "nvim-neorg/neorg",
         "nvim-orgmode/orgmode",
     },

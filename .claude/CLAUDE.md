@@ -76,10 +76,11 @@ colourscheme, fuzzy finder and the Herdr and Termux checks, are made at the
 point of use rather than through an indirection layer.
 
 Language servers use Neovim's **native** `vim.lsp.config` and `vim.lsp.enable`,
-one table per server in `lsp/` and everything shared in `lua/util/lsp.lua`,
-never `nvim-lspconfig`'s old `setup{}` API. This is worth stating here because a
-new server file can be written without reading an existing one, which is the one
-route that reaches no narrower file.
+one complete table per server in `lsp/` and everything shared in
+`lua/util/lsp.lua`. `nvim-lspconfig` is condemned, so a file supplies its own
+`cmd`, `filetypes` and root. This is worth stating here because a new server
+file can be written without reading an existing one, which is the one route that
+reaches no narrower file.
 
 ## Conventions
 

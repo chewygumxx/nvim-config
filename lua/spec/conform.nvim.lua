@@ -27,13 +27,7 @@ local M = {
 ---@type conform.setupOpts
 M.opts = {
     formatters_by_ft = {
-        javascript      = { "prettier" },
-        javascriptreact = { "prettier" },
-        typescript      = { "prettier" },
-        typescriptreact = { "prettier" },
-        json            = { "prettier" },
-        jsonc           = { "prettier_jsonc" },
-        yaml            = { "prettier" },
+        yaml = { "prettier" },
         -- Explicit, so format_on_save never falls back to remark_ls: its
         -- formatter forces "*" bullets and mangles YAML frontmatter it
         -- doesn't recognize.
@@ -61,6 +55,30 @@ M.opts.formatters_by_ft.lua = function(bufnr)
         return { "stylua" }
     end
     return { "luafmt" }
+end
+
+-- Biome or prettier, by the same rule `lsp/biome.lua` starts the server
+-- by, so the formatter never disagrees with the diagnostics.
+---@type table<string, string>
+local prettier_for = {
+    javascript      = "prettier",
+    javascriptreact = "prettier",
+    typescript      = "prettier",
+    typescriptreact = "prettier",
+    json            = "prettier",
+    jsonc           = "prettier_jsonc",
+}
+---@type table<string, conform.FiletypeFormatter>
+local by_ft = M.opts.formatters_by_ft
+for ft, prettier in pairs(prettier_for) do
+    ---@param bufnr integer
+    ---@return string[]
+    by_ft[ft] = function(bufnr)
+        if require("util.biome").enabled(bufnr) then
+            return { "biome" }
+        end
+        return { prettier }
+    end
 end
 
 -- Unlike prettier's "json" parser, "jsonc" honors `trailingComma` and

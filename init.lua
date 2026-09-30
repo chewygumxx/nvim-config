@@ -40,5 +40,8 @@ require("usercmd").setup()
 -- name the dependency rather than what is called here.
 require("plugin").setup()
 
+-- After  plugin,   for blink.cmp's completion capabilities
+require("util.lsp").setup()
+
 -- After  util.lazy,  for treesitter parsing and colorscheme overwrite
 require("highlight").setup()

@@ -632,6 +632,10 @@ describe("util.wip.autocmd", function()
 
         eq(snapshotted() ~= "", true)
         eq(vim.b[newbuf].cgxx_wip_location ~= false, true)
+        -- Deleting the current buffer fires its `BufLeave`, whose snapshot
+        -- would outlive `after_each` deleting the repository and fail in
+        -- whichever later file next waits on the event loop
+        vim.b[newbuf].cgxx_wip = false
         vim.api.nvim_buf_delete(newbuf, { force = true })
     end)
 end)

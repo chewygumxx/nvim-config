@@ -10,6 +10,11 @@
 --
 
 ---@type vim.lsp.Config
-local M = {}
+local M = {
+    cmd       = { "sqls" },
+    filetypes = { "sql", "mysql" },
+    -- sqls reads its connections from `config.yml`, so that is the root
+    root_markers = { "config.yml" },
+}
 
 return M

@@ -11,12 +11,11 @@
     "homepage": "https://github.com/chewygumxx/nvim-config",
     "repository": "github:chewygumxx/nvim-config",
     "devDependencies": {
+        "@chewygumxx/cz-commitlint": "^1.0.2",
         "@commitlint/cli": "^21.2.2",
         "@commitlint/config-conventional": "^21.2.2",
-        "@commitlint/cz-commitlint": "^21.2.2",
         "commitizen": "^4.3.2",
         "husky": "^9.1.7",
-        "patch-package": "^8.0.1",
         "prettier": "^3.9.7",
         "remark-frontmatter": "^5.0.0",
         "remark-preset-lint-consistent": "^6.0.1",
@@ -25,13 +24,12 @@
     },
     "scripts": {
         "commit": "cz",
-        "postinstall": "patch-package",
         "prepare": "test -d node_modules/husky && husky || true",
         "typecheck": "tsc"
     },
     "config": {
         "commitizen": {
-            "path": "@commitlint/cz-commitlint"
+            "path": "@chewygumxx/cz-commitlint"
         }
     },
     "remarkConfig": {
