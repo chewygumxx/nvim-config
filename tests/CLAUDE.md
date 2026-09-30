@@ -73,15 +73,15 @@ Several files here are about a whole directory rather than one module, and a
 change to what they police is a change to a registry rather than to an
 assertion. `test_spec.lua` is the smoke test over `lua/spec/` and `lsp/`,
 including that every slug in `lua/plugin.lua`'s `elide` and `condemn` lists
-names a plugin some spec declares and that `mason-lspconfig`'s
-`ensure_installed` holds exactly the servers `lsp/` configures.
-`test_coverage.lua` is the coverage registry described above.
-`test_filetype_modules.lua` drives the specialised filetype modules through
-`filetype.config`, the real dispatcher. `test_queries.lua` validates `queries/`
-at three depths, `test_lockfile.lua` checks `lazy-lock.json` against the spec
-directory, `test_lazy_integration.lua` resolves the specs through a real
-lazy.nvim, and `test_claude_assets.lua` checks `.claude/` against the tree its
-prose names.
+names a plugin some spec declares, that `mason-lspconfig`'s `ensure_installed`
+holds exactly the servers `lsp/` configures, and that each of those is a whole
+configuration that loads with no module missing. `test_coverage.lua` is the
+coverage registry described above. `test_filetype_modules.lua` drives the
+specialised filetype modules through `filetype.config`, the real dispatcher.
+`test_queries.lua` validates `queries/` at three depths, `test_lockfile.lua`
+checks `lazy-lock.json` against the spec directory, `test_lazy_integration.lua`
+resolves the specs through a real lazy.nvim, and `test_claude_assets.lua` checks
+`.claude/` against the tree its prose names.
 
 **Three files run a second Neovim, for different reasons, and none should be
 turned into an in-process test.** `test_init.lua` is the one that uses
