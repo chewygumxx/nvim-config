@@ -10,6 +10,10 @@
 --
 
 ---@type vim.lsp.Config
-local M = {}
+local M = {
+    cmd          = { "marksman", "server" },
+    filetypes    = { "markdown", "markdown.mdx" },
+    root_markers = { ".marksman.toml", ".git" },
+}
 
 return M

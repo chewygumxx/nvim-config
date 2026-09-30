@@ -11,17 +11,29 @@
 
 ---@type vim.lsp.Config
 local M = {
+    cmd       = { "lua-language-server" },
+    filetypes = { "lua" },
+    -- Any tool's config marks a root, and `.git` only where none does
     root_markers = {
-        ".emmyrc.json",
-        ".luarc.json",
-        ".luarc.jsonc",
-        ".luacheckrc",
-        ".luafmt.toml",
-        "luafmt.toml",
-        ".stylua.toml",
-        "stylua.toml",
-        "selene.toml",
-        "selene.yml",
+        {
+            ".emmyrc.json",
+            ".luarc.json",
+            ".luarc.jsonc",
+            ".luacheckrc",
+            ".luafmt.toml",
+            "luafmt.toml",
+            ".stylua.toml",
+            "stylua.toml",
+            "selene.toml",
+            "selene.yml",
+        },
+        { ".git" },
+    },
+    settings     = {
+        Lua = {
+            codeLens = { enable = true },
+            hint     = { enable = true, semicolon = "Disable" },
+        },
     },
 }
 
