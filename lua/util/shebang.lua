@@ -26,6 +26,7 @@ local source_dirs = {
     "~/.config/yay",
     "~/.config/yazi",
     "~/.config/zsh",
+    "~/dev/zsh-config",
 
     "~/.local/share/hyprland",
     "~/.local/share/lua",
