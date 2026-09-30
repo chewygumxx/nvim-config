@@ -173,3 +173,33 @@ describe("init", function()
         )
     end)
 end)
+
+describe("scripts/minimal_init.lua", function()
+    it("clears the repository-local git variables a hook exports", function()
+        -- `.husky/pre-commit` starts the suite inside git's hook environment.
+        -- `git commit -- <path>` exports an absolute `GIT_INDEX_FILE` there,
+        -- which sent every fixture repository's writes, and those of the
+        -- modules under test, to the committing repository's index. A second
+        -- Neovim, since only a fresh process starts with that environment.
+        ---@type string[]
+        local command = {
+            vim.v.progpath,
+            "--headless",
+            "-u",
+            "scripts/minimal_init.lua",
+            "-c",
+            "lua io.stdout:write(vim.env.GIT_INDEX_FILE or 'unset')",
+            "-c",
+            "qa!",
+        }
+
+        ---@type vim.SystemOpts
+        local opts   = {
+            text = true,
+            env  = { GIT_INDEX_FILE = "/nonexistent/next-index.lock" },
+        }
+        local result = vim.system(command, opts):wait(30000)
+
+        eq(result.stdout, "unset")
+    end)
+end)

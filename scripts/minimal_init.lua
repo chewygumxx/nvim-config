@@ -96,3 +96,20 @@ keep[#keep + 1] = minitest
 -- for the whole workspace, which then flags every `vim.opt.rtp:append()`
 -- elsewhere in the repo as a call on an undefined field
 vim.o.runtimepath = table.concat(keep, ",")
+
+-- `.husky/pre-commit` starts this suite inside git's hook environment, and
+-- a pathspec commit (`git commit -- <path>`) exports an absolute
+-- `GIT_INDEX_FILE` there. Every git process the suite spawned inherited
+-- it, so the fixture repositories under `vim.fn.tempname()`, and the
+-- modules under test, all wrote to the committing repository's index. git
+-- names the variables that bind a process to one repository itself, so
+-- they are cleared by its own list rather than by a copy of it.
+local local_vars = vim.system({ "git", "rev-parse", "--local-env-vars" }, {
+    text = true,
+}):wait()
+if local_vars.code == 0 then
+    local names = vim.split(local_vars.stdout or "", "\n", { trimempty = true })
+    for _, name in ipairs(names) do
+        vim.uv.os_unsetenv(name)
+    end
+end
