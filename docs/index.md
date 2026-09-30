@@ -29,6 +29,7 @@
 
 ## Modules
 - [lsp.bashls](modules/lsp.bashls.md)
+- [lsp.biome](modules/lsp.biome.md)
 - [lsp.eslint](modules/lsp.eslint.md)
 - [lsp.jsonls](modules/lsp.jsonls.md)
 - [lsp.lua_ls](modules/lsp.lua_ls.md)

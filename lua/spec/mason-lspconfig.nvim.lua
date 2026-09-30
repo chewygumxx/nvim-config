@@ -10,9 +10,10 @@
 --
 
 --
--- Bridges mason.nvim-installed servers to Neovim's native LSP client:
--- installs everything in ensure_installed, then calls vim.lsp.enable()
--- for them automatically.
+-- Installs every server in ensure_installed through mason.nvim, and does
+-- nothing else: `util.lsp.setup` enables exactly what `lsp/` configures,
+-- which is also what makes servers work under Termux, where this plugin
+-- is condemned.
 -- https://github.com/mason-org/mason-lspconfig.nvim
 --
 
@@ -25,7 +26,6 @@ local M = {
     lazy         = false,
     dependencies = {
         "mason-org/mason.nvim",
-        "neovim/nvim-lspconfig",
     },
 }
 
@@ -37,6 +37,7 @@ M.opts = {
         -- TSX/JSX
         "vtsls",
         "eslint",
+        "biome",
 
         -- Structured Data
         "jsonls",
@@ -63,7 +64,7 @@ M.opts = {
         -- Tree-sitter queries
         "ts_query_ls",
     },
-    automatic_enable = true,
+    automatic_enable = false,
 }
 
 return M
