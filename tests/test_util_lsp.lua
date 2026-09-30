@@ -208,6 +208,16 @@ describe("util.lsp.setup", function()
         -- Assigned rather than passed to `vim.lsp.config("*", ...)`, which
         -- deep-merges and so could never take a key back out
         vim.lsp.config["*"] = defaults
+        -- `setup` enables every server, and an enabled server would start
+        -- on the next buffer of its filetype in every later file
+        vim.lsp.enable(lsp.servers(), false)
+    end)
+
+    it("enables exactly the servers lsp/ configures", function()
+        lsp.setup()
+        for _, name in ipairs(lsp.servers()) do
+            eq({ name, vim.lsp.is_enabled(name) }, { name, true })
+        end
     end)
 
     it("wires on_attach up to LspAttach", function()
@@ -229,5 +239,92 @@ describe("util.lsp.setup", function()
         -- Guards the restore above: `setup` writes a global that every
         -- later file's servers would otherwise inherit
         eq(vim.lsp.config["*"].capabilities, nil)
+    end)
+end)
+
+describe("util.lsp.servers", function()
+    it("names every file under lsp/, sorted", function()
+        ---@type string[]
+        local want = {}
+        ---@type string[]
+        local paths = vim.fn.globpath("lsp", "*.lua", true, true)
+        for _, path in ipairs(paths) do
+            table.insert(want, vim.fn.fnamemodify(path, ":t:r"))
+        end
+        table.sort(want)
+
+        eq(#want > 0, true)
+        eq(lsp.servers(), want)
+    end)
+end)
+
+describe("util.lsp.node_available / js_root", function()
+    ---@type string
+    local root
+
+    ---@type integer[]
+    local bufs
+
+    --- A buffer named for `path` under the fixture, never loaded.
+    ---@param path string
+    ---@return integer buf
+    local buf_at = function(path)
+        local buf = vim.fn.bufadd(vim.fs.joinpath(root, path))
+        table.insert(bufs, buf)
+        return buf
+    end
+
+    --- Writes an empty file, creating directories on the way.
+    ---@param path string
+    ---@return string full
+    local touch = function(path)
+        local full = vim.fs.joinpath(root, path)
+        vim.fn.mkdir(vim.fs.dirname(full), "p")
+        vim.fn.writefile({}, full)
+        return full
+    end
+
+    before_each(function()
+        root = vim.fn.tempname()
+        vim.fn.mkdir(vim.fs.joinpath(root, ".git"), "p")
+        bufs = {}
+    end)
+
+    after_each(function()
+        for _, buf in ipairs(bufs) do
+            vim.api.nvim_buf_delete(buf, { force = true })
+        end
+        vim.fn.delete(root, "rf")
+    end)
+
+    it("prefers a project's own node_modules binary", function()
+        local exe = "cgxx-test-no-such-server"
+        eq(lsp.node_available(exe, root), false)
+
+        vim.fn.setfperm(touch("node_modules/.bin/" .. exe), "rwxr-xr-x")
+        eq(lsp.node_available(exe, root), true)
+    end)
+
+    it("roots at the nearest lockfile over .git", function()
+        touch("packages/app/package-lock.json")
+        eq(
+            lsp.js_root(buf_at("packages/app/src/a.ts")),
+            vim.fs.joinpath(root, "packages/app")
+        )
+    end)
+
+    it("falls back to .git without a lockfile", function()
+        eq(lsp.js_root(buf_at("src/a.ts")), root)
+    end)
+
+    it("declines a Deno project", function()
+        touch("deno.json")
+        eq(lsp.js_root(buf_at("src/a.ts")), nil)
+    end)
+
+    it("keeps a Node package nested inside a Deno one", function()
+        touch("deno.json")
+        touch("web/package-lock.json")
+        eq(lsp.js_root(buf_at("web/a.ts")), vim.fs.joinpath(root, "web"))
     end)
 end)
