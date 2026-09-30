@@ -56,6 +56,7 @@ M.config = function()
     ---@type lint
     local lint         = require("lint")
     local lua_checker  = require("util.lua_checker")
+    local yamllint     = require("util.yamllint")
     lint.linters_by_ft = {
         -- Switchable via XXLuaChecker; see util.lua_checker.
         lua    = lua_checker.linters(),
@@ -81,6 +82,11 @@ M.config = function()
         args = { "lint", "--format=json", "-", "--dialect", "sqlite" },
     })
     lint.linters.sqlfluff = sqlfluff
+
+    -- Run on the saved file from the buffer's directory rather than
+    -- stdin, so the repository's own `.yamllint*` applies; see
+    -- util.yamllint.
+    lint.linters.yamllint = yamllint.linter
 
     -- Not bundled with nvim-lint. One of XXLuaChecker's two options:
     -- lua-language-server's own --check mode, run headless against the
@@ -239,7 +245,15 @@ M.config = function()
     vim.api.nvim_create_autocmd("BufWritePost", {
         group = augroup,
         callback = function(args)
-            if vim.bo[args.buf].filetype ~= "lua" then
+            ---@type string
+            local ft = vim.bo[args.buf].filetype
+            -- nvim-lint runs a compound filetype's every component, so
+            -- "yaml.gitlab" reaches yamllint too.
+            if vim.split(ft, ".", { plain = true })[1] == "yaml" then
+                lint.try_lint(nil, { cwd = yamllint.cwd(args.buf) })
+                return
+            end
+            if ft ~= "lua" then
                 lint.try_lint()
                 return
             end
