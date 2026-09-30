@@ -225,16 +225,12 @@ entry for `@commitlint/cz-commitlint`, inert under npm (nothing in this
 project's scripts ever applied `patches/`), and `npm install`'s re-resolution
 silently dropped the matching `patched` block from `package-lock.json` on
 every run while `npm ci` left it alone, which made `install` unsafe for a
-hook that should leave the tree clean. `patch-package` now owns applying that
-patch for real, through `package.json`'s `postinstall`, so nothing in
-dependency resolution depends on a field only pnpm understands any more.
-Verified by probe: a clean `npm install` now reproduces `package-lock.json`
-byte-for-byte against what is committed, both from nothing and repeated on
-top of itself. One thing worth knowing if that patch ever needs updating:
-`npx patch-package @commitlint/cz-commitlint` regenerates
-`patches/@commitlint+cz-commitlint+21.2.2.patch` from scratch, which means it
-overwrites this repository's header block too; re-add it same as any other
-tracked file.
+hook that should leave the tree clean. No dependency is patched any more: the
+prompt's titles come from the `@chewygumxx/cz-commitlint` adapter that
+`config.commitizen.path` names, so nothing in dependency resolution depends
+on a field only pnpm understands, nor on a `postinstall` script. Verified by
+probe: a clean `npm install` now reproduces `package-lock.json` byte-for-byte
+against what is committed, both from nothing and repeated on top of itself.
 
 ## `hooks/lib/tools.sh`
 
