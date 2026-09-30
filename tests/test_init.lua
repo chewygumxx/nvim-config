@@ -37,7 +37,8 @@ local eq       = MiniTest.expect.equality
 --- and keymap first, `filetype` after both so its `FileType` overrides
 --- win, `autocmd`/`usercmd` after filetype registration, `plugin` after
 --- keymap/filetype/autocmd since specs key off `vim.g.mapleader`, filetype
---- triggers and augroups, and `highlight` last so it overwrites whatever
+--- triggers and augroups, `util.lsp` after `plugin` for blink.cmp's
+--- capabilities, and `highlight` last so it overwrites whatever
 --- the colorscheme and treesitter plugins set.
 ---@type string[]
 local order = {
@@ -47,6 +48,7 @@ local order = {
     "autocmd",
     "usercmd",
     "plugin",
+    "util.lsp",
     "highlight",
 }
 

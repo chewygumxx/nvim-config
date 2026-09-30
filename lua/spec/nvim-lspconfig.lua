@@ -10,6 +10,12 @@
 --
 
 --
+-- Condemned in `lua/plugin.lua`, and kept only as the upstream the
+-- configurations in `lsp/` were first ported from; nothing requires it.
+-- Were it loaded, its own `lsp/<name>.lua` files would sit later on the
+-- runtimepath than ours and so win every key both set, which is how
+-- `shuck` once attached to bash buffers and `markdown_oxide` ran a
+-- binary name its own file did not give.
 -- https://github.com/neovim/nvim-lspconfig
 --
 
@@ -18,11 +24,6 @@
 ---@type LazyPluginSpec
 local M = {
     "neovim/nvim-lspconfig",
-    lazy = false,
 }
-
-M.config = function()
-    require("util.lsp").setup()
-end
 
 return M

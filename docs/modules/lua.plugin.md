@@ -93,7 +93,7 @@ M.elide : ("L3MON4D3/LuaSnip","MeanderingProgrammer/render-markdown.nvim","OXY2D
 ### M.condemn
 ---
 ```lua
-M.condemn : ("nvim-neorg/neorg","nvim-orgmode/orgmode")
+M.condemn : ("neovim/nvim-lspconfig","nvim-neorg/neorg","nvim-orgmode/orgmode")
 ```
 
 
