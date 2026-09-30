@@ -87,6 +87,7 @@
 - [lua.util.vimdoc](modules/lua.util.vimdoc.md)
 - [lua.util.visual_traversal](modules/lua.util.visual_traversal.md)
 - [lua.util.wip](modules/lua.util.wip.md)
+- [lua.util.yamllint](modules/lua.util.yamllint.md)
 
 
 
