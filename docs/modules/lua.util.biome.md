@@ -106,6 +106,49 @@ Biome's own evidence.
 
 
 
+### M.eslint
+---
+```lua
+M.eslint : util.biome.Tool {
+    files: string[],
+    package_keys: string[],
+    dependencies: string[],
+}
+```
+
+
+
+An eslint configuration, flat or legacy. `lsp/eslint.lua` starts the
+server by this and nothing else.
+
+
+
+
+
+
+
+
+### M.prettier
+---
+```lua
+M.prettier : util.biome.Tool {
+    files: string[],
+    package_keys: string[],
+    dependencies: string[],
+}
+```
+
+
+
+A prettier configuration.
+
+
+
+
+
+
+
+
 ### M.incumbent
 ---
 ```lua

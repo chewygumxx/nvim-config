@@ -10,10 +10,10 @@
 --
 
 --
--- Decides whether Biome or the eslint/prettier pair owns a buffer. Both
--- `lsp/biome.lua` and `lua/spec/conform.nvim.lua` ask the same question,
--- and two copies of the answer would let the language server and the
--- formatter disagree about one file.
+-- Decides whether Biome or the eslint/prettier pair owns a buffer.
+-- `lsp/biome.lua`, `lsp/eslint.lua` and `lua/spec/conform.nvim.lua` all
+-- ask, and separate copies of the answer would let the language servers
+-- and the formatter disagree about one file.
 --
 -- Biome wins when the repository configures it, stands aside when the
 -- repository configures eslint or prettier instead, and is the fallback
@@ -40,13 +40,11 @@ M.biome = {
     dependencies = { "@biomejs/biome" },
 }
 
---- The evidence that a repository has chosen eslint or prettier. Only
---- configuration counts, not a dependency: a transitive `prettier` in
---- `package.json` says nothing about how the repository wants formatting.
+--- An eslint configuration, flat or legacy. `lsp/eslint.lua` starts the
+--- server by this and nothing else.
 ---@type util.biome.Tool
-M.incumbent = {
+M.eslint = {
     files        = {
-        -- eslint, flat and legacy
         "eslint.config.js",
         "eslint.config.mjs",
         "eslint.config.cjs",
@@ -59,7 +57,15 @@ M.incumbent = {
         ".eslintrc.yaml",
         ".eslintrc.yml",
         ".eslintrc.json",
-        -- prettier
+    },
+    package_keys = { "eslintConfig" },
+    dependencies = {},
+}
+
+--- A prettier configuration.
+---@type util.biome.Tool
+M.prettier = {
+    files        = {
         ".prettierrc",
         ".prettierrc.json",
         ".prettierrc.json5",
@@ -79,6 +85,19 @@ M.incumbent = {
         "prettier.config.cts",
         "prettier.config.mts",
     },
+    package_keys = { "prettier" },
+    dependencies = {},
+}
+
+--- The evidence that a repository has chosen eslint or prettier. Only
+--- configuration counts, not a dependency: a transitive `prettier` in
+--- `package.json` says nothing about how the repository wants formatting.
+---@type util.biome.Tool
+M.incumbent = {
+    files        = vim.list_extend(
+        vim.list_extend({}, M.eslint.files),
+        M.prettier.files
+    ),
     package_keys = { "eslintConfig", "prettier" },
     dependencies = {},
 }
