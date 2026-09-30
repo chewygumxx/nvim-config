@@ -60,12 +60,7 @@ backend = "github:ewhauser/shuck"
 #
 # Runtimes
 #
-# `npm` is pinned separately from the Node it ships with: `npm patch` is
-# needed for `patchedDependencies` in `package.json`, and the npm bundled
-# with Node 24 predates it.
-#
-node      = "24"
-"npm:npm" = "12"
+node = "24"
 
 #
 # Neovim. This is the release CI installs through `jdx/mise-action`, so it
