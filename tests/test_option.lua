@@ -47,6 +47,7 @@ local general = {
     ignorecase    = true,
     smartcase     = true,
     spelllang     = "en",
+    exrc          = true,
 }
 
 --- Every global option value `option.view` documents, bar 'statusline',

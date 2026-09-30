@@ -42,6 +42,10 @@ local opts = {
     -- Spelling: language only, per-filetype modules toggle `spell` itself
     spelllang = "en",
 
+    -- Per-project `.nvim.lua`, gated by `:trust` on first sight and on
+    -- every change after it
+    exrc = true,
+
     -- Consign security to oblivion
     --modelineexpr = true,
 }
