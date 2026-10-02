@@ -10,6 +10,9 @@
     "license": "GPL-3.0-only",
     "homepage": "https://github.com/chewygumxx/nvim-config",
     "repository": "github:chewygumxx/nvim-config",
+    "engines": {
+        "bun": ">=1.4"
+    },
     "devDependencies": {
         "@chewygumxx/cz-commitlint": "^1.0.2",
         "@commitlint/cli": "^21.2.2",

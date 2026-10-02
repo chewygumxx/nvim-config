@@ -78,9 +78,9 @@ lintfmt_json_yaml() {
     json_yaml_files=$(get_files '*.json' '*.jsonc' '*.yaml' '*.yml')
     [ -z "$json_yaml_files" ] && return
 
-    cmd_exist npx || return 0
+    cmd_exist bunx || return 0
 
-    echo "$json_yaml_files" | xargs -d '\n' npx --no -- prettier --write || return 1
+    echo "$json_yaml_files" | xargs -d '\n' bunx --bun --no-install prettier --write || return 1
     echo "$json_yaml_files" | xargs -d '\n' git add --
 }
 

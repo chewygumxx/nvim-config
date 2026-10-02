@@ -58,8 +58,11 @@ backend = "github:ewhauser/shuck"
 
 [tools]
 #
-# Runtimes
+# Runtimes. Bun installs the `devDependencies` in `package.json` and runs
+# their CLIs. Node stays for the `npm:` language servers and linters below,
+# which run on it.
 #
+bun  = "1.4"
 node = "24"
 
 #
@@ -96,8 +99,8 @@ emmylua_doc_cli                  = { version = "0.25.1", matching = "emmylua_doc
 
 #
 # Structured data. `prettier` is deliberately absent: it is a real
-# `devDependency` in `package.json` and `npm ci` is what CI installs it
-# with, so duplicating it here would create the second pin this file
+# `devDependency` in `package.json` and `bun install` is what CI installs
+# it with, so duplicating it here would create the second pin this file
 # exists to remove.
 #
 "npm:vscode-langservers-extracted" = "4.10.0"  # jsonls
