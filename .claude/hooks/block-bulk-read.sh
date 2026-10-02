@@ -26,8 +26,9 @@
 # allow rule, while leaving Bash completely alone and saying what to reach
 # for instead.
 #
-# `package-lock.json` is deliberately absent. It is large but occasionally
-# wanted in earnest, and `jq` is the right way into it.
+# `bun.lock` is deliberately absent. It is large but occasionally wanted in
+# earnest, and `grep` for the package in question is the right way into it:
+# its trailing commas are not JSON, so `jq` cannot parse it.
 
 set -u
 

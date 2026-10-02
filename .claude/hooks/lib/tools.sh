@@ -77,7 +77,7 @@ require_tools() {
 
 
 # The gate binaries `.husky/pre-commit` runs, in the order it runs them.
-# `npx` is deliberately absent: prettier is an npm devDependency rather
-# than a mise pin, so its absence is a broken `npm ci` and not a broken
+# `bunx` is deliberately absent: prettier is a devDependency rather than a
+# mise pin, so its absence is a broken `bun install` and not a broken
 # toolchain, and it would report differently.
 GATE_TOOLS='selene luafmt tombi ts_query_ls nvim lua-language-server'
