@@ -91,7 +91,7 @@ single line of it.
   script writing to real stdout uses `io.write`.
 - **TOML**: `tombi format --check --offline` and
   `tombi lint --error-on-warnings --offline` (`.tombi.toml`).
-- **JSON/YAML**: `npx prettier --check <files>`. prettier is configured by the
+- **JSON/YAML**: `bunx prettier --check <files>`. prettier is configured by the
   `prettier` key inside `package.json` rather than a `.prettierrc`, and
   `.prettierignore` excludes `lazy-lock.json`. prettier reads `.editorconfig`,
   which is why `.luarc.json` is 4-space and passes; there is no `tabWidth`
@@ -112,7 +112,7 @@ single line of it.
   `param-type-mismatch` are the ones that bite.
 - **Tests**:
   `nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua`.
-- **Commit message typecheck**: `npm run typecheck`, running `tsc` scoped to
+- **Commit message typecheck**: `bun run typecheck`, running `tsc` scoped to
   `.commitlintrc.mts` only per `tsconfig.json`.
 
 ## The test suite

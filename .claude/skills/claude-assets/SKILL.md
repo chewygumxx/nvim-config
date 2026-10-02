@@ -199,10 +199,10 @@ rejected.
 ## `install-deps.sh`
 
 The one `SessionStart` hook here, and the answer to "why does a cloud session
-need `npm ci` run by hand": a cloud session starts from a bare clone, and
+need `bun install` run by hand": a cloud session starts from a bare clone, and
 `core.hooksPath` stays unset, husky's git hooks stay unwired, and
-`commit-msg`/`.husky/pre-commit` never fire, until something runs `npm ci` or
-`npm install`. Nothing about that is specific to this repository; it is true
+`commit-msg`/`.husky/pre-commit` never fire, until something runs
+`bun install`. Nothing about that is specific to this repository; it is true
 of any project that gates commits through husky. Established by doing exactly
 this by hand mid-session, more than once, before the hook existed: a commit
 went through with no `Claude-Session:` trailer question or gate failure
@@ -217,10 +217,10 @@ that policy. Fixing it, if it needs fixing, is an environment setting, not a
 `.claude/` change; the gate binaries `mise` would otherwise supply stay
 whatever they were before this hook ran.
 
-It runs `npm install`, not `npm ci`, for the general reason: this hook fires
-on every session start, and `install` reuses container-cached `node_modules`
-instead of deleting and rebuilding it from nothing each time. That was not
-always safe here. `package.json` once carried a pnpm-only `patchedDependencies`
+It runs `bun install`, not `bun install --frozen-lockfile`, for the general
+reason: this hook fires on every session start, and a lockfile that has
+drifted from `package.json` should not leave a session with no hooks at all.
+That was not always safe here, back when the project was on npm. `package.json` once carried a pnpm-only `patchedDependencies`
 entry for `@commitlint/cz-commitlint`, inert under npm (nothing in this
 project's scripts ever applied `patches/`), and `npm install`'s re-resolution
 silently dropped the matching `patched` block from `package-lock.json` on
@@ -229,8 +229,9 @@ hook that should leave the tree clean. No dependency is patched any more: the
 prompt's titles come from the `@chewygumxx/cz-commitlint` adapter that
 `config.commitizen.path` names, so nothing in dependency resolution depends
 on a field only pnpm understands, nor on a `postinstall` script. Verified by
-probe: a clean `npm install` now reproduces `package-lock.json` byte-for-byte
-against what is committed, both from nothing and repeated on top of itself.
+probe since the move to Bun: a clean `bun install` reproduces `bun.lock`
+byte-for-byte against what is committed, both from nothing and repeated on
+top of itself.
 
 ## `hooks/lib/tools.sh`
 

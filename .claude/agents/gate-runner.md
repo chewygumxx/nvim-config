@@ -72,14 +72,15 @@ would do.
    intentional global declarations.
 2. `tombi lint --error-on-warnings --offline` and
    `tombi format --check --offline` over `*.toml`.
-3. `npx --no -- prettier --check` over tracked `*.json`, `*.jsonc`, `*.yaml`,
-   `*.yml`. Note `.prettierignore` excludes `lazy-lock.json` deliberately.
+3. `bunx --bun --no-install prettier --check` over tracked `*.json`, `*.jsonc`,
+   `*.yaml`, `*.yml`. Note `.prettierignore` excludes `lazy-lock.json`
+   deliberately.
 4. `ts_query_ls format --check queries` and `ts_query_ls lint queries`.
 5. `lua-language-server --check=. --checklevel=Warning`, with `VIMRUNTIME`
    exported. Get it from
    `nvim --headless --clean -c 'lua io.stdout:write(vim.env.VIMRUNTIME or "")' -c 'qa!'`.
 6. `nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua`.
-7. `npm run typecheck`.
+7. `bun run typecheck`.
 8. `git status --porcelain -- doc/ docs/`, which must be empty. Use `status` and
    not `git diff`: a new page is untracked and invisible to a diff, and a page
    the generator no longer produces would be staged away by `git add -A` before
