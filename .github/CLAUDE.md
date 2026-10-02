@@ -36,7 +36,8 @@ cannot quietly fall back to whatever the runner happened to ship. A version
 restated in an `env:` block, inlined into a download URL or handed to a
 `setup-*` action is a second pin that will disagree with the first, and the one
 a contributor's `PATH` supplies is the one that decides whether the gate meant
-anything. Node is no exception: it is installed by mise, not `setup-node`.
+anything. Node and Bun are no exception: both are installed by mise, not by
+`setup-node` or `setup-bun`.
 
 Always pass `install_args`. `mise.toml` pins the whole editor toolchain beside
 the gates, and a bare `mise install` would fetch all of it, `pipx:` and `npm:`

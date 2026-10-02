@@ -96,7 +96,7 @@ coverage and the generated documentation are checked by CI only.
 | Lua format          | `luafmt --check --verify <file>.lua`                                         |
 | Lua lint            | `selene <file>.lua`                                                          |
 | TOML                | `tombi format --check --offline && tombi lint --error-on-warnings --offline` |
-| JSON, YAML          | `npx prettier --check <files>`                                               |
+| JSON, YAML          | `bunx prettier --check <files>`                                              |
 | Query format        | `ts_query_ls format --check queries`                                         |
 | Query lint          | `ts_query_ls lint queries`                                                   |
 | Lua typecheck       | `lua-language-server --check=. --checklevel=Warning`                         |
@@ -187,7 +187,7 @@ Commits are [Conventional Commits](https://www.conventionalcommits.org),
 enforced by commitlint through husky. Scopes come from a fixed list in
 `.commitlintrc.mts` (`hl`, `opt`, `ft`, `key`, `ucmd`, `acmd`, `lsp`, `spec`,
 `util`, `asset`, `claude`), and the whole `type(scope): Subject` header is
-capped at 50 characters, so subjects stay short. `npm run commit` walks through
+capped at 50 characters, so subjects stay short. `bun run commit` walks through
 it interactively.
 
 `.claude/CLAUDE.md` is the long-form reference: what each directory is for,
