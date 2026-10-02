@@ -144,22 +144,22 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
-            # Node is pinned in `mise.toml` like every other tool, so it is
-            # installed from there rather than restated to `setup-node`.
-            # prettier itself is a `devDependency`, installed by `npm ci`.
+            # Bun is pinned in `mise.toml` like every other tool, so it is
+            # installed from there rather than restated to `setup-bun`.
+            # prettier itself is a `devDependency`, installed by `bun install`.
             - name: Setup mise
               uses: jdx/mise-action@v4
               with:
-                  install_args: node
+                  install_args: bun
 
-            - name: NPM Clean Install
-              run: npm ci
+            - name: Bun Install
+              run: bun install --frozen-lockfile
 
             - name: Check Formatting
               run: |
                   git ls-files -- '*.json' '*.jsonc' '*.yaml' '*.yml' ':!**/symlink_*' |
                       while IFS= read -r f; do [ -L "$f" ] || printf '%s\n' "$f"; done |
-                      xargs -d '\n' npx --no -- prettier --check
+                      xargs -d '\n' bunx --bun --no-install prettier --check
 
     queries:
         name: Queries

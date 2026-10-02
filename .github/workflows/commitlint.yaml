@@ -31,20 +31,20 @@ jobs:
               with:
                   fetch-depth: 0
 
-            # Node is pinned in `mise.toml`, and installed from there
-            # rather than restated to `setup-node`.
+            # Bun is pinned in `mise.toml`, and installed from there
+            # rather than restated to `setup-bun`.
             - name: Setup mise
               uses: jdx/mise-action@v4
               with:
-                  install_args: node
+                  install_args: bun
 
-            - name: NPM Clean Install
-              run: npm ci
+            - name: Bun Install
+              run: bun install --frozen-lockfile
 
             - name: Lint Pull Request Commits
               if: github.event_name == 'pull_request'
-              run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+              run: bunx --bun --no-install commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
             - name: Lint Pushed Commit
               if: github.event_name != 'pull_request'
-              run: npx commitlint --last --verbose
+              run: bunx --bun --no-install commitlint --last --verbose
