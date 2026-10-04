@@ -30,26 +30,26 @@ tags:
 `.claude/` holds four kinds of asset beside `CLAUDE.md`, and they load on
 different terms. `skills/` carries two things: the per-subsystem references that
 load only when that subsystem is touched, which is the whole reason `CLAUDE.md`
-is a fraction of the length it once was, and the three slash-invoked workflows,
-`/gate-battery`, `/regen` and `/fresh`. The reasons did not go away when
-`CLAUDE.md` shrank, they stopped being loaded into every session regardless of
-relevance. `agents/gate-runner.md` runs the gate battery without its output
-reaching the caller. `rules/` holds a warning per tree that needs one, loaded by
-path rather than by prompt, which is what makes a rule the cheapest place to put
-anything triggered by a path: unlike a skill, whose description is resident in
-every session, a rule costs nothing until something in its scope is read.
-`hooks/` is what makes five rules mechanical rather than advisory: refusing a
-write into a generated tree, refusing a commit while a gate binary is absent,
-refusing a whole-file read of the wordlists and the compiled spell file, linting
-every language `.husky/pre-commit` gates at write time, and reporting that the
-generated help has gone stale. `run-tests.sh` brings the suite forward the same
-way, running the one test file that covers what was just written, found by
-`tests/test_coverage.lua`'s derivation and its `covered_by` table rather than a
-copy of either. Another hook, `install-deps.sh`, is not one of these: it fires
-on `SessionStart` rather than `PreToolUse`/`PostToolUse`, and it bootstraps a
-cloud session's `node_modules` rather than making an advisory rule mechanical.
-See `install-deps.sh` below for why it exists and what it deliberately leaves
-alone.
+is a fraction of the length it once was, and the four slash-invoked workflows,
+`/gate-battery`, `/regen`, `/fresh` and `/new-server`. The reasons did not go
+away when `CLAUDE.md` shrank, they stopped being loaded into every session
+regardless of relevance. `agents/gate-runner.md` runs the gate battery without
+its output reaching the caller. `rules/` holds a warning per tree that needs
+one, loaded by path rather than by prompt, which is what makes a rule the
+cheapest place to put anything triggered by a path: unlike a skill, whose
+description is resident in every session, a rule costs nothing until something
+in its scope is read. `hooks/` is what makes five rules mechanical rather than
+advisory: refusing a write into a generated tree, refusing a commit while a gate
+binary is absent, refusing a whole-file read of the wordlists and the compiled
+spell file, linting every language `.husky/pre-commit` gates at write time, and
+reporting that the generated help has gone stale. `run-tests.sh` brings the
+suite forward the same way, running the one test file that covers what was just
+written, found by `tests/test_coverage.lua`'s derivation and its `covered_by`
+table rather than a copy of either. Another hook, `install-deps.sh`, is not one
+of these: it fires on `SessionStart` rather than `PreToolUse`/`PostToolUse`, and
+it bootstraps a cloud session's `node_modules` rather than making an advisory
+rule mechanical. See `install-deps.sh` below for why it exists and what it
+deliberately leaves alone.
 
 **A newly added agent is not selectable as a `subagent_type` until the session
 restarts**, so the session that writes one cannot use it. A skill is not like

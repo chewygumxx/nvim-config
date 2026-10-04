@@ -71,6 +71,7 @@ local workflow = {
     ["gate-battery"] = "the gate sequence, run on request",
     ["regen"] = "the two generators, run on request",
     ["fresh"] = "the end-of-session judgement pass",
+    ["new-server"] = "the steps adding a language server, run on request",
 }
 
 --- Every Markdown asset under `.claude/`.
