@@ -39,8 +39,12 @@ local opts = {
     ignorecase = true,
     smartcase  = true,
 
-    -- Spelling: language only, per-filetype modules toggle `spell` itself
+    -- Spelling: per-filetype modules toggle `spell` itself. The word list
+    -- is tracked in this repository rather than left to `zg`'s default of
+    -- `stdpath("data")/site/spell`, which is a cache: wiping it, or running
+    -- under another NVIM_APPNAME, silently lost every added word.
     spelllang = "en",
+    spellfile = vim.fn.stdpath("config") .. "/spell/en.utf-8.add",
 
     -- Consign security to oblivion
     --modelineexpr = true,

@@ -21,8 +21,9 @@ node_modules/
 
 # Raw wordlist used to (re)generate spell/en.utf-8.spl via :mkspell;
 # third-party-derived and large, not worth tracking. Only the compiled
-# .spl is tracked. Personal `zg` additions are local state too.
+# .spl is tracked, and the personal `zg` list, `spell/en.utf-8.add`, which
+# 'spellfile' points at. Its compiled `.add.spl` is rebuilt on demand by
+# `util.spell`, so it is not.
 /words.txt
 /words_alpha.txt
-/spell/*.add
 /spell/*.add.spl
