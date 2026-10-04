@@ -37,6 +37,9 @@ local eq       = MiniTest.expect.equality
 --- an aggregate covered with its siblings, a submodule covered through the
 --- dispatcher that loads it, or a wrapper covered through the command that
 --- calls it.
+---
+--- `.claude/hooks/run-tests.sh` reads this table with `sed` to pick the
+--- file to run after an edit, so keep each entry on one line.
 ---@type table<string, string>
 local covered_by = {
     ["init.lua"] = "tests/test_init.lua",

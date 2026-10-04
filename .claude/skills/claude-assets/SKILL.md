@@ -42,11 +42,14 @@ every session, a rule costs nothing until something in its scope is read.
 write into a generated tree, refusing a commit while a gate binary is absent,
 refusing a whole-file read of the wordlists and the compiled spell file, linting
 every language `.husky/pre-commit` gates at write time, and reporting that the
-generated help has gone stale. A sixth hook, `install-deps.sh`, is not one of
-these: it fires on `SessionStart` rather than `PreToolUse`/`PostToolUse`, and it
-bootstraps a cloud session's `node_modules` rather than making an advisory rule
-mechanical. See `install-deps.sh` below for why it exists and what it
-deliberately leaves alone.
+generated help has gone stale. `run-tests.sh` brings the suite forward the same
+way, running the one test file that covers what was just written, found by
+`tests/test_coverage.lua`'s derivation and its `covered_by` table rather than a
+copy of either. Another hook, `install-deps.sh`, is not one of these: it fires
+on `SessionStart` rather than `PreToolUse`/`PostToolUse`, and it bootstraps a
+cloud session's `node_modules` rather than making an advisory rule mechanical.
+See `install-deps.sh` below for why it exists and what it deliberately leaves
+alone.
 
 **A newly added agent is not selectable as a `subagent_type` until the session
 restarts**, so the session that writes one cannot use it. A skill is not like
