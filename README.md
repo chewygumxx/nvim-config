@@ -211,6 +211,6 @@ affects a normal editor session.
 
 ## Licence
 
-GPL-3.0-only. See [LICENSE](LICENSE).
+GPL-3.0-only. See [LICENSE](./LICENSE).
 
 <!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->
