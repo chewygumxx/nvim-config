@@ -59,6 +59,12 @@ M.local_opts : { [string]: (boolean|string|number) }
 
 
 
+`autoindent` is what lets `n` in 'formatoptions' indent by
+'formatlistpat' at all. `comments` drops the bundled ftplugin's `fb:-`,
+`fb:*` and `fb:+`, keeping only the blockquote: as comment leaders they
+outrank 'formatlistpat' and always hang by two columns, whatever follows
+the bullet.
+
 
 
 

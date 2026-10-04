@@ -15,10 +15,28 @@
 
 local M = {}
 
+--- 'formatlistpat' recognises a bullet, an ordered item (`.` or `)`) and
+--- either followed by a checkbox, so that `gq` and auto-wrap indent an
+--- item's continuation lines past the whole marker: two columns under
+--- `- `, six under `- [ ] `. The tail is the bundled ftplugin's own
+--- clause for a footnote definition, kept. Level-one long brackets, since
+--- `[^\]]` would close a plain `[[`.
+---@type string
+local formatlistpat = [=[^\s*\%([-*+]\|\d\+[.)]\)\s\+\%(\[[ xX]\]\s\+\)\=]=]
+    .. [=[\|^\[^\ze[^\]]\+\]:\&^.\{4\}]=]
+
+--- `autoindent` is what lets `n` in 'formatoptions' indent by
+--- 'formatlistpat' at all. `comments` drops the bundled ftplugin's `fb:-`,
+--- `fb:*` and `fb:+`, keeping only the blockquote: as comment leaders they
+--- outrank 'formatlistpat' and always hang by two columns, whatever follows
+--- the bullet.
 ---@type { [string]: number | string | boolean }
 M.local_opts = {
-    shiftwidth = 2,
-    spell      = true,
+    shiftwidth    = 2,
+    spell         = true,
+    autoindent    = true,
+    formatlistpat = formatlistpat,
+    comments      = "n:>",
 }
 
 ---@type { [string]: vim.api.keyset.highlight }
