@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/snippets.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Snippet manifest
 paths:
   - "snippets/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/snippets.md
+   -
+   -->
 
 # `snippets/` is not currently reached at runtime
 
@@ -31,3 +29,5 @@ the manifest instead.
 
 The **`specs` skill** holds what elision is and the single place it survives
 lazy.nvim's merge.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

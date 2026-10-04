@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/lsp.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Per-server LSP configuration
 paths:
   - "lsp/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/lsp.md
+   -
+   -->
 
 # Each file in `lsp/` is a whole configuration
 
@@ -68,3 +66,5 @@ servers `lsp/` configures, so adding a server without adding it there fails the
 suite, and so does the reverse. Under Termux the whole mason trio is condemned
 from `lua/plugin.lua`, and `mise.toml` is where those same servers come from
 instead, so a server added to `lsp/` should be reachable by both routes.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

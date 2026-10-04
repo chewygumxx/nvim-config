@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/github.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: GitHub Actions
 paths:
   - ".github/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/github.md
+   -
+   -->
 
 # Every tool version lives in `mise.toml`
 
@@ -81,3 +79,5 @@ about before it reaches a release and is not reported as the fault of whichever
 pull request ran next. Keep a new canary job inside that matrix rather than
 beside it. Only the pinned leg runs `jdx/mise-action`, so on the nightly leg no
 shim for the pinned release sits on `PATH` beside the canary.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

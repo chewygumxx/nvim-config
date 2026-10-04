@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/doc.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Generated help tree
 paths:
   - "doc/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/doc.md
+   -
+   -->
 
 # `doc/` is generated
 
@@ -38,3 +36,5 @@ This tree holds `.txt`, so the Markdown reflow hook does not touch it and a hand
 edit survives the write to die silently at the next run.
 `.claude/hooks/block-generated.sh` refuses the write instead. The
 **`generated-output` skill** holds the rest.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

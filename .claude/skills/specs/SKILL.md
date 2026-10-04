@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/specs/SKILL.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Plugin specs and the lazy.nvim bootstrap
 name: specs
 description: >-
@@ -23,6 +14,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/specs/SKILL.md
+   -
+   -->
 
 # Plugin specs and the lazy.nvim bootstrap
 
@@ -220,3 +218,5 @@ fallback that loads.
 
 `lua/util/spec.lua` predates all of this and held the same idea, a
 `{ import = "spec" }` entry plus one elision list. Nothing requires it any more.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

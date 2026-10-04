@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/generated-output/SKILL.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Generated output
 name: generated-output
 description: >-
@@ -23,6 +14,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/generated-output/SKILL.md
+   -
+   -->
 
 # Generated output
 
@@ -164,3 +162,5 @@ visible. The keymaps and plugin-mappings sections of `doc/nvim-config.txt` are
 now a second place, and unlike the popup they are visible to a headless process
 and to `git diff`. The popup is still the only place the grouping and its
 wording can be judged.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

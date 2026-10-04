@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/claude-assets/SKILL.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Claude Code assets
 name: claude-assets
 description: >-
@@ -24,6 +15,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/claude-assets/SKILL.md
+   -
+   -->
 
 # Claude Code assets
 
@@ -174,8 +172,8 @@ show.
 A command declares no name at all: its filename is the slash command. A rule
 declares neither, and no `description` either, which is why the description
 cases skip `rules/` rather than having been forgotten there. Every asset also
-carries the repository's Markdown document head, ie. the `__cgxx:` block,
-`ctime`, `title` and `tags`.
+carries the repository's Markdown document head, ie. `ctime`, `mtime`, `spdx`,
+`title` and `tags`, the HTML comment box beneath them and the closing modeline.
 
 ## Prefer a hook to a `permissions.deny` rule
 
@@ -270,3 +268,5 @@ describe: a path a rule names is checked like any other, where a directory
 `CLAUDE.md` would rely entirely on care at write time.
 
 `/fresh` is the end-of-session pass over the half no gate can reach.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

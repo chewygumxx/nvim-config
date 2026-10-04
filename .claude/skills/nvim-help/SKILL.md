@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/nvim-help/SKILL.md
-  #
-  #
-
 ctime: 2026-10-05
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Neovim and plugin help
 name: nvim-help
 description: >-
@@ -23,6 +14,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/nvim-help/SKILL.md
+   -
+   -->
 
 # Neovim and plugin help
 
@@ -84,3 +82,5 @@ and if they differ, read the locked commit's documentation with
 defaults: `lua/plugin.lua` condemns it and every file in `lsp/` is a whole
 configuration. Read its server pages for what a server expects, never for what
 this configuration inherits.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

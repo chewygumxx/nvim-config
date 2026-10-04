@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/scripts.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Headless entry points
 paths:
   - "scripts/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/scripts.md
+   -
+   -->
 
 # `scripts/` may not reach the network
 
@@ -34,3 +32,5 @@ touches plugin state owes the same three switches.
 
 The **`gates` skill** holds what each script is for, except `scripts/gendoc.lua`
 and `scripts/genhelp.lua`, which belong to the **`generated-output` skill**.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

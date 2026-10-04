@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/fresh/SKILL.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Session freshness pass
 name: fresh
 description: >-
@@ -20,6 +11,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/fresh/SKILL.md
+   -
+   -->
 
 Run this before concluding a session.
 
@@ -89,3 +87,5 @@ Report what you changed, and what you checked and found already correct. Say
 plainly if something is stale and you have not fixed it.
 
 $ARGUMENTS
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

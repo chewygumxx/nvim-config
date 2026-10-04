@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/CLAUDE.md
-  #
-  #
-
 ctime: 2026-09-26
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: CLAUDE.md
 description: >-
   The long-form reference for this configuration: why each decision is the way
@@ -19,6 +10,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/CLAUDE.md
+   -
+   -->
 
 # CLAUDE.md
 
@@ -93,10 +91,10 @@ reaches no narrower file.
   repository slug and the file's repo-relative path, in that file's line-comment
   syntax. Follow a sibling of the same type rather than inventing one;
   `XXInsertHeader` generates one, and the `sync-header-metadata` Action corrects
-  drift. Markdown wears the same three parts as a `__cgxx: |` block inside the
-  frontmatter, rendered by `util.header.frontmatter`, which is the only
-  description of that shape: copy a sibling or call it rather than assembling
-  one by hand.
+  drift. Markdown splits the three: `spdx:` is a frontmatter key, the box an
+  HTML comment beneath the frontmatter and the modeline an HTML comment on the
+  last line, all rendered by `util.header.frontmatter`, the only description of
+  that shape: copy a sibling or call it rather than assembling one by hand.
 - **Indentation**: owned by `.editorconfig`, 4 spaces except 2 for `*.md` and
   `*.scm`, and Lua additionally by `luafmt`'s `max_line_width = 80`.
 - **Lua annotations vs. `luafmt`**: two habits exist because the formatter will
@@ -124,3 +122,5 @@ They are the statusline's colours and its truncation from the left, the
 a restart, and which-key's group labels. Each is described where it belongs: the
 **`statusline` skill**, `.claude/rules/filetype.md`, the **`specs` skill** and
 the **`generated-output` skill** respectively.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

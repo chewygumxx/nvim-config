@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/queries.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Tree-sitter queries
 paths:
   - "queries/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/queries.md
+   -
+   -->
 
 # `queries/` replaces the runtime queries
 
@@ -94,3 +92,5 @@ are the bundled-query overrides, largely copied from upstream, so asserting
 `norg` and `norg_meta` are dormant while neorg is condemned in `lua/plugin.lua`,
 which is not the same as unchecked: the query-language parse and the predicate
 parity gate still cover them.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

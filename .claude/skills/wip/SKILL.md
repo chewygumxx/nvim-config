@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/wip/SKILL.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: WIP snapshots
 name: wip
 description: >-
@@ -22,6 +13,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/wip/SKILL.md
+   -
+   -->
 
 # WIP snapshots
 
@@ -90,3 +88,5 @@ A case about a snapshot **not** happening waits for a fence rather than
 sleeping. `M.snapshot`'s `report` argument makes it announce the no-op it
 reached, which replaced three fixed `vim.wait(2000, ...)` sleeps that were half
 the suite's runtime. Keep that shape when adding a case of the same kind.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

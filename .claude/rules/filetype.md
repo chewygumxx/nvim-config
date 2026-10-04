@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/filetype.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Filetype modules
 paths:
   - "lua/filetype/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/filetype.md
+   -
+   -->
 
 # `lua/filetype/` runs one module per filetype
 
@@ -83,3 +81,5 @@ so a module that declares the right options but is unreachable from `M.modmap`
 still fails. Whether `colorcolumn=51,73` lands where git's limits actually are
 is not something a headless run can see, and `.claude/CLAUDE.md` records it
 among the behaviours no gate covers.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

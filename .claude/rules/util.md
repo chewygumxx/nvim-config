@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/util.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Shared helper modules
 paths:
   - "lua/util/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/util.md
+   -
+   -->
 
 # `lua/util/` is a library first
 
@@ -70,3 +68,5 @@ required by nothing. Do not build on it.
 plugin spec's `config` and `scripts/minitest.lua`. A spec whose `config` is a
 function never has its `opts` applied by lazy.nvim, so the configuration cannot
 live on the spec if the headless runner is to see the same one.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

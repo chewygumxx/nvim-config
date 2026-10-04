@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/gate-battery/SKILL.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Gate battery
 name: gate-battery
 description: >-
@@ -19,6 +10,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/gate-battery/SKILL.md
+   -
+   -->
 
 Run this repository's full gate battery locally. Invoke the `gates` skill first
 for the detail behind each step, then work through the sequence below.
@@ -52,3 +50,5 @@ Report only what failed, with enough output to act on. If everything passed, say
 so in one line with the test count.
 
 $ARGUMENTS
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

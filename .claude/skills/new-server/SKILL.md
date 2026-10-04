@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/new-server/SKILL.md
-  #
-  #
-
 ctime: 2026-10-05
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: New language server
 name: new-server
 description: >-
@@ -22,6 +13,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/new-server/SKILL.md
+   -
+   -->
 
 Add the language server `$ARGUMENTS` to this configuration. The first word is
 the server's name, the rest are the filetypes it should attach to when they are
@@ -88,3 +86,5 @@ gains a page for the server and the `Docs` CI job fails without it.
 Granularly, scoped `lsp`, eg. `feat(lsp): Add <name>`, keeping the header under
 50 characters. The regenerated `docs/` belongs in the same commit as the file
 that changed it.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

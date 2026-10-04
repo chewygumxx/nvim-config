@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/spec.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Plugin specs
 paths:
   - "lua/spec/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/spec.md
+   -
+   -->
 
 # `lua/spec/` holds one spec per plugin
 
@@ -69,3 +67,5 @@ whenever both sides are tables and arrays merge by index, so `{}` leaves the
 default intact. `false` is what replaces a value. `lua/spec/hardtime.nvim.lua`
 is the worked example, and the arrow keys depend on it whenever it is loaded; it
 is elided at present, so what it protects is re-enabling it.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/rules/types.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: LuaLS type stubs
 paths:
   - "types/**/*"
@@ -18,6 +9,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/rules/types.md
+   -
+   -->
 
 # `types/` stubs are load-bearing, and look redundant
 
@@ -34,3 +32,5 @@ configuration.
 `.husky/pre-commit` holds `selene` back from this directory, because a stub's
 intentional global declarations would otherwise read as real bugs. A lint that
 suddenly fires here means the exclusion was lost, not that the stub is wrong.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

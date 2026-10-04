@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/agents/gate-runner.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Gate runner
 name: gate-runner
 description: >-
@@ -24,6 +15,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/agents/gate-runner.md
+   -
+   -->
 
 # Gate runner
 
@@ -98,3 +96,5 @@ gate at all, say which and why rather than reporting it as passing.
 
 You have no Write or Edit tool. Do not describe fixes as though you applied
 them.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

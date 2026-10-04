@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/agents/lock-bump-reviewer.md
-  #
-  #
-
 ctime: 2026-10-05
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Lock bump reviewer
 name: lock-bump-reviewer
 description: >-
@@ -26,6 +17,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/agents/lock-bump-reviewer.md
+   -
+   -->
 
 # Lock bump reviewer
 
@@ -105,3 +103,5 @@ One block per bumped plugin, ordered by risk:
 
 End with one verdict line: safe to commit, or the specific edits needed first.
 A plugin with nothing notable takes one line. Never paste a whole commit log.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

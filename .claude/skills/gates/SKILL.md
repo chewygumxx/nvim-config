@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/gates/SKILL.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Gates
 name: gates
 description: >-
@@ -23,6 +14,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/gates/SKILL.md
+   -
+   -->
 
 # Gates
 
@@ -214,3 +212,5 @@ CI installs every pin through `jdx/mise-action`, narrowed per job by
 `install_args`, rather than restating it, so a workflow cannot silently fall
 back to whatever the runner happened to have. The one exception is the nightly
 canary in `.github/workflows/test.yaml`, which is not a pin.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

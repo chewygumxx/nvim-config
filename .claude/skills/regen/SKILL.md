@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/regen/SKILL.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Tree regeneration
 name: regen
 description: >-
@@ -19,6 +10,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/regen/SKILL.md
+   -
+   -->
 
 Regenerate this repository's two generated trees. Invoke the `generated-output`
 skill first for why each step is shaped the way it is.
@@ -53,3 +51,5 @@ is downstream of. If nothing changed, say so; that is the expected result when
 the trees were already current.
 
 $ARGUMENTS
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

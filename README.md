@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/README.md
-  #
-  #
-
 ctime: 2026-09-26
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: nvim-config
 description: >-
   A standalone Neovim configuration, plugin-managed by lazy.nvim, gated by a
@@ -20,6 +11,13 @@ tags:
   - lua
   - config
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/README.md
+   -
+   -->
 
 # nvim-config
 
@@ -181,8 +179,10 @@ through.
 **File headers.** Nearly every tracked file opens with a modeline, an SPDX
 identifier and a boxed comment naming the repository and the file's path within
 it. `XXInsertHeader` writes one, a GitHub Action corrects drift on every push,
-and Markdown files carry the same three parts inside a `__cgxx: |` block at the
-head of their YAML frontmatter.
+and Markdown files split the three: the SPDX identifier is a `spdx:` key in the
+YAML frontmatter, the box an HTML comment beneath it, and the modeline an HTML
+comment on the last line. Saving one keeps `title:`, `mtime:` and the box in
+step with the document.
 
 ## Contributing
 
@@ -212,3 +212,5 @@ affects a normal editor session.
 ## Licence
 
 GPL-3.0-only. See [LICENSE](LICENSE).
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->

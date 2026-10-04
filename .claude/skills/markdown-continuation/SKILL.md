@@ -1,16 +1,7 @@
 ---
-__cgxx: |
-  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:
-  # SPDX-License-Identifier: GPL-3.0-only
-
-  #
-  #
-  # ~chewygumxx/nvim-config.git
-  # ::: :/.claude/skills/markdown-continuation/SKILL.md
-  #
-  #
-
 ctime: 2026-09-27
+mtime: 2026-10-05
+spdx: GPL-3.0-only
 title: Markdown list continuation
 name: markdown-continuation
 description: >-
@@ -23,6 +14,13 @@ tags:
   - llm
   - claude
 ---
+
+<!--
+   -
+   - ~chewygumxx/nvim-config.git
+   - ::: :/.claude/skills/markdown-continuation/SKILL.md
+   -
+   -->
 
 # Markdown list continuation
 
@@ -83,3 +81,5 @@ siblings make a bullet a comment leader, and a comment leader outranks
 formatter one prose run at a time, skipping fences, frontmatter, HTML blocks and
 pipe tables, and declines auto-wrap on a line inside one. Tree-sitter finds the
 blocks; a line scan stands in for frontmatter and fences when it cannot parse.
+
+<!-- vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3: -->
