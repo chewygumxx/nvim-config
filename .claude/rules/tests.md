@@ -6,21 +6,20 @@ __cgxx: |
   #
   #
   # ~chewygumxx/nvim-config.git
-  # ::: :/tests/CLAUDE.md
+  # ::: :/.claude/rules/tests.md
   #
   #
 
 ctime: 2026-09-27
-title: CLAUDE.md
-description: >-
-  Conventions for the mini.test suite, most of which exist because the whole
-  suite shares one Neovim process.
+title: The mini.test suite
+paths:
+  - "tests/**/*"
 tags:
   - llm
   - claude
 ---
 
-# CLAUDE.md
+# `tests/` shares one Neovim process
 
 Name a test file `test_<module>.lua` with `/` flattened to `_`, so
 `lua/util/git.lua` is covered by `tests/test_util_git.lua`.
@@ -28,7 +27,7 @@ Name a test file `test_<module>.lua` with `/` flattened to `_`, so
 conventionally named file needs no registry entry and an unconventional one
 needs a `covered_by` entry or an `exempt` entry with a stated reason. An empty
 reason is rejected. That file also cross-checks the collection glob, so a
-misnamed test cannot sit in this directory looking collected.
+misnamed test cannot sit in `tests/` looking collected.
 
 Load the shared fixtures with `dofile("tests/helpers.lua")` and never `require`.
 Nothing puts `tests/` on the Lua module path and nothing should:
@@ -69,8 +68,8 @@ The runner fails closed, and deliberately: `mini.test` ends a run with `cquit 0`
 whenever nothing failed, so a run that collected nothing exits 0 and reports
 success. Keep it that way.
 
-Several files here are about a whole directory rather than one module, and a
-change to what they police is a change to a registry rather than to an
+Several files in `tests/` are about a whole directory rather than one module,
+and a change to what they police is a change to a registry rather than to an
 assertion. `test_spec.lua` is the smoke test over `lua/spec/` and `lsp/`,
 including that every slug in `lua/plugin.lua`'s `elide` and `condemn` lists
 names a plugin some spec declares, that `mason-lspconfig`'s `ensure_installed`

@@ -111,7 +111,7 @@ end
 --- rather than inside `setup()`; a stub installed afterwards would miss it
 --- and `require`'s cache would not run the file again.
 ---
---- Each is written with the real arity, for the reason `tests/CLAUDE.md`
+--- Each is written with the real arity, for the reason `.claude/rules/tests.md`
 --- gives: a narrower stub retypes the field for the whole workspace and
 --- makes every genuine call site report `redundant-parameter`.
 ---@return cgxx.genhelp.Captured captured

@@ -58,7 +58,7 @@ mechanical rather than advisory.
 | Filetype detection and dispatch                            | `.claude/rules/filetype.md`                        |
 | What belongs in a per-server file                          | `.claude/rules/lsp.md`                             |
 | The shared helpers and their annotation habits             | `.claude/rules/util.md`                            |
-| Writing a test, and what the registry files police         | `tests/CLAUDE.md`                                  |
+| Writing a test, and what the registry files police         | `.claude/rules/tests.md`                           |
 | Tree-sitter queries and their layout                       | `.claude/rules/queries.md`                         |
 | `scripts/`, `types/`, `snippets/`, `.repo-metadata.jsonc`  | a rule in `.claude/rules/`, loaded on a read there |
 

@@ -147,7 +147,7 @@ describe("util.nex.commit", function()
         eq(commits(1), 1)
 
         -- Announced rather than slept through: `report` makes the no-op
-        -- say so, which is the fence `tests/CLAUDE.md` asks for
+        -- say so, which is the fence `.claude/rules/tests.md` asks for
         eq(
             helpers.announced(function()
                 nex.commit(path, true)
