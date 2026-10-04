@@ -90,7 +90,8 @@ colourscheme and Tree-sitter set.
 Every gate below runs from the repository root. `.husky/pre-commit` runs the
 formatters and linters over staged files, then the Lua typecheck and the test
 suite over the whole repository regardless of what was staged. Annotation
-coverage and the generated documentation are checked by CI only.
+coverage and the generated documentation are checked by CI only, and the
+commitlint config's typecheck by neither.
 
 | What                | Command                                                                      |
 | ------------------- | ---------------------------------------------------------------------------- |
@@ -102,6 +103,7 @@ coverage and the generated documentation are checked by CI only.
 | Query lint          | `ts_query_ls lint queries`                                                   |
 | Lua typecheck       | `lua-language-server --check=. --checklevel=Warning`                         |
 | Tests               | `nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua`        |
+| Commitlint config   | `bun run typecheck`                                                          |
 | Annotation coverage | `nvim --headless -u scripts/minimal_init.lua -l scripts/luals_untyped.lua`   |
 | Generated docs      | `nvim --headless -u scripts/minimal_init.lua -l scripts/gendoc.lua`          |
 | Generated help      | `nvim --headless -u scripts/minimal_init.lua -l scripts/genhelp.lua`         |
@@ -132,7 +134,7 @@ MINITEST_PATTERN='util%.header' \
     nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua
 ```
 
-Two sweeps exist that no gate runs, because they are for reading rather than
+One sweep exists that no gate runs, because it is for reading rather than
 satisfying: `scripts/typecheck_sensitive.lua` repeats the typecheck at `Hint`,
 ie. everything the gate ignores.
 
