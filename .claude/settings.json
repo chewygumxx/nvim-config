@@ -75,5 +75,14 @@
                 ]
             }
         ]
+    },
+    "extraKnownMarketplaces": {
+        "chewygumxx": {
+            "autoUpdate": true,
+            "source": {
+                "source": "github",
+                "repo": "chewygumxx/claude-library"
+            }
+        }
     }
 }
