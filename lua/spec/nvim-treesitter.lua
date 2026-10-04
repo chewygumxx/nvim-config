@@ -99,20 +99,23 @@ local ensure_installed = {
     -- https://github.com/tree-sitter-grammars/tree-sitter-diff
     -- Required by: gitcommit
 
-    --"editorconfig",
+    "dockerfile",
+    -- https://github.com/camdencheek/tree-sitter-dockerfile
+
+    "editorconfig",
     -- https://github.com/ValdezFOmar/tree-sitter-editorconfig
 
     --"fish",
     -- https://github.com/ram02z/tree-sitter-fish
 
-    --"git_config",
+    "git_config",
     -- https://github.com/the-mikedavis/tree-sitter-git-config
 
     "git_rebase",
     -- https://github.com/the-mikedavis/tree-sitter-git-rebase
     -- Required by: gitcommit
 
-    --"gitattributes",
+    "gitattributes",
     -- https://github.com/tree-sitter-grammars/tree-sitter-gitattributes
 
     "gitcommit",
@@ -128,7 +131,7 @@ local ensure_installed = {
     --"go",
     -- https://github.com/tree-sitter/tree-sitter-go
 
-    "gotmpl",
+    --"gotmpl",
     -- https://github.com/ngalaiko/tree-sitter-go-template
     -- Golang text/template
 
@@ -175,10 +178,10 @@ local ensure_installed = {
     "javascript",
     -- https://github.com/tree-sitter/tree-sitter-javascript
 
-    --"jq",
+    "jq",
     -- https://github.com/flurie/tree-sitter-jq
 
-    --"jsdoc",
+    "jsdoc",
     -- https://github.com/tree-sitter/tree-sitter-jsdoc
 
     "json",
@@ -190,7 +193,13 @@ local ensure_installed = {
     --"jsonnet",
     -- https://github.com/sourcegraph/tree-sitter-jsonnet
 
-    --"kdl",
+    "jsx",
+    -- Queries only
+
+    --"just",
+    -- https://github.com/IndianBoy42/tree-sitter-just
+
+    "kdl",
     -- https://github.com/tree-sitter-grammars/tree-sitter-kdl
 
     --"latex",
@@ -210,7 +219,7 @@ local ensure_installed = {
     "markdown_inline",
     -- https://github.com/tree-sitter-grammars/tree-sitter-markdown
 
-    --"mermaid",
+    "mermaid",
     -- https://github.com/monaqa/tree-sitter-mermaid
 
     --"nginx",
@@ -246,7 +255,7 @@ local ensure_installed = {
     "python",
     -- https://github.com/tree-sitter/tree-sitter-python
 
-    --"query",
+    "query",
     -- https://github.com/tree-sitter-grammars/tree-sitter-query
     -- Treesitter query language
 
@@ -272,7 +281,7 @@ local ensure_installed = {
     "sql",
     -- https://github.com/derekstride/tree-sitter-sql
 
-    --"ssh_config",
+    "ssh_config",
     -- https://github.com/tree-sitter-grammars/tree-sitter-ssh-config
 
     --"superhtml"
@@ -281,16 +290,16 @@ local ensure_installed = {
     "toml",
     -- https://github.com/tree-sitter-grammars/tree-sitter-toml
 
-    "tsx",
+    --"tsx",
     -- https://github.com/tree-sitter/tree-sitter-typescript
 
     "typescript",
     -- https://github.com/tree-sitter/tree-sitter-typescript
 
-    --"vim",
+    "vim",
     -- https://github.com/tree-sitter-grammars/tree-sitter-vim
 
-    --"vimdoc",
+    "vimdoc",
     -- https://github.com/neovim/tree-sitter-vimdoc
 
     "xml",
