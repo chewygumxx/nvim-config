@@ -87,6 +87,13 @@ local function scalar(value)
         if value == "" or value:match("^%s") or value:match("%s$") then
             return vim.inspect(value)
         end
+        -- A path under the configuration directory, eg. 'spellfile', is
+        -- written as the call that produced it: the absolute form differs
+        -- per machine, so CI's regeneration would never match a local one
+        local config = vim.fn.stdpath("config")
+        if value:sub(1, #config + 1) == config .. "/" then
+            return 'stdpath("config")' .. value:sub(#config + 1)
+        end
         return value
     end
     local text = vim.inspect(value):gsub("%s+", " ")
