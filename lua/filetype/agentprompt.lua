@@ -5,12 +5,12 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/filetype/claude.lua
+-- ::: :/lua/filetype/agentprompt.lua
 --
 --
 
 --
--- Filetype-specific configuration for the `markdown.claude` compound
+-- Filetype-specific configuration for the `markdown.agentprompt` compound
 -- filetype: Claude Code CLI's external-editor prompt-composition buffers
 --
 
@@ -22,8 +22,8 @@ M.local_opts   = markdown.local_opts
 M.hlgroup_defs = markdown.hlgroup_defs
 
 --- Moves the cursor past the last-response divider line (if present, see
---- `util.claude`), to where the reply is actually composed. The fold
---- itself is applied per-window by `util.claude`'s `BufWinEnter` autocmd,
+--- `util.agentprompt`), to where the reply is actually composed. The fold
+--- itself is applied per-window by `util.agentprompt`'s `BufWinEnter` autocmd,
 --- since folds don't carry over between windows on the same buffer.
 ---@param opts vim.api.keyset.create_autocmd.callback_args
 ---@return nil
@@ -32,7 +32,7 @@ M.setup = function(opts)
     -- still Markdown, and should still get the table keymaps.
     markdown.setup(opts)
 
-    if not require("util.claude").reply_divider_line(opts.buf) then
+    if not require("util.agentprompt").reply_divider_line(opts.buf) then
         return
     end
 

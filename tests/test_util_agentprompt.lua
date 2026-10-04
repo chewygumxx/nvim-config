@@ -5,24 +5,24 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/tests/test_util_claude.lua
+-- ::: :/tests/test_util_agentprompt.lua
 --
 --
 
 --
--- `util.claude` folds away the quoted last response in a prompt buffer
+-- `util.agentprompt` folds away the quoted last response in a prompt buffer
 -- Claude Code's external editor opens. Its inputs are a compound
 -- filetype and a divider line, both of which come from software this
 -- repository does not control, so each is pinned here rather than left
 -- to be noticed the next time a prompt buffer opens wrong.
 --
 
-local claude = require("util.claude")
+local agentprompt = require("util.agentprompt")
 ---@type mini.test
 local MiniTest = require("mini.test")
 local eq       = MiniTest.expect.equality
 
-describe("util.claude.is_prompt_buffer", function()
+describe("util.agentprompt.is_prompt_buffer", function()
     ---@type integer
     local bufnr
 
@@ -34,31 +34,31 @@ describe("util.claude.is_prompt_buffer", function()
     end)
 
     it("accepts the compound filetype lua/filetype resolves to", function()
-        -- `markdown.claude` is what `lua/filetype/init.lua` maps the
+        -- `markdown.agentprompt` is what `lua/filetype/init.lua` maps the
         -- prompt file's path to, so the tail is what identifies it
-        vim.bo[bufnr].filetype = "markdown.claude"
-        eq(claude.is_prompt_buffer(bufnr), true)
+        vim.bo[bufnr].filetype = "markdown.agentprompt"
+        eq(agentprompt.is_prompt_buffer(bufnr), true)
     end)
 
     it("accepts the bare filetype", function()
-        vim.bo[bufnr].filetype = "claude"
-        eq(claude.is_prompt_buffer(bufnr), true)
+        vim.bo[bufnr].filetype = "agentprompt"
+        eq(agentprompt.is_prompt_buffer(bufnr), true)
     end)
 
     it("rejects an ordinary markdown buffer", function()
         vim.bo[bufnr].filetype = "markdown"
-        eq(claude.is_prompt_buffer(bufnr), false)
+        eq(agentprompt.is_prompt_buffer(bufnr), false)
     end)
 
-    it("rejects a filetype that merely ends in claude", function()
-        -- The tail test is on ".claude", not "claude", so a filetype
-        -- like "notclaude" is not one of these buffers
-        vim.bo[bufnr].filetype = "notclaude"
-        eq(claude.is_prompt_buffer(bufnr), false)
+    it("rejects a filetype that merely ends in agentprompt", function()
+        -- The tail test is on ".agentprompt", not "agentprompt", so a filetype
+        -- like "notagentprompt" is not one of these buffers
+        vim.bo[bufnr].filetype = "notagentprompt"
+        eq(agentprompt.is_prompt_buffer(bufnr), false)
     end)
 end)
 
-describe("util.claude.reply_divider_line", function()
+describe("util.agentprompt.reply_divider_line", function()
     ---@type integer
     local bufnr
 
@@ -73,22 +73,22 @@ describe("util.claude.reply_divider_line", function()
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {
             "# quoted response",
             "# more",
-            "# --- " .. claude.reply_divider .. " ---",
+            "# --- " .. agentprompt.reply_divider .. " ---",
             "",
             "the reply",
         })
-        eq(claude.reply_divider_line(bufnr), 3)
+        eq(agentprompt.reply_divider_line(bufnr), 3)
     end)
 
     it("reports nothing when the divider is absent", function()
         -- Which is the normal case: the quoted response only appears
         -- with "Show last response in external editor" enabled
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "just a prompt" })
-        eq(claude.reply_divider_line(bufnr), nil)
+        eq(agentprompt.reply_divider_line(bufnr), nil)
     end)
 end)
 
-describe("util.claude.setup_fold_window", function()
+describe("util.agentprompt.setup_fold_window", function()
     ---@type integer
     local bufnr
 
@@ -97,7 +97,7 @@ describe("util.claude.setup_fold_window", function()
         bufnr = vim.api.nvim_get_current_buf()
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {
             "# quoted response",
-            "# " .. claude.reply_divider,
+            "# " .. agentprompt.reply_divider,
             "",
             "the reply",
         })
@@ -109,8 +109,8 @@ describe("util.claude.setup_fold_window", function()
     end)
 
     it("folds the quoted context closed, manually", function()
-        vim.bo[bufnr].filetype = "markdown.claude"
-        claude.setup_fold_window(bufnr)
+        vim.bo[bufnr].filetype = "markdown.agentprompt"
+        agentprompt.setup_fold_window(bufnr)
 
         -- `foldmethod=manual` on purpose: this block is one leading "# "
         -- per line, which treesitter's own foldexpr reads as a run of
@@ -125,26 +125,26 @@ describe("util.claude.setup_fold_window", function()
 
     it("leaves a buffer that is not a prompt alone", function()
         vim.bo[bufnr].filetype = "markdown"
-        claude.setup_fold_window(bufnr)
+        agentprompt.setup_fold_window(bufnr)
         eq(vim.fn.foldclosed(1), -1)
     end)
 
     it("leaves a prompt without a divider alone", function()
-        vim.bo[bufnr].filetype = "markdown.claude"
+        vim.bo[bufnr].filetype = "markdown.agentprompt"
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { "just a prompt" })
-        claude.setup_fold_window(bufnr)
+        agentprompt.setup_fold_window(bufnr)
         eq(vim.fn.foldclosed(1), -1)
     end)
 
     it("refolds on every BufWinEnter, since folds are window-local", function()
-        claude.autocmd()
-        vim.bo[bufnr].filetype = "markdown.claude"
+        agentprompt.autocmd()
+        vim.bo[bufnr].filetype = "markdown.agentprompt"
 
         -- A window that has never folded this buffer is exactly what
         -- a split produces, so the event has to be enough on its own
         vim.api.nvim_exec_autocmds("BufWinEnter", { buffer = bufnr })
         eq(vim.fn.foldclosed(1), 1)
 
-        vim.api.nvim_create_augroup("cgxx.claude", { clear = true })
+        vim.api.nvim_create_augroup("cgxx.agentprompt", { clear = true })
     end)
 end)

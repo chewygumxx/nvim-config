@@ -54,7 +54,7 @@ end
 ---
 --- `lua/filetype/init.lua` dispatches exactly one module per filetype, so
 --- the compound Markdown filetypes cannot inherit this by being Markdown:
---- `filetype.nex_note` and `filetype.claude` call it themselves, the same
+--- `filetype.nex_note` and `filetype.agentprompt` call it themselves, the same
 --- way they already copy `local_opts` and `hlgroup_defs`.
 ---@param opts vim.api.keyset.create_autocmd.callback_args
 ---@return nil

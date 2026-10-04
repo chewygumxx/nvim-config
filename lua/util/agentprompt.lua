@@ -5,7 +5,7 @@
 --
 --
 -- ~chewygumxx/nvim-config.git
--- ::: :/lua/util/claude.lua
+-- ::: :/lua/util/agentprompt.lua
 --
 --
 
@@ -15,7 +15,7 @@
 -- writes `claude-prompt-<hash>.md` under a shared `claude-<uid>` directory
 -- in the OS temp dir, and unlinks it again once the editor exits.
 -- `lua/filetype/init.lua` resolves these to the compound filetype
--- `markdown.claude` (see its `pattern` table), which is this module's
+-- `markdown.agentprompt` (see its `pattern` table), which is this module's
 -- resolution heuristic.
 --
 
@@ -36,13 +36,13 @@ M.prompt_path_pattern = ".*/claude%-prompt%-.-%.md"
 ---@type string
 M.reply_divider = "Write your reply below this line"
 
---- Whether buffer `bufnr` was resolved to the `markdown.claude` compound
+--- Whether buffer `bufnr` was resolved to the `markdown.agentprompt` compound
 --- filetype.
 ---@param bufnr? integer (default: current buffer)
 ---@return boolean
 M.is_prompt_buffer = function(bufnr)
     local ft = vim.bo[bufnr or 0].filetype
-    return ft == "claude" or ft:sub(-7) == ".claude"
+    return ft == "agentprompt" or ft:sub(-12) == ".agentprompt"
 end
 
 --- Finds the 1-indexed line number of the last-response divider in buffer
@@ -92,7 +92,7 @@ end
 M.autocmd = function()
     vim.api.nvim_create_autocmd("BufWinEnter", {
         desc     = "Fold Claude Code's last-response context, if present",
-        group    = vim.api.nvim_create_augroup("cgxx.claude", {
+        group    = vim.api.nvim_create_augroup("cgxx.agentprompt", {
             clear = true,
         }),
         callback = function(opts)

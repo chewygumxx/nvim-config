@@ -1,4 +1,4 @@
-# global lua.filetype.claude
+# global lua.filetype.agentprompt
 
 
 
@@ -31,8 +31,8 @@ function M.setup(opts: vim.api.keyset.create_autocmd.callback_args {
 
 
 Moves the cursor past the last-response divider line (if present, see
-`util.claude`), to where the reply is actually composed. The fold
-itself is applied per-window by `util.claude`'s `BufWinEnter` autocmd,
+`util.agentprompt`), to where the reply is actually composed. The fold
+itself is applied per-window by `util.agentprompt`'s `BufWinEnter` autocmd,
 since folds don't carry over between windows on the same buffer.
 
 
@@ -51,10 +51,13 @@ since folds don't carry over between windows on the same buffer.
 ### M.local_opts
 ---
 ```lua
-M.local_opts : { [string]: (boolean|string|number) }
+M.local_opts: table
 ```
 
 
+
+A copy rather than the table itself, which `filetype.nex_note` aliases:
+assigning into an alias would hand every Markdown buffer this width
 
 
 

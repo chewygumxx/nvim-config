@@ -15,6 +15,9 @@
 
 local M = {}
 
+local agentprompt = require("util.agentprompt")
+local nex         = require("util.nex")
+
 ---@type vim.filetype.add.filetypes
 M.filetypes = {
     extension = {
@@ -48,28 +51,28 @@ M.filetypes = {
         [".*zsh/func/[^/]*"]      = "zsh",
         [".*zsh/functions/[^/]*"] = "zsh",
 
-        [require("util.claude").prompt_path_pattern] = "markdown.claude",
-        [require("util.nex").note_path_pattern]      = "markdown.nex-note",
+        [agentprompt.prompt_path_pattern] = "markdown.agentprompt",
+        [nex.note_path_pattern]           = "markdown.nex-note",
     },
 }
 
 --- Maps a detected filetype to the specialised module that handles it.
 ---@type { [string]: string } { [Filetype]: Module }
 M.modmap = {
-    man                   = "man",
-    markdown              = "markdown",
-    ["markdown.claude"]   = "claude",
-    ["markdown.nex-note"] = "nex_note",
-    kdl                   = "kdl",
-    dosini                = "dosini",
-    confini               = "dosini",
-    gitconfig             = "dosini",
-    cfg                   = "dosini",
-    editorconfig          = "dosini",
-    gitcommit             = "gitcommit",
-    gitrebase             = "gitcommit",
-    text                  = "prose",
-    help                  = "help",
+    man                      = "man",
+    markdown                 = "markdown",
+    ["markdown.agentprompt"] = "agentprompt",
+    ["markdown.nex-note"]    = "nex_note",
+    kdl                      = "kdl",
+    dosini                   = "dosini",
+    confini                  = "dosini",
+    gitconfig                = "dosini",
+    cfg                      = "dosini",
+    editorconfig             = "dosini",
+    gitcommit                = "gitcommit",
+    gitrebase                = "gitcommit",
+    text                     = "prose",
+    help                     = "help",
 }
 
 ---@class (exact) cgxx.filetype.Module

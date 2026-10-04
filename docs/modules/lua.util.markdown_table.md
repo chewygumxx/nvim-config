@@ -579,7 +579,7 @@ Buffer-local keymaps, attached per Markdown buffer by
 
 Buffer-local rather than global because they are only meaningful in
 Markdown, and `lua/filetype/init.lua` dispatches one module per
-filetype, so `markdown.nex-note` and `markdown.claude` reach this
+filetype, so `markdown.nex-note` and `markdown.agentprompt` reach this
 through `filetype.markdown` rather than by being listed here.
 
 

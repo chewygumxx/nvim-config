@@ -136,7 +136,7 @@ describe("util.header.insert", function()
 
     it("leaves a compound markdown filetype to its own renderer", function()
         -- `markdown.nex-note` is `util.nex`'s to render and
-        -- `markdown.claude` carries no repository frontmatter, so the
+        -- `markdown.agentprompt` carries no repository frontmatter, so the
         -- frontmatter path is gated on equality rather than a prefix
         local md = dir .. "/note.md"
         vim.fn.writefile({ "body" }, md)

@@ -17,7 +17,7 @@ description: >-
   Work on Markdown list continuation and the buffer-local Markdown keymaps. Use
   when editing lua/util/markdown_list.lua, lua/util/markdown_table.lua,
   lua/filetype/markdown.lua, lua/filetype/nex_note.lua or
-  lua/filetype/claude.lua, when o/O or <M-CR> behaves wrongly in a Markdown
+  lua/filetype/agentprompt.lua, when o/O or <M-CR> behaves wrongly in a Markdown
   buffer, or when a completion key stops working there.
 tags:
   - llm
@@ -66,6 +66,6 @@ keymaps, from `util.markdown_table` and `util.markdown_list`.
 
 The filetype dispatcher runs exactly one module per filetype, so the compound
 Markdown filetypes cannot inherit that by being Markdown. `filetype.nex_note`
-aliases `markdown.setup` outright, and `filetype.claude` calls it before its own
-work. **Adding to `markdown.setup` is therefore what covers all three**; adding
-a mapping anywhere else covers only plain Markdown.
+aliases `markdown.setup` outright, and `filetype.agentprompt` calls it before
+its own work. **Adding to `markdown.setup` is therefore what covers all three**;
+adding a mapping anywhere else covers only plain Markdown.

@@ -46,16 +46,16 @@ the help window is not expressible as an option.
 **The dispatcher runs exactly one module per filetype, and everything awkward
 here follows from that.** A compound filetype cannot inherit Markdown's
 behaviour by being Markdown, so `nex_note.lua` aliases `markdown.setup` outright
-and `claude.lua` calls it before its own work; adding to `markdown.setup` is
-therefore what reaches all three, and adding to `claude.lua` reaches one. The
-same rule cost `prose.lua` its `spell` setting when `gitcommit` arrived: a
-`gitcommit` buffer runs `gitcommit.lua` and never `prose.lua`, so that option
-had to be copied rather than inherited. Check what a filetype displaces before
-assuming it composes.
+and `agentprompt.lua` calls it before its own work; adding to `markdown.setup`
+is therefore what reaches all three, and adding to `agentprompt.lua` reaches
+one. The same rule cost `prose.lua` its `spell` setting when `gitcommit`
+arrived: a `gitcommit` buffer runs `gitcommit.lua` and never `prose.lua`, so
+that option had to be copied rather than inherited. Check what a filetype
+displaces before assuming it composes.
 
 The same rule reaches outside `lua/filetype/`. `util.header.frontmatter` renders
 the repository's Markdown document head gated on `filetype == "markdown"`
-exactly, so `markdown.claude` and `markdown.nex-note` do not get one
+exactly, so `markdown.agentprompt` and `markdown.nex-note` do not get one
 automatically: a compound filetype is not `markdown` for the purposes of an
 equality test, whatever it inherits by aliasing.
 

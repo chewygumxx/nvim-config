@@ -1,4 +1,4 @@
-# global lua.util.claude
+# global lua.util.agentprompt
 
 
 
@@ -24,7 +24,7 @@ function M.is_prompt_buffer(bufnr: integer?) ->  boolean
 
 
 
-Whether buffer `bufnr` was resolved to the `markdown.claude` compound
+Whether buffer `bufnr` was resolved to the `markdown.agentprompt` compound
 filetype.
 
 

@@ -306,7 +306,7 @@ M.insert = function(file, buf, opt)
     --
     -- Compound filetypes are deliberately excluded by the equality check:
     -- a `markdown.nex-note` buffer is `util.nex`'s to render, and a
-    -- `markdown.claude` one carries no repository frontmatter at all.
+    -- `markdown.agentprompt` one carries no repository frontmatter at all.
     --
     if vim.bo[buf].filetype == "markdown" then
         local lines = M.frontmatter({

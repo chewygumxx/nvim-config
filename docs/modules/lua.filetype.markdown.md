@@ -35,7 +35,7 @@ Attaches the buffer-local keymaps from `util.markdown_table` and
 
 `lua/filetype/init.lua` dispatches exactly one module per filetype, so
 the compound Markdown filetypes cannot inherit this by being Markdown:
-`filetype.nex_note` and `filetype.claude` call it themselves, the same
+`filetype.nex_note` and `filetype.agentprompt` call it themselves, the same
 way they already copy `local_opts` and `hlgroup_defs`.
 
 
