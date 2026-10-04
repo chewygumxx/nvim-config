@@ -6,27 +6,26 @@ __cgxx: |
   #
   #
   # ~chewygumxx/nvim-config.git
-  # ::: :/lua/spec/CLAUDE.md
+  # ::: :/.claude/rules/spec.md
   #
   #
 
 ctime: 2026-09-27
-title: CLAUDE.md
-description: >-
-  Conventions for this configuration's lazy.nvim plugin specs, and the one trap
-  that is invisible after the merge.
+title: Plugin specs
+paths:
+  - "lua/spec/**/*"
 tags:
   - llm
   - claude
 ---
 
-# CLAUDE.md
+# `lua/spec/` holds one spec per plugin
 
 One file per plugin, each a self-contained `LazySpec`, named for the plugin's
 own repository rather than its owner (`lua/spec/fzf-lua.lua` to
-`ibhagwan/fzf-lua`). `tests/test_spec.lua` asserts every file here parses,
-evaluates to a table, and names the plugin its filename claims, so a rename in
-one place without the other fails the suite.
+`ibhagwan/fzf-lua`). `tests/test_spec.lua` asserts every file in `lua/spec/`
+parses, evaluates to a table, and names the plugin its filename claims, so a
+rename in one place without the other fails the suite.
 
 Carry `---@module "lazy"` and then `---@type LazyPluginSpec` on `local M`,
 closing with `return M`. Add a second `---@module` when the plugin ships its own
