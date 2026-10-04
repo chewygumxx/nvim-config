@@ -43,6 +43,7 @@ local delegated = {
     ["util.markdown_table"]   = "cgxx.mdtable",
     ["util.statusline"]       = "cgxx.statusline",
     ["util.spell"]            = "cgxx.spell",
+    ["util.frontmatter"]      = "cgxx.frontmatter",
 }
 
 describe("autocmd.setup", function()

@@ -72,6 +72,7 @@ M.setup = function()
     require("util.markdown_table").autocmd()
     require("util.statusline").autocmd()
     require("util.spell").autocmd()
+    require("util.frontmatter").autocmd()
 end
 
 return M

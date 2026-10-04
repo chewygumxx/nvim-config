@@ -71,6 +71,7 @@
 - [lua.usercmd.redirect_awkward_pager](modules/lua.usercmd.redirect_awkward_pager.md)
 - [lua.util.agentprompt](modules/lua.util.agentprompt.md)
 - [lua.util.biome](modules/lua.util.biome.md)
+- [lua.util.frontmatter](modules/lua.util.frontmatter.md)
 - [lua.util.git](modules/lua.util.git.md)
 - [lua.util.header](modules/lua.util.header.md)
 - [lua.util.lazy](modules/lua.util.lazy.md)

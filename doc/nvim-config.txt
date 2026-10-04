@@ -223,6 +223,7 @@ BufWritePost            Recompile a personal word list written by hand
 BufWritePost            Stage and commit a written nex note
 BufWritePost,BufLeave,FocusLost
                         Take a WIP snapshot at an editing checkpoint
+BufWritePre             Sync a Markdown header's title, mtime and box on save
 FileType                If exists, implements filetype-specific configuration
 FileType                Inserts templated header into new file buffer once
                         filetype is known.
