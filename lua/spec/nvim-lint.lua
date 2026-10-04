@@ -83,6 +83,39 @@ M.config = function()
     })
     lint.linters.sqlfluff = sqlfluff
 
+    -- markdownlint-cli2 reads the buffer on stdin, so it looks for its
+    -- configuration in its cwd, which is Neovim's rather than the
+    -- buffer's. Run it from the buffer's project when that configures it,
+    -- and otherwise hand it this repository's `.markdownlint-cli2.jsonc`.
+    ---@type lint.Linter
+    local mdlint         = vim.deepcopy(lint.linters["markdownlint-cli2"])
+    local mdlint_markers = {
+        ".markdownlint-cli2.jsonc",
+        ".markdownlint-cli2.yaml",
+        ".markdownlint-cli2.cjs",
+        ".markdownlint-cli2.mjs",
+        ".markdownlint.jsonc",
+        ".markdownlint.json",
+        ".markdownlint.yaml",
+        ".markdownlint.yml",
+        ".markdownlint.cjs",
+        ".markdownlint.mjs",
+    }
+
+    -- nvim-lint resolves a linter given as a function on every run, but
+    -- annotates the table as holding only `lint.Linter`
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    lint.linters["markdownlint-cli2"] = function()
+        local root = vim.fs.root(0, mdlint_markers)
+        if root then
+            return vim.tbl_extend("force", mdlint, { cwd = root })
+        end
+        local fallback = vim.fn.stdpath("config") .. "/.markdownlint-cli2.jsonc"
+        return vim.tbl_extend("force", mdlint, {
+            args = { "--config", fallback, "-" },
+        })
+    end
+
     -- Run on the saved file from the buffer's directory rather than
     -- stdin, so the repository's own `.yamllint*` applies; see
     -- util.yamllint.
