@@ -508,7 +508,7 @@ function M.diagnostic_open_float(
   desc: string?
 ) ->  nil
 ```
-@param `lhs` - Default: "<leader>e"
+@param `lhs` - Default: "<leader>ee"
 
 @param `desc` - Default: "LSP: Open diagnostic float"
 

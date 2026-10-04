@@ -66,10 +66,14 @@ M.opts = {
     -- carries `cond = false`, so labelling them would promise keys that do
     -- not exist.
     --
+    -- `<leader>e` is `lua/util/lsp.lua`'s, mapped buffer-local on
+    -- `LspAttach`, so the label only ever appears beside its keys.
+    --
     spec = {
         { "<leader>a", group = "Claude Code" },
         { "<leader>H", group = "Herdr" },
         { "<leader>d", group = "Debug (DAP)" },
+        { "<leader>e", group = "Diagnostics" },
         { "<leader>h", group = "Search highlight, Harpoon" },
         { "<leader>i", group = "Inspect" },
         { "<leader>l", group = "Line numbers" },

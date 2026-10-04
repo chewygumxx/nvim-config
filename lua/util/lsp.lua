@@ -327,11 +327,15 @@ end
 
 --- Maps lhs to `vim.diagnostic.open_float`, buffer-local.
 ---@param buf   integer
----@param lhs?  string  Default: "<leader>e"
+---
+--- `<leader>ee` rather than `<leader>e`, which is the prefix of the two
+--- pickers below: a mapping that is also a prefix waits out 'timeoutlen'
+--- before it fires, every time.
+---@param lhs?  string  Default: "<leader>ee"
 ---@param desc? string  Default: "LSP: Open diagnostic float"
 ---@return nil
 M.diagnostic_open_float = function(buf, lhs, desc)
-    lhs  = lhs or "<leader>e"
+    lhs  = lhs or "<leader>ee"
     desc = desc or "LSP: Open diagnostic float"
     vim.keymap.set("n", lhs, vim.diagnostic.open_float, {
         buf  = buf,
