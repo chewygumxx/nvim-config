@@ -8,24 +8,13 @@
 #
 #
 
+env*
+*.local.*
 node_modules/
 
-# Explicitly allow Claude
-!CLAUDE.md
-!.claude/
-!.claude.json
-!.remember/
+/.herdr/
+/.claude/worktrees/
 
-# ...but not the personal overrides that sit beside the shared settings.
-# The `*.local.*` pattern in this machine's global excludes already
-# catches it; naming it here means the repository does not depend on
-# that being true of whoever clones it next.
-.claude/settings.local.json
-
-# Raw wordlist used to (re)generate spell/en.utf-8.spl via :mkspell;
-# third-party-derived and large, not worth tracking. Only the compiled
-# .spl is tracked. Personal `zg` additions are local state too.
-/words.txt
-/words_alpha.txt
-/spell/*.add
-/spell/*.add.spl
+/.remember/
+/.superpowers/
+*.tgz
