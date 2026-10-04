@@ -47,11 +47,9 @@ the wordlists and the compiled spell file, linting every language
 has gone stale. `run-tests.sh` brings the suite forward the same way, running
 the one test file that covers what was just written, found by
 `tests/test_coverage.lua`'s derivation and its `covered_by` table rather than a
-copy of either. Another hook, `install-deps.sh`, is not one of these: it fires
-on `SessionStart` rather than `PreToolUse`/`PostToolUse`, and it bootstraps a
-cloud session's `node_modules` rather than making an advisory rule mechanical.
-See `install-deps.sh` below for why it exists and what it deliberately leaves
-alone.
+copy of either. No `SessionStart` hook lives here any more: the
+`bun-install@chewygumxx` plugin that `settings.json` enables is what bootstraps
+a session's `node_modules`. See "Dependencies on `SessionStart`" below.
 
 **A newly added agent is not selectable as a `subagent_type` until the session
 restarts**, so the session that writes one cannot use it. A skill is not like
@@ -201,42 +199,26 @@ the intermediate state, twice in a row if the consumer takes two edits. Read a
 failure there as a description of the file as it stands, not as an edit that was
 rejected.
 
-## `install-deps.sh`
+## Dependencies on `SessionStart`
 
-The one `SessionStart` hook here, and the answer to "why does a cloud session
-need `bun install` run by hand": a cloud session starts from a bare clone, and
-`core.hooksPath` stays unset, husky's git hooks stay unwired, and
-`commit-msg`/`.husky/pre-commit` never fire, until something runs `bun install`.
-Nothing about that is specific to this repository; it is true of any project
-that gates commits through husky. Established by doing exactly this by hand
-mid-session, more than once, before the hook existed: a commit went through with
-no `Claude-Session:` trailer question or gate failure reported at all, because
-nothing was wired to ask either question.
+A cloud session starts from a bare clone, and `core.hooksPath` stays unset,
+husky's git hooks stay unwired, and `commit-msg`/`.husky/pre-commit` never fire,
+until something runs `bun install`. Nothing about that is specific to this
+repository, which is why the hook that once did it here became the
+`bun-install@chewygumxx` plugin rather than staying a file under `hooks/`. Its
+behaviour and its reasons are that plugin's to document; do not add a
+repository-local `SessionStart` hook beside it, or `bun install` runs twice.
 
-It runs only when `$CLAUDE_CODE_REMOTE` is `true`, and it deliberately does not
-attempt `mise install`. Both are the same fact stated from two directions: a
-cloud environment's network policy can block the hosts `mise` downloads from
-(established by probe, in a session where `mise install` hung against exactly
-those hosts), and a hook committed to this repository cannot change that policy.
-Fixing it, if it needs fixing, is an environment setting, not a `.claude/`
-change; the gate binaries `mise` would otherwise supply stay whatever they were
-before this hook ran.
+What stays true here is the half no hook can fix: a cloud environment's network
+policy can block the hosts `mise` downloads from (established by probe, in a
+session where `mise install` hung against exactly those hosts), so the gate
+binaries it pins may be absent there. That is an environment setting, not a
+`.claude/` change, and it is why `require-gates.sh` refuses a commit while a
+gate binary is missing.
 
-It runs `bun install`, not `bun install --frozen-lockfile`, for the general
-reason: this hook fires on every session start, and a lockfile that has drifted
-from `package.json` should not leave a session with no hooks at all. That was
-not always safe here, back when the project was on npm. `package.json` once
-carried a pnpm-only `patchedDependencies` entry for `@commitlint/cz-commitlint`,
-inert under npm (nothing in this project's scripts ever applied `patches/`), and
-`npm install`'s re-resolution silently dropped the matching `patched` block from
-`package-lock.json` on every run while `npm ci` left it alone, which made
-`install` unsafe for a hook that should leave the tree clean. No dependency is
-patched any more: the prompt's titles come from the `@chewygumxx/cz-commitlint`
-adapter that `config.commitizen.path` names, so nothing in dependency resolution
-depends on a field only pnpm understands, nor on a `postinstall` script.
-Verified by probe since the move to Bun: a clean `bun install` reproduces
-`bun.lock` byte-for-byte against what is committed, both from nothing and
-repeated on top of itself.
+`bun install` is safe to rerun on every session start: no dependency is patched
+and `package.json` has no `postinstall`, so a clean install reproduces
+`bun.lock` byte-for-byte.
 
 ## `hooks/lib/tools.sh`
 
