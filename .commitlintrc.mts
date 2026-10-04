@@ -65,10 +65,5 @@ export default defineConfig({
             description:
                 "Inclusion of assets ie. templates, snippets, spell, etc.",
         },
-        {
-            name: "claude",
-            fullName: "Claude",
-            description: "Claude Code assets ie. hooks, skills, agents, etc.",
-        },
     ],
 });
