@@ -58,6 +58,7 @@ mechanical rather than advisory.
 | The repository-notation statusline                         | **`statusline` skill**                             |
 | WIP snapshots onto `refs/wip`                              | **`wip` skill**                                    |
 | Markdown list continuation and the Markdown keymaps        | **`markdown-continuation` skill**                  |
+| Neovim and plugin documentation at the installed version   | **`nvim-help` skill**                              |
 | Workflows, composite actions, how a job reads a pin        | `.claude/rules/github.md`                          |
 | Filetype detection and dispatch                            | `.claude/rules/filetype.md`                        |
 | What belongs in a per-server file                          | `.claude/rules/lsp.md`                             |
