@@ -11,6 +11,7 @@
 // Also the fallback `lua/spec/nvim-lint.lua` hands markdownlint-cli2 for a
 // buffer whose project has no markdownlint configuration of its own.
 {
+    "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2/v0.23.3/schema/markdownlint-cli2-config-schema.json",
     "config": {
         // A document's frontmatter `title:` is kept equal to its first
         // heading by `util.frontmatter`, so counting the key as a heading
