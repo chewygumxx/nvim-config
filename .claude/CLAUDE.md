@@ -56,7 +56,7 @@ mechanical rather than advisory.
 | Markdown list continuation and the Markdown keymaps        | **`markdown-continuation` skill**                  |
 | Workflows, composite actions, how a job reads a pin        | `.claude/rules/github.md`                          |
 | Filetype detection and dispatch                            | `lua/filetype/CLAUDE.md`                           |
-| What belongs in a per-server file                          | `lsp/CLAUDE.md`                                    |
+| What belongs in a per-server file                          | `.claude/rules/lsp.md`                             |
 | The shared helpers and their annotation habits             | `lua/util/CLAUDE.md`                               |
 | Writing a test, and what the registry files police         | `tests/CLAUDE.md`                                  |
 | Tree-sitter queries and their layout                       | `queries/CLAUDE.md`                                |

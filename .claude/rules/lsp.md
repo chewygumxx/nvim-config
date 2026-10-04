@@ -6,23 +6,22 @@ __cgxx: |
   #
   #
   # ~chewygumxx/nvim-config.git
-  # ::: :/lsp/CLAUDE.md
+  # ::: :/.claude/rules/lsp.md
   #
   #
 
 ctime: 2026-09-27
-title: CLAUDE.md
-description: >-
-  Conventions for the per-server LSP configuration tables Neovim discovers on
-  the runtimepath.
+title: Per-server LSP configuration
+paths:
+  - "lsp/**/*"
 tags:
   - llm
   - claude
 ---
 
-# CLAUDE.md
+# Each file in `lsp/` is a whole configuration
 
-This directory is Neovim's own runtimepath convention, not a directory this
+`lsp/` is Neovim's own runtimepath convention, not a directory this
 configuration invents: `vim.lsp.enable()` resolves `lsp/<name>.lua` by the
 server's name, so the filename is load-bearing. Carry `---@type vim.lsp.Config`
 on `local M` and close with `return M`.
@@ -41,8 +40,8 @@ runtimepath than ours, so it silently won every key both set; that is how
 server's upstream config, carry its values over and write its functions afresh
 rather than `require("lspconfig.util")`, which would load nothing.
 
-`util.lsp.setup`, called from `init.lua`, enables exactly the servers this
-directory holds, and evaluates every file here at startup to do so. A file that
+`util.lsp.setup`, called from `init.lua`, enables exactly the servers `lsp/`
+holds, and evaluates every file in `lsp/` at startup to do so. A file that
 cannot load therefore takes the session down rather than one filetype, so an
 optional plugin such as schemastore is `pcall`ed, and the suite evaluates every
 file with no module allowed to be missing. mason-lspconfig only installs:
@@ -54,18 +53,18 @@ Neovim's defaults, `vim.diagnostic.config()`, the buffer-local keymaps on every
 `LspAttach`, and three helpers several servers here need. `node_cmd` prefers a
 project's own `node_modules/.bin` binary; pair it with `node_available` in the
 server's `root_dir`, since Neovim checks only a _table_ `cmd` for an executable
-and a function that cannot start one errors on every buffer it matches. `js_root`
-is the lockfile-then-`.git` root the JavaScript servers share, declining Deno
-projects. A per-server file that repeats any of that is a second opinion waiting
-to drift.
+and a function that cannot start one errors on every buffer it matches.
+`js_root` is the lockfile-then-`.git` root the JavaScript servers share,
+declining Deno projects. A per-server file that repeats any of that is a second
+opinion waiting to drift.
 
 `eslint`, `biome` and the conform spec all read the same evidence through
 `lua/util/biome.lua`, so they cannot disagree about a buffer. A repository that
 configures both eslint and Biome gets both, which is what it asked for.
 
-A new file here is not self-sufficient. `tests/test_spec.lua` asserts that
+A new file in `lsp/` is not self-sufficient. `tests/test_spec.lua` asserts that
 `lua/spec/mason-lspconfig.nvim.lua`'s `ensure_installed` holds _exactly_ the
-servers this directory configures, so adding a server without adding it there
-fails the suite, and so does the reverse. Under Termux the whole mason trio is
-condemned from `lua/plugin.lua`, and `mise.toml` is where those same servers
-come from instead, so a server added here should be reachable by both routes.
+servers `lsp/` configures, so adding a server without adding it there fails the
+suite, and so does the reverse. Under Termux the whole mason trio is condemned
+from `lua/plugin.lua`, and `mise.toml` is where those same servers come from
+instead, so a server added to `lsp/` should be reachable by both routes.
