@@ -193,21 +193,21 @@ enforced by commitlint through husky. Scopes come from a fixed list in
 capped at 50 characters, so subjects stay short. `bun run commit` walks through
 it interactively.
 
-`.claude/CLAUDE.md` is the long-form reference: what each directory is for,
-which decisions are load-bearing and why, and what a given change is likely to
-break. Read it before changing anything structural. `.claude/rules/` holds
-conventions specific to a directory, loaded on a read of a file there, and
-`.claude/skills/` holds the per-subsystem reasoning that only matters when you
-are in that subsystem.
+`.claude/CLAUDE.md` holds only the repository-wide conventions, and a table
+saying where the reasoning for each subsystem lives. Start there before changing
+anything structural. `.claude/rules/` holds conventions specific to a directory,
+loaded on a read of a file there, and `.claude/skills/` holds the per-subsystem
+reasoning that only matters when you are in that subsystem.
 
-`.claude/settings.json` wires five hooks that run if you work here through
-Claude Code, and they are worth knowing about before one surprises you: writes
-into `doc/` and `docs/` are refused because both are regenerated wholesale, a
-commit is refused while any gate binary is missing from `PATH`, Lua is formatted
-and linted at write time, a reminder fires when a change makes the generated
-`:help` stale, and whole-file reads of the wordlists and the compiled spell file
-are refused in favour of `head` or `wc`. None of them affects a normal editor
-session.
+`.claude/settings.json` wires six hooks that run if you work here through Claude
+Code, and they are worth knowing about before one surprises you: writes into
+`doc/` and `docs/` are refused because both are regenerated wholesale, a commit
+is refused while any gate binary is missing from `PATH`, every file
+`.husky/pre-commit` would gate is format-checked and linted at write time, the
+one test file covering it runs straight after, a reminder fires when a change
+makes the generated `:help` stale, and whole-file reads of the wordlists and the
+compiled spell file are refused in favour of `head` or `wc`. None of them
+affects a normal editor session.
 
 ## Licence
 
