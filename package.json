@@ -41,13 +41,8 @@
         }
     },
     "remarkConfig": {
-        "settings": {
-            "bullet": "-"
-        },
         "plugins": [
-            "remark-frontmatter",
-            "remark-preset-lint-recommended",
-            "remark-preset-lint-consistent"
+            "@chewygumxx/remark-preset"
         ]
     },
     "prettier": {
