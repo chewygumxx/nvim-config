@@ -53,8 +53,13 @@ jobs:
         continue-on-error: ${{ !matrix.required }}
 
         steps:
+            # `spell/en.utf-8.spl` is in Git LFS. Without `lfs` the runner
+            # checks out the pointer file, and the first case to set
+            # 'spell' in a Markdown or commit buffer fails on E757.
             - name: Checkout
               uses: actions/checkout@v7
+              with:
+                  lfs: true
 
             # Only the pinned leg sets up mise, so on the nightly leg no
             # shim for the pinned Neovim is on PATH to outrank the canary.

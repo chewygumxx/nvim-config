@@ -26,7 +26,13 @@
 /doc/tags   -sync-header-metadata
 
 # ---------------------
-# Binary
+# Spell
 # ---------------------
 
-spell/*.spl binary -diff -sync-header-metadata
+# The compiled dictionary is 1.4 MB of binary, so it lives in Git LFS; the
+# `.husky/` LFS hooks exist for it. The `.add` word list beside it is plain
+# text on purpose, so a new word shows up as a readable diff. Neither can
+# carry a header: a `#` line in the `.add` is legal but is rewritten by
+# nothing that understands it, and the `.spl` is opaque.
+spell/*.spl filter=lfs diff=lfs merge=lfs -text -sync-header-metadata
+spell/*.add -sync-header-metadata

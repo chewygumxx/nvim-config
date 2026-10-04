@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+# vim:set expandtab shiftwidth=4 filetype=sh:
+# SPDX-License-Identifier: GPL-3.0-only
+
+#
+#
+# ~chewygumxx/nvim-config.git
+# ::: :/.husky/pre-push
+#
+#
+
+# Git LFS's own hook, which `git lfs install` cannot place while husky owns
+# core.hooksPath. `spell/*.spl` is stored in LFS.
+command -v git-lfs >/dev/null 2>&1 || {
+    printf 'This repository uses Git LFS, but git-lfs is not on PATH.\n' >&2
+    exit 2
+}
+git lfs pre-push "$@"
