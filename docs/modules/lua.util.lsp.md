@@ -830,6 +830,58 @@ an `LspAttach` autocmd.
 
 
 
+### M.named_root
+---
+```lua
+function M.named_root(markers: string[]) -> root_dir fun(buf: integer, on_dir: fun(root_dir: string?))
+```
+
+
+
+
+
+A `root_dir` that declines a buffer with no name, and otherwise roots it
+at the nearest of markers as `root_markers` would.
+
+For a server that cannot open an unnamed buffer at all: markdown-oxide
+panics on one ("file should have file stem"), and since such a buffer
+roots at the cwd it shares that client with every named file there,
+so the one panic takes the server down for all of them. The buffer is
+marked instead, and `M.attach_when_named` attaches it once it has a
+name to give.
+
+
+
+
+
+
+
+
+### M.attach_when_named
+---
+```lua
+function M.attach_when_named() ->  nil
+```
+
+
+
+
+
+Registers the autocmd that offers a buffer `M.named_root` declined to
+every enabled server again, once it has been given a name.
+
+`:write {file}` names a buffer without firing `BufFilePost`, which only
+`:file` and `:saveas` do, so both events are watched. Only Neovim's own
+`nvim.lsp.enable` group is re-run, rather than the whole of `FileType`,
+which would also re-apply every filetype module.
+
+
+
+
+
+
+
+
 ### M.setup
 ---
 ```lua

@@ -9,11 +9,19 @@
 --
 --
 
+--- A `root_dir` rather than `root_markers`: the server panics on a buffer
+--- with no name, and that buffer would share, and so kill, the cwd's client.
+--- See `util.lsp.named_root`.
 ---@type vim.lsp.Config
 local M = {
-    cmd          = { "markdown-oxide" },
-    filetypes    = { "markdown" },
-    root_markers = { ".moxide.toml", ".git", "README", "index.md" },
+    cmd       = { "markdown-oxide" },
+    filetypes = { "markdown" },
+    root_dir  = require("util.lsp").named_root({
+        ".moxide.toml",
+        ".git",
+        "README",
+        "index.md",
+    }),
 }
 
 ---@type lsp.ClientCapabilities

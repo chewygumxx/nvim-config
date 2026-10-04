@@ -205,6 +205,7 @@ describe("util.lsp.setup", function()
     after_each(function()
         vim.diagnostic.config(original)
         vim.api.nvim_create_augroup("UtilLspAttach", { clear = true })
+        vim.api.nvim_create_augroup("cgxx.lsp_named", { clear = true })
         -- Assigned rather than passed to `vim.lsp.config("*", ...)`, which
         -- deep-merges and so could never take a key back out
         vim.lsp.config["*"] = defaults
@@ -326,5 +327,67 @@ describe("util.lsp.node_available / js_root", function()
         touch("deno.json")
         touch("web/package-lock.json")
         eq(lsp.js_root(buf_at("web/a.ts")), vim.fs.joinpath(root, "web"))
+    end)
+end)
+
+describe("util.lsp.named_root", function()
+    ---@type integer
+    local bufnr
+    ---@type string
+    local root
+
+    before_each(function()
+        root = vim.fn.tempname()
+        vim.fn.mkdir(root .. "/notes", "p")
+        vim.fn.writefile({}, root .. "/.moxide.toml")
+        -- Not a scratch buffer: `vim.fs.root` searches from the cwd for
+        -- any buffer whose 'buftype' is set
+        bufnr = vim.api.nvim_create_buf(false, false)
+    end)
+
+    after_each(function()
+        vim.api.nvim_buf_delete(bufnr, { force = true })
+        vim.fn.delete(root, "rf")
+    end)
+
+    it("declines a buffer with no name, and marks it", function()
+        ---@type boolean
+        local called = false
+        lsp.named_root({ ".moxide.toml" })(bufnr, function()
+            called = true
+        end)
+        eq(called, false)
+        eq(vim.b[bufnr].cgxx_lsp_unnamed, true)
+    end)
+
+    it("roots a named buffer at the nearest marker", function()
+        vim.api.nvim_buf_set_name(bufnr, root .. "/notes/a.md")
+        ---@type string?
+        local found
+        lsp.named_root({ ".moxide.toml" })(bufnr, function(dir)
+            found = dir
+        end)
+        eq(found, root)
+    end)
+end)
+
+describe("util.lsp.attach_when_named", function()
+    after_each(function()
+        vim.api.nvim_del_augroup_by_name("cgxx.lsp_named")
+    end)
+
+    it("watches both ways a buffer gains a name", function()
+        lsp.attach_when_named()
+        ---@type string[]
+        local events = {}
+        for _, autocmd in ipairs(
+            vim.api.nvim_get_autocmds({
+                group = "cgxx.lsp_named",
+            })
+        ) do
+            events[#events + 1] = autocmd.event
+        end
+        table.sort(events)
+        eq(events, { "BufFilePost", "BufWritePost" })
     end)
 end)

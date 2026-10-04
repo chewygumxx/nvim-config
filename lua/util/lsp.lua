@@ -463,6 +463,55 @@ M.on_attach = function(buf, client)
     M.workspace_symbols(buf)
 end
 
+--- A `root_dir` that declines a buffer with no name, and otherwise roots it
+--- at the nearest of markers as `root_markers` would.
+---
+--- For a server that cannot open an unnamed buffer at all: markdown-oxide
+--- panics on one ("file should have file stem"), and since such a buffer
+--- roots at the cwd it shares that client with every named file there,
+--- so the one panic takes the server down for all of them. The buffer is
+--- marked instead, and `M.attach_when_named` attaches it once it has a
+--- name to give.
+---@param markers string[]
+---@return fun(buf: integer, on_dir: fun(root_dir?: string)) root_dir
+M.named_root = function(markers)
+    return function(buf, on_dir)
+        if vim.api.nvim_buf_get_name(buf) == "" then
+            vim.b[buf].cgxx_lsp_unnamed = true
+            return
+        end
+        on_dir(vim.fs.root(buf, markers))
+    end
+end
+
+--- Registers the autocmd that offers a buffer `M.named_root` declined to
+--- every enabled server again, once it has been given a name.
+---
+--- `:write {file}` names a buffer without firing `BufFilePost`, which only
+--- `:file` and `:saveas` do, so both events are watched. Only Neovim's own
+--- `nvim.lsp.enable` group is re-run, rather than the whole of `FileType`,
+--- which would also re-apply every filetype module.
+---@return nil
+M.attach_when_named = function()
+    vim.api.nvim_create_autocmd({ "BufFilePost", "BufWritePost" }, {
+        group    = vim.api.nvim_create_augroup("cgxx.lsp_named", {
+            clear = true,
+        }),
+        desc     = "Attach LSP to a buffer that has just been given a name",
+        callback = function(event)
+            if not vim.b[event.buf].cgxx_lsp_unnamed
+                or vim.api.nvim_buf_get_name(event.buf) == "" then
+                return
+            end
+            vim.b[event.buf].cgxx_lsp_unnamed = nil
+            pcall(vim.api.nvim_exec_autocmds, "FileType", {
+                group  = "nvim.lsp.enable",
+                buffer = event.buf,
+            })
+        end,
+    })
+end
+
 --- Applies global diagnostic config and capabilities, wires `M.on_attach`
 --- up to `LspAttach`, and enables every server `lsp/` configures.
 ---
@@ -493,6 +542,8 @@ M.setup = function()
             M.on_attach(event.buf, client)
         end,
     })
+
+    M.attach_when_named()
 end
 
 return M
