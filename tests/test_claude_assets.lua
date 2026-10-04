@@ -488,10 +488,9 @@ describe("claude assets", function()
         -- session and every subagent regardless of relevance, so its
         -- length is a standing cost rather than one paid when the subject
         -- comes up. Everything it could say instead has a destination that
-        -- costs nothing until something in scope is read: a skill, a rule,
-        -- or the directory's own `CLAUDE.md`. A failure here is therefore
-        -- an instruction to move a reason somewhere narrower, not to write
-        -- a shorter one.
+        -- costs nothing until something in scope is read: a skill or a
+        -- path-scoped rule. A failure here is therefore an instruction to
+        -- move a reason somewhere narrower, not to write a shorter one.
         --
         -- The cap is mechanical because care at write time demonstrably
         -- does not hold it. On 2026-09-27 the file went from 8609 words to

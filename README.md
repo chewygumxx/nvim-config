@@ -192,10 +192,10 @@ it interactively.
 
 `.claude/CLAUDE.md` is the long-form reference: what each directory is for,
 which decisions are load-bearing and why, and what a given change is likely to
-break. Read it before changing anything structural. Several directories carry
-their own `CLAUDE.md` with conventions specific to them, and `.claude/skills/`
-holds the per-subsystem reasoning that only matters when you are in that
-subsystem.
+break. Read it before changing anything structural. `.claude/rules/` holds
+conventions specific to a directory, loaded on a read of a file there, and
+`.claude/skills/` holds the per-subsystem reasoning that only matters when you
+are in that subsystem.
 
 `.claude/settings.json` wires five hooks that run if you work here through
 Claude Code, and they are worth knowing about before one surprises you: writes

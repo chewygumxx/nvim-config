@@ -63,10 +63,9 @@ mechanical rather than advisory.
 | `scripts/`, `types/`, `snippets/`, `.repo-metadata.jsonc`  | a rule in `.claude/rules/`, loaded on a read there |
 
 `README.md` holds the directory layout, the requirements and the gate commands.
-The skills load when their subsystem is touched; the directory files load on a
-read in their directory; the rules load on a read of a path they scope. None of
-them costs anything until then, which is why they are the right destination and
-this file is not.
+The skills load when their subsystem is touched and the rules load on a read of
+a path they scope. None of them costs anything until then, which is why they are
+the right destination and this file is not.
 
 ## Architecture
 

@@ -45,8 +45,7 @@ Lua at write time, and reporting that the generated help has gone stale. A sixth
 hook, `install-deps.sh`, is not one of these: it fires on `SessionStart` rather
 than `PreToolUse`/`PostToolUse`, and it bootstraps a cloud session's
 `node_modules` rather than making an advisory rule mechanical. See
-`install-deps.sh` below for why it exists and what it deliberately leaves
-alone.
+`install-deps.sh` below for why it exists and what it deliberately leaves alone.
 
 **A newly added agent is not selectable as a `subagent_type` until the session
 restarts**, so the session that writes one cannot use it. A skill is not like
@@ -201,37 +200,37 @@ rejected.
 The one `SessionStart` hook here, and the answer to "why does a cloud session
 need `bun install` run by hand": a cloud session starts from a bare clone, and
 `core.hooksPath` stays unset, husky's git hooks stay unwired, and
-`commit-msg`/`.husky/pre-commit` never fire, until something runs
-`bun install`. Nothing about that is specific to this repository; it is true
-of any project that gates commits through husky. Established by doing exactly
-this by hand mid-session, more than once, before the hook existed: a commit
-went through with no `Claude-Session:` trailer question or gate failure
-reported at all, because nothing was wired to ask either question.
+`commit-msg`/`.husky/pre-commit` never fire, until something runs `bun install`.
+Nothing about that is specific to this repository; it is true of any project
+that gates commits through husky. Established by doing exactly this by hand
+mid-session, more than once, before the hook existed: a commit went through with
+no `Claude-Session:` trailer question or gate failure reported at all, because
+nothing was wired to ask either question.
 
-It runs only when `$CLAUDE_CODE_REMOTE` is `true`, and it deliberately does
-not attempt `mise install`. Both are the same fact stated from two directions:
-a cloud environment's network policy can block the hosts `mise` downloads
-from (established by probe, in a session where `mise install` hung against
-exactly those hosts), and a hook committed to this repository cannot change
-that policy. Fixing it, if it needs fixing, is an environment setting, not a
-`.claude/` change; the gate binaries `mise` would otherwise supply stay
-whatever they were before this hook ran.
+It runs only when `$CLAUDE_CODE_REMOTE` is `true`, and it deliberately does not
+attempt `mise install`. Both are the same fact stated from two directions: a
+cloud environment's network policy can block the hosts `mise` downloads from
+(established by probe, in a session where `mise install` hung against exactly
+those hosts), and a hook committed to this repository cannot change that policy.
+Fixing it, if it needs fixing, is an environment setting, not a `.claude/`
+change; the gate binaries `mise` would otherwise supply stay whatever they were
+before this hook ran.
 
 It runs `bun install`, not `bun install --frozen-lockfile`, for the general
-reason: this hook fires on every session start, and a lockfile that has
-drifted from `package.json` should not leave a session with no hooks at all.
-That was not always safe here, back when the project was on npm. `package.json` once carried a pnpm-only `patchedDependencies`
-entry for `@commitlint/cz-commitlint`, inert under npm (nothing in this
-project's scripts ever applied `patches/`), and `npm install`'s re-resolution
-silently dropped the matching `patched` block from `package-lock.json` on
-every run while `npm ci` left it alone, which made `install` unsafe for a
-hook that should leave the tree clean. No dependency is patched any more: the
-prompt's titles come from the `@chewygumxx/cz-commitlint` adapter that
-`config.commitizen.path` names, so nothing in dependency resolution depends
-on a field only pnpm understands, nor on a `postinstall` script. Verified by
-probe since the move to Bun: a clean `bun install` reproduces `bun.lock`
-byte-for-byte against what is committed, both from nothing and repeated on
-top of itself.
+reason: this hook fires on every session start, and a lockfile that has drifted
+from `package.json` should not leave a session with no hooks at all. That was
+not always safe here, back when the project was on npm. `package.json` once
+carried a pnpm-only `patchedDependencies` entry for `@commitlint/cz-commitlint`,
+inert under npm (nothing in this project's scripts ever applied `patches/`), and
+`npm install`'s re-resolution silently dropped the matching `patched` block from
+`package-lock.json` on every run while `npm ci` left it alone, which made
+`install` unsafe for a hook that should leave the tree clean. No dependency is
+patched any more: the prompt's titles come from the `@chewygumxx/cz-commitlint`
+adapter that `config.commitizen.path` names, so nothing in dependency resolution
+depends on a field only pnpm understands, nor on a `postinstall` script.
+Verified by probe since the move to Bun: a clean `bun install` reproduces
+`bun.lock` byte-for-byte against what is committed, both from nothing and
+repeated on top of itself.
 
 ## `hooks/lib/tools.sh`
 
@@ -271,13 +270,15 @@ loaded into every session and every subagent regardless of relevance, and
 hand-restraint demonstrably does not hold it: on 2026-09-27 it went from 8609
 words to 2432 across seven extraction commits and was back to 2506 within the
 hour. A failure there is an instruction to move a reason somewhere narrower
-rather than to write a shorter one, since a skill, a rule and a directory
-`CLAUDE.md` all cost nothing until something in scope is read.
+rather than to write a shorter one, since a skill and a rule both cost nothing
+until something in scope is read.
 
 Its reach stops at `.claude/`. **No workflow or hook globs `*.md`**: prettier
 takes `*.json`, `*.jsonc`, `*.yaml` and `*.yml` and nothing else, in both
-`.husky/pre-commit` and CI. So the directory `CLAUDE.md` files scattered through
-the repository are reached by no gate at all, and correctness in them is
-entirely a matter of care at write time.
+`.husky/pre-commit` and CI. A Markdown file outside `.claude/` is therefore
+reached by no gate at all. That is one more reason the per-directory notes are
+rules under `.claude/rules/` rather than `CLAUDE.md` files beside the code they
+describe: a path a rule names is checked like any other, where a directory
+`CLAUDE.md` would rely entirely on care at write time.
 
 `/fresh` is the end-of-session pass over the half no gate can reach.
