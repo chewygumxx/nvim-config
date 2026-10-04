@@ -22,13 +22,17 @@ tags:
 
 # CLAUDE.md
 
-Absolutely no em dashes are to be employed within this repository.
+Continuously granularly commit as you work. Compose single-line commit messages
+whenever appropriate. If the granular commit does indeed warrant further
+context, include such within the commit message body.
 
-Ensure any printed conversation output line length is limited to 80 characters
-except where it may be unfeasable to do so eg. URL.
+When appropriate and worthwhile to compact, append the following
+newline-delimited items to your response:
 
-For all work performed in this repository, please compose single-line commit
-messages for granular commits and continuously commit as you work.
+- A `/compact <summary>`
+- Appraisal rating scaled 1-100
+- Risk assessment rating scaled 1-100
+- Terse single-sentence justification.
 
 ## What this repository is
 
