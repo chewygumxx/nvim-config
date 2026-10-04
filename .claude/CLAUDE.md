@@ -105,7 +105,7 @@ reaches no narrower file.
   under `lua/util/`.
 - **Commit messages**: Conventional Commits, enforced by commitlint and husky.
   Scope is optional and several can be joined with `/`, but nothing outside
-  `.commitlintrc.mts`'s `scope.enum` is accepted, **including a type name**:
+  the `scopes` in `.commitlintrc.mts` is accepted, **including a type name**:
   `docs(ci)` is rejected, since `ci` is a type rather than a scope.
   `header-max-length` caps the whole `type(scope): Subject` header at 50
   characters, so keep subjects short.
