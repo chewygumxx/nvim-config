@@ -14,11 +14,11 @@
 
     "files": {
         "includes": [
+            "**",
+
             // lazy.nvim writes `lazy-lock.json` itself, one line per plugin at
             // two-space indent
-            "lazy-lock.json",
-
-            "**"
+            "!lazy-lock.json"
         ]
     }
 }
