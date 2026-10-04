@@ -12,6 +12,62 @@
 ## methods
 ---
 
+### M.description
+---
+```lua
+function M.description(description: string) -> lines string[]
+```
+
+
+
+
+
+Renders a `description:` key, folded when its value would not sit on
+one line as plain YAML.
+
+Folded (`>-`, so the value keeps no trailing newline) when the value is
+longer than `M.description_limit` or is anything `util.text.yaml_scalar`
+would have to quote, since a block scalar needs no quoting at all. An
+empty value is a bare key, YAML's null, because a folded scalar with no
+body would read the next key as its content.
+
+Shared with `util.frontmatter`, which rewrites a hand-written value into
+this same form on save.
+
+
+
+
+
+
+
+
+### M.box
+---
+```lua
+function M.box(
+  slug: string?,
+  fork_slug: string?,
+  path: string?
+) -> lines string[]
+```
+
+
+
+
+
+The lines of the HTML comment box naming a file's repository and path,
+`<!--` to `-->` inclusive.
+
+Every line inside opens `   - `, aligning the dashes under the `!` of
+`<!--`, the way a C block comment aligns its `*`s.
+
+
+
+
+
+
+
+
 ### M.frontmatter
 ---
 ```lua
@@ -27,22 +83,25 @@ function M.frontmatter(opt: util.FrontmatterOpt {
     description = string?,
     tags = string[]?,
     ctime = string?,
-}) -> lines string[]
+    mtime = string?,
+}) -> frontmatter util.Frontmatter {
+    head = string[],
+    tail = string[],
+}
 ```
 
 
 
 
 
-Renders a Markdown file's YAML frontmatter, opening `---` to closing
-`---` inclusive.
+Renders a Markdown file's header: YAML frontmatter and the boxed
+repository notation at its head, and the modeline at its foot.
 
-The modeline and the boxed repository notation live inside a `__cgxx: |`
-literal block scalar rather than above the frontmatter, so that a file
-opens with both a valid YAML document at its head and a modeline Vim
-still reads. Inside that block the comment syntax is the frontmatter's
-own (`# %s`) and not the buffer's, which is why nothing here consults
-'commentstring'.
+The frontmatter is plain data, so a YAML parser sees nothing it does
+not need. The repository box is an HTML comment, which no renderer
+shows. The modeline goes last, since Vim reads one from the final
+'modelines' lines as readily as from the first and frontmatter must
+open on line 1.
 
 Shared with `util.nex`, which renders the same shape for a note: this is
 the one description of the format, so a change here reaches both.
@@ -89,6 +148,38 @@ Markdown one.
 
 
 
+### M.locate
+---
+```lua
+function M.locate(file: string) -> location util.HeaderLocation {
+    path = string,
+    slug = string?,
+    fork_slug = string?,
+    upstream = string?,
+}
+```
+
+
+
+
+
+Where file lives, as the header box names it.
+
+A fork is boxed upstream first and the fork beneath it, so when an
+`upstream` remote exists its slug is what `slug` holds and the file's
+own repository moves to `fork_slug`. Anything under `~/.config` is the
+dotfiles repository's, at the path chezmoi gives it there.
+
+Split out of `M.insert` because `util.frontmatter` re-derives the same
+box on every save, to follow a file that has been renamed or moved.
+
+
+
+
+
+
+
+
 ### M.insert
 ---
 ```lua
@@ -107,8 +198,9 @@ function M.insert(
 
 
 
-Prepends buf with a templated header (modeline, SPDX line, repo slug
-and path), then Markdown frontmatter if buf's filetype is "markdown".
+Inserts a templated header into buf: the plain-comment form (modeline,
+SPDX line, repository box) at its head, or for a "markdown" buffer the
+frontmatter and box at its head and the modeline at its foot.
 
 
 
@@ -169,6 +261,29 @@ function M.setup() ->  nil
 Registers the `XXInsertHeader` user command and its supporting autocmds.
 
 
+
+
+
+
+
+
+
+
+
+## fields
+---
+
+### M.description_limit
+---
+```lua
+M.description_limit : integer
+```
+
+
+
+A `description:` longer than this is folded rather than left on one
+line. 66 rather than 80 because the key and its separator take the
+difference, so a value at this length still ends within 80 columns.
 
 
 

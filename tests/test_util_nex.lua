@@ -85,42 +85,42 @@ describe("util.nex", function()
         eq(nex.yaml_scalar('a "b" \\ c'), '"a \\"b\\" \\\\ c"')
     end)
 
-    it("renders frontmatter delimiters and the __cgxx block", function()
+    it("opens on frontmatter and closes on the modeline", function()
         local lines = nex.render(note)
         eq(lines[1], "---")
-        eq(lines[2], "__cgxx: |")
+        eq(lines[2], "ctime: 2026-09-26")
         eq(
-            lines[3],
-            "  # vim:set expandtab shiftwidth=2 "
-                .. "filetype=markdown.nex-note foldlevel=3:"
+            lines[#lines],
+            "<!-- vim:set expandtab shiftwidth=2 "
+                .. "filetype=markdown.nex-note foldlevel=3: -->"
         )
     end)
 
     it("renders the boxed repo slug and root-relative path", function()
         local lines = nex.render(note)
-        eq(index_of(lines, "  # ~chewygumxx/nex.git") ~= nil, true)
+        eq(index_of(lines, "   - ~chewygumxx/nex.git") ~= nil, true)
         eq(
             index_of(
                 lines,
-                "  # ::: :/note/2026-09-26-some-note-title.note.md"
+                "   - ::: :/note/2026-09-26-some-note-title.note.md"
             ) ~= nil,
             true
         )
     end)
 
-    it("renders ctime, title and a folded description", function()
+    it("renders ctime, title and a short description inline", function()
+        -- Folded only past `util.header.description_limit`, or when YAML
+        -- would need the value quoted
         local lines = nex.render(note)
         eq(index_of(lines, "ctime: 2026-09-26") ~= nil, true)
         eq(index_of(lines, "title: Some Note Title") ~= nil, true)
-        local desc = index_of(lines, "description: >-")
-        eq(desc ~= nil, true)
-        eq(lines[desc + 1], "  A short description.")
+        eq(index_of(lines, "description: A short description.") ~= nil, true)
     end)
 
-    it("renders an empty description as an empty flow scalar", function()
+    it("renders an empty description as a bare key", function()
         note.description = ""
         local lines      = nex.render(note)
-        eq(index_of(lines, 'description: ""') ~= nil, true)
+        eq(index_of(lines, "description:") ~= nil, true)
         eq(index_of(lines, "description: >-"), nil)
     end)
 
@@ -146,25 +146,34 @@ describe("util.nex", function()
         eq(lines[tags + 2], "  - nvim")
     end)
 
-    it("renders an empty tag list as an empty flow sequence", function()
+    it("renders an empty tag list as a bare key", function()
         note.tags   = {}
         local lines = nex.render(note)
-        eq(index_of(lines, "tags: []") ~= nil, true)
-        eq(index_of(lines, "tags:"), nil)
+        local tags  = index_of(lines, "tags:")
+        eq(tags ~= nil, true)
+        eq(lines[tags + 1], "---")
     end)
 
-    it("closes the frontmatter and opens with a heading 1", function()
+    it("boxes the repository between frontmatter and heading", function()
         local lines = nex.render(note)
-        eq(lines[#lines - 4], "---")
-        eq(lines[#lines - 3], "")
-        eq(lines[#lines - 2], "# Some Note Title")
+        eq(lines[#lines - 6], "   -->")
+        eq(lines[#lines - 5], "")
+        eq(lines[#lines - 4], "# Some Note Title")
     end)
 
-    it("ends on a blank line separated from the heading", function()
-        local lines = nex.render(note)
-        eq(lines[#lines - 1], "")
-        eq(lines[#lines], "")
-    end)
+    it(
+        "leaves the cursor's line blank, between heading and modeline",
+        function()
+            local lines  = nex.render(note)
+            local cursor = #lines - nex.cursor_offset
+            eq({ lines[cursor - 1], lines[cursor], lines[cursor + 1] }, {
+                "",
+                "",
+                "",
+            })
+            eq(lines[cursor - 2], "# Some Note Title")
+        end
+    )
 
     it("leaves no trailing whitespace on any rendered line", function()
         for _, line in ipairs(nex.render(note)) do

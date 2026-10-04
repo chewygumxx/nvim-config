@@ -134,6 +134,11 @@ M.path = function(note)
     return M.root .. "/" .. M.subdir .. "/" .. M.filename(note)
 end
 
+--- How many lines above the end of a freshly rendered note the cursor is
+--- left: past the modeline and the blank line separating it from the body.
+---@type integer
+M.cursor_offset = 2
+
 --- Renders note as the full text of its file.
 ---@param note cgxx.nex.Note
 ---@return string[] lines
@@ -145,7 +150,7 @@ M.render = function(note)
     -- differs from that only in what it fills in: its own compound
     -- filetype, the `nex` repository rather than the file's own, and no
     -- SPDX line, notes not being licensed source.
-    local lines = util_header.frontmatter({
+    local header = util_header.frontmatter({
         slug        = M.slug,
         path        = ":/" .. M.subdir .. "/" .. M.filename(note),
         filetype    = M.filetype,
@@ -156,15 +161,18 @@ M.render = function(note)
         tags        = note.tags,
     })
 
-    -- Two trailing blanks, not one: the cursor lands on the last of them,
-    -- so the first thing typed is separated from the heading by a blank
-    -- line rather than butting straight up against it.
-    vim.list_extend(lines, {
+    -- Two blanks under the heading, not one: the cursor lands on the second
+    -- (`M.cursor_offset` lines above the end), so the first thing typed is
+    -- separated from the heading by a blank line rather than butting
+    -- straight up against it, and from the modeline by another.
+    local lines = vim.list_extend(header.head, {
         "",
         "# " .. note.title,
         "",
         "",
+        "",
     })
+    vim.list_extend(lines, header.tail)
 
     return lines
 end
@@ -292,7 +300,10 @@ M.create = function(note)
 
     -- Synchronous, so that `lua/autocmd.lua`'s scheduled last-position
     -- restore sees a cursor that is no longer at (1, 0) and backs off.
-    vim.api.nvim_win_set_cursor(0, { vim.api.nvim_buf_line_count(0), 0 })
+    vim.api.nvim_win_set_cursor(0, {
+        vim.api.nvim_buf_line_count(0) - M.cursor_offset,
+        0,
+    })
     vim.cmd.startinsert()
 end
 

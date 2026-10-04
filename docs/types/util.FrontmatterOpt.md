@@ -95,7 +95,7 @@ FrontmatterOpt.spdx : string?
 
 
 
-SPDX identifier; the line is omitted without one
+SPDX identifier; the key is omitted without one
 
 
 
@@ -163,7 +163,7 @@ FrontmatterOpt.description : string?
 
 
 
-Body of the folded `description:` scalar
+Value of `description:`, folded if long
 
 
 
@@ -198,6 +198,23 @@ FrontmatterOpt.ctime : string?
 
 
 YYYY-MM-DD (default: today)
+
+
+
+
+
+
+
+
+### FrontmatterOpt.mtime
+---
+```lua
+FrontmatterOpt.mtime : string?
+```
+
+
+
+YYYY-MM-DD (default: ctime)
 
 
 

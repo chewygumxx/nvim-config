@@ -44,7 +44,7 @@ M.indent = 24
 
 --- Comment syntax the header box is rendered in. Help files have no
 --- comment syntax at all, so one is assumed rather than derived, the way
---- `util.header.frontmatter` assumes the same `# %s` inside frontmatter.
+--- `util.header.frontmatter` assumes an HTML comment for Markdown.
 ---@type string
 local commentstring = "# %s"
 

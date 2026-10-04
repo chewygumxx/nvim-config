@@ -545,4 +545,22 @@ Full-path pattern (for `vim.filetype.add`) matching a note.
 
 
 
+### M.cursor_offset
+---
+```lua
+M.cursor_offset : integer
+```
+
+
+
+How many lines above the end of a freshly rendered note the cursor is
+left: past the modeline and the blank line separating it from the body.
+
+
+
+
+
+
+
+
 

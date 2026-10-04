@@ -106,32 +106,44 @@ describe("util.header.insert", function()
         local bufnr = opened(md, "markdown")
         header.insert(md, bufnr)
 
-        -- The modeline, SPDX line and box sit inside the `__cgxx: |` block
-        -- scalar, indented two spaces, so the file opens with a valid YAML
-        -- document at its head and a modeline Vim still reads
+        -- Frontmatter and box at the head, modeline at the foot: the file
+        -- opens with a valid YAML document and Vim still reads a modeline
+        -- from its last lines
+        local today = tostring(os.date("%Y-%m-%d"))
         eq(lines_of(bufnr), {
             "---",
-            "__cgxx: |",
-            "  # vim:set expandtab shiftwidth=2 filetype=markdown foldlevel=3:",
-            "  # SPDX-License-Identifier: GPL-3.0-only",
-            "",
-            "  #",
-            "  #",
-            "  # ~example-owner/example-repo.git",
-            "  # ::: :/note.md",
-            "  #",
-            "  #",
-            "",
-            "ctime: " .. os.date("%Y-%m-%d"),
+            "ctime: " .. today,
+            "mtime: " .. today,
+            "spdx: GPL-3.0-only",
             "title: XXTITLE",
-            'description: ""',
-            "tags: []",
+            "description:",
+            "tags:",
             "---",
+            "",
+            "<!--",
+            "   -",
+            "   - ~example-owner/example-repo.git",
+            "   - ::: :/note.md",
+            "   -",
+            "   -->",
             "",
             "# XXTITLE",
             "",
             "body",
+            "",
+            "<!-- vim:set expandtab shiftwidth=2 filetype=markdown" .. " foldlevel=3: -->",
         })
+    end)
+
+    it("does not double a blank line the body already ends on", function()
+        local md = dir .. "/new.md"
+        vim.fn.writefile({ "" }, md)
+        local bufnr = opened(md, "markdown")
+        header.insert(md, bufnr)
+
+        local lines = lines_of(bufnr)
+        eq({ lines[#lines - 2], lines[#lines - 1] }, { "", "" })
+        eq(lines[#lines - 3], "# XXTITLE")
     end)
 
     it("leaves a compound markdown filetype to its own renderer", function()
@@ -252,117 +264,109 @@ describe("util.header.frontmatter", function()
     -- `util.nex.render` for a note, so the cases below cover the arguments
     -- only one of those two supplies.
 
-    it("omits the SPDX line when given no identifier", function()
+    it("omits the spdx key when given no identifier", function()
         -- What a note does: `util.nex` passes no `spdx`, notes not being
-        -- licensed source, and the blank line after the modeline stays
-        eq(
-            header.frontmatter({ title = "T", slug = "o/r", path = ":/a.md" }),
-            {
+        -- licensed source
+        eq(header.frontmatter({
+            title = "T",
+            slug  = "o/r",
+            path  = ":/a.md",
+            ctime = "2026-10-05",
+        }), {
+            head = {
                 "---",
-                "__cgxx: |",
-                "  # vim:set expandtab shiftwidth=2 filetype=markdown:",
-                "",
-                "  #",
-                "  #",
-                "  # ~o/r.git",
-                "  # ::: :/a.md",
-                "  #",
-                "  #",
-                "",
-                "ctime: " .. os.date("%Y-%m-%d"),
+                "ctime: 2026-10-05",
+                "mtime: 2026-10-05",
                 "title: T",
-                'description: ""',
-                "tags: []",
+                "description:",
+                "tags:",
                 "---",
-            }
-        )
+                "",
+                "<!--",
+                "   -",
+                "   - ~o/r.git",
+                "   - ::: :/a.md",
+                "   -",
+                "   -->",
+            },
+            tail = {
+                "<!-- vim:set expandtab shiftwidth=2 filetype=markdown: -->",
+            },
+        })
     end)
 
     it("names both repositories of a fork", function()
-        eq(
-            header.frontmatter({
-                title     = "T",
-                slug      = "upstream/repo",
-                fork_slug = "chewygumxx/repo",
-                path      = ":/a.md",
-            })[7],
-            "  # ~upstream/repo.git"
-        )
-        eq(
-            header.frontmatter({
-                title     = "T",
-                slug      = "upstream/repo",
-                fork_slug = "chewygumxx/repo",
-                path      = ":/a.md",
-            })[8],
-            "  # └─> ~chewygumxx/repo.git"
-        )
+        local head = header.frontmatter({
+            title     = "T",
+            slug      = "upstream/repo",
+            fork_slug = "chewygumxx/repo",
+            path      = ":/a.md",
+        }).head
+        eq(vim.list_slice(head, 11, 13), {
+            "   - ~upstream/repo.git",
+            "   - └─> ~chewygumxx/repo.git",
+            "   - ::: :/a.md",
+        })
     end)
 
     it("boxes a bare path when no repository names it", function()
         -- No slug means no `:::` prefix either: that notation is
         -- repository-relative and would be a claim the path cannot support
-        local lines = header.frontmatter({
+        local head = header.frontmatter({
             title = "T",
             path  = "~/loose/a.md",
-        })
-        eq(lines[7], "  # ~/loose/a.md")
+        }).head
+        eq(head[#head - 2], "   - ~/loose/a.md")
     end)
 
-    it("wraps a folded description at 80 columns including indent", function()
-        local lines = header.frontmatter({
-            title       = "T",
-            description = string.rep("word ", 40),
-        })
-        -- The folded scalar's body is every indented line after the key,
-        -- and stops at the next one: `tags:` follows it at column one
-        ---@type string[]
-        local wrapped = {}
-        ---@type boolean
-        local inside = false
-        for _, line in ipairs(lines) do
-            if inside and line:sub(1, 2) ~= "  " then
-                inside = false
-            end
-            if inside then
-                wrapped[#wrapped + 1] = line
-            end
-            if line == "description: >-" then
-                inside = true
-            end
-        end
+    it("leaves a short, plain description on one line", function()
+        eq(header.description("A short one."), { "description: A short one." })
+    end)
 
-        eq(#wrapped > 1, true)
-        for _, line in ipairs(wrapped) do
+    it("folds a description past the limit", function()
+        local lines = header.description(string.rep("word ", 40))
+        eq(lines[1], "description: >-")
+        eq(#lines > 2, true)
+        for index = 2, #lines do
+            local line = lines[index]
             eq({ line, #line <= 80, line:sub(1, 2) }, { line, true, "  " })
         end
+    end)
+
+    it("folds a short description YAML would need quoted", function()
+        eq(header.description("Note: this"), {
+            "description: >-",
+            "  Note: this",
+        })
     end)
 
     it(
         "renders tags as a block sequence, quoting where YAML needs it",
         function()
-            local lines = header.frontmatter({
+            local head = header.frontmatter({
                 title = "T",
                 tags  = { "config", "a: colon" },
-            })
+            }).head
+            local tags = vim.fn.index(head, "tags:") + 1
 
-            eq({ lines[#lines - 3], lines[#lines - 2], lines[#lines - 1] }, {
+            eq(vim.list_slice(head, tags, tags + 3), {
                 "tags:",
                 "  - config",
                 '  - "a: colon"',
+                "---",
             })
         end
     )
 
     it("leaves no trailing whitespace on any rendered line", function()
-        local lines = header.frontmatter({
+        local header_lines = header.frontmatter({
             title = "T",
             slug  = "o/r",
             path  = ":/a.md",
             spdx  = "GPL-3.0-only",
         })
 
-        for _, line in ipairs(lines) do
+        for _, line in ipairs(header_lines.head) do
             eq({ line, line:find("%s$") }, { line, nil })
         end
     end)
