@@ -18,7 +18,11 @@ local M = {}
 
 local markdown = require("filetype.markdown")
 
-M.local_opts   = markdown.local_opts
+-- A copy rather than the table itself, which `filetype.nex_note` aliases:
+-- assigning into an alias would hand every Markdown buffer this width
+M.local_opts   = vim.tbl_extend("force", markdown.local_opts, {
+    textwidth = 80,
+})
 M.hlgroup_defs = markdown.hlgroup_defs
 
 --- Moves the cursor past the last-response divider line (if present, see
