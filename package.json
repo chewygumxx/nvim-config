@@ -14,7 +14,6 @@
         "bun": ">=1.4"
     },
     "devDependencies": {
-        "@chewygumxx/cz-commitlint": "^1.0.2",
         "@commitlint/cli": "^21.2.2",
         "@commitlint/config-conventional": "^21.2.2",
         "commitizen": "^4.3.2",
@@ -23,11 +22,17 @@
         "remark-frontmatter": "^5.0.0",
         "remark-preset-lint-consistent": "^6.0.1",
         "remark-preset-lint-recommended": "^7.0.1",
-        "typescript": "^7.0.2"
+        "typescript": "^7.0.2",
+        "@chewygumxx/cz-commitlint": "^1.0.2",
+        "@chewygumxx/biome-config": "^1.0.1",
+        "@chewygumxx/commitlint-config": "^1.1.0",
+        "@chewygumxx/remark-preset": "^1.0.3",
+        "@chewygumxx/yamllint-config": "^1.0.1",
+        "sync-header-metadata": "^2.4.2"
     },
     "scripts": {
         "commit": "cz",
-        "prepare": "test -d node_modules/husky && husky || true",
+        "prepare": "husky",
         "typecheck": "tsc"
     },
     "config": {
