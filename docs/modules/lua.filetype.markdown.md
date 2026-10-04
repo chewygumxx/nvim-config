@@ -63,7 +63,7 @@ M.local_opts : { [string]: (boolean|string|number) }
 'formatlistpat' at all. `comments` drops the bundled ftplugin's `fb:-`,
 `fb:*` and `fb:+`, keeping only the blockquote: as comment leaders they
 outrank 'formatlistpat' and always hang by two columns, whatever follows
-the bullet.
+the bullet. See `util.markdown_format` for 'formatexpr'.
 
 
 

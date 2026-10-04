@@ -69,3 +69,17 @@ Markdown filetypes cannot inherit that by being Markdown. `filetype.nex_note`
 aliases `markdown.setup` outright, and `filetype.agentprompt` calls it before
 its own work. **Adding to `markdown.setup` is therefore what covers all three**;
 adding a mapping anywhere else covers only plain Markdown.
+
+## `gq`, auto-wrap and the hanging indent
+
+The indent under a wrapped list item, two columns under `- ` and six under
+`- [ ] `, is not computed: it is `n` in 'formatoptions' reading
+'formatlistpat', which `filetype.markdown` widens to recognise a checkbox. That
+only works because `comments` is trimmed to `n:>`. The ftplugin's `fb:-` and its
+siblings make a bullet a comment leader, and a comment leader outranks
+'formatlistpat' and always hangs by two columns.
+
+`util.markdown_format` is the 'formatexpr'. It hands `gq` to the internal
+formatter one prose run at a time, skipping fences, frontmatter, HTML blocks and
+pipe tables, and declines auto-wrap on a line inside one. Tree-sitter finds the
+blocks; a line scan stands in for frontmatter and fences when it cannot parse.

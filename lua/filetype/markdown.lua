@@ -29,7 +29,7 @@ local formatlistpat = [=[^\s*\%([-*+]\|\d\+[.)]\)\s\+\%(\[[ xX]\]\s\+\)\=]=]
 --- 'formatlistpat' at all. `comments` drops the bundled ftplugin's `fb:-`,
 --- `fb:*` and `fb:+`, keeping only the blockquote: as comment leaders they
 --- outrank 'formatlistpat' and always hang by two columns, whatever follows
---- the bullet.
+--- the bullet. See `util.markdown_format` for 'formatexpr'.
 ---@type { [string]: number | string | boolean }
 M.local_opts = {
     shiftwidth    = 2,
@@ -37,6 +37,7 @@ M.local_opts = {
     autoindent    = true,
     formatlistpat = formatlistpat,
     comments      = "n:>",
+    formatexpr    = "v:lua.require'util.markdown_format'.formatexpr()",
 }
 
 ---@type { [string]: vim.api.keyset.highlight }
