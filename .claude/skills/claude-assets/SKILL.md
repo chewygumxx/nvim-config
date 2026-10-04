@@ -41,11 +41,12 @@ every session, a rule costs nothing until something in its scope is read.
 `hooks/` is what makes five rules mechanical rather than advisory: refusing a
 write into a generated tree, refusing a commit while a gate binary is absent,
 refusing a whole-file read of the wordlists and the compiled spell file, linting
-Lua at write time, and reporting that the generated help has gone stale. A sixth
-hook, `install-deps.sh`, is not one of these: it fires on `SessionStart` rather
-than `PreToolUse`/`PostToolUse`, and it bootstraps a cloud session's
-`node_modules` rather than making an advisory rule mechanical. See
-`install-deps.sh` below for why it exists and what it deliberately leaves alone.
+every language `.husky/pre-commit` gates at write time, and reporting that the
+generated help has gone stale. A sixth hook, `install-deps.sh`, is not one of
+these: it fires on `SessionStart` rather than `PreToolUse`/`PostToolUse`, and it
+bootstraps a cloud session's `node_modules` rather than making an advisory rule
+mechanical. See `install-deps.sh` below for why it exists and what it
+deliberately leaves alone.
 
 **A newly added agent is not selectable as a `subagent_type` until the session
 restarts**, so the session that writes one cannot use it. A skill is not like
@@ -188,9 +189,9 @@ Every hook wired in `settings.json` has to be executable, which the suite
 checks, and it checks that the table is non-empty in the same case so that a
 shape change cannot pass as "nothing broken".
 
-`lint-lua.sh` is `PostToolUse`, so it reports on a write that has already landed
-rather than refusing one, and it fires per edit. A change that introduces a
-local before the edit that consumes it therefore reports `unused_variable` on
+`lint-file.sh` is `PostToolUse`, so it reports on a write that has already
+landed rather than refusing one, and it fires per edit. A change that introduces
+a local before the edit that consumes it therefore reports `unused_variable` on
 the intermediate state, twice in a row if the consumer takes two edits. Read a
 failure there as a description of the file as it stands, not as an edit that was
 rejected.
