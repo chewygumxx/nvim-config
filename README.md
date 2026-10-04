@@ -47,7 +47,8 @@ mise install
 ```
 
 That covers two different sets in one file, deliberately. The first is the gates
-(`luafmt`, `selene`, `tombi`, `lua-language-server`, Neovim itself). The second
+(`luafmt`, `selene`, `tombi`, `ts_query_ls`, `lua-language-server`, Neovim
+itself, and `bun`, which installs prettier and commitlint). The second
 is the editor toolchain mason would otherwise fetch: language servers, linters,
 formatters, debug adapters and `universal-ctags`. The editor half is listed for
 a specific reason, which is Termux: `lua/plugin.lua` switches the whole mason
