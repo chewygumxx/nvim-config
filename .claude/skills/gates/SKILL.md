@@ -183,6 +183,14 @@ and the full suite whenever anything under `lua/`, `tests/`, `scripts/`, `lsp/`,
 `queries/` or `init.lua` is. Each asks `git diff --cached` for its own file list
 rather than reading a variable another function left behind.
 
+The suite inherits git's hook environment, and `git commit -- <path>` exports an
+absolute `GIT_INDEX_FILE` into it, which once sent every fixture repository's
+writes to the committing repository's index and errored `util.wip`'s cases in
+setup. `scripts/minimal_init.lua` now unsets whatever
+`git rev-parse --local-env-vars` names, and `tests/test_init.lua` pins that, so
+a pathspec commit is safe. Anything that starts the suite some other way than
+through `minimal_init.lua` gets no such protection.
+
 **Every tool it cannot find is skipped silently.** That is deliberate and
 correct for a hook other people's machines also run, but it is why
 `.claude/hooks/require-gates.sh` refuses a commit while a gate binary is absent,

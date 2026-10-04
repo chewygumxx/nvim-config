@@ -46,6 +46,10 @@ local opts = {
     spelllang = "en",
     spellfile = vim.fn.stdpath("config") .. "/spell/en.utf-8.add",
 
+    -- Per-project `.nvim.lua`, gated by `:trust` on first sight and on
+    -- every change after it
+    exrc = true,
+
     -- Consign security to oblivion
     --modelineexpr = true,
 }

@@ -48,6 +48,7 @@ local general = {
     smartcase     = true,
     spelllang     = "en",
     spellfile     = vim.fn.stdpath("config") .. "/spell/en.utf-8.add",
+    exrc          = true,
 }
 
 --- Every global option value `option.view` documents, bar 'statusline',
