@@ -6,37 +6,36 @@ __cgxx: |
   #
   #
   # ~chewygumxx/nvim-config.git
-  # ::: :/queries/CLAUDE.md
+  # ::: :/.claude/rules/queries.md
   #
   #
 
 ctime: 2026-09-27
-title: CLAUDE.md
-description: >-
-  Conventions for the Tree-sitter queries, every one of which replaces the
-  runtime query rather than extending it.
+title: Tree-sitter queries
+paths:
+  - "queries/**/*"
 tags:
   - llm
   - claude
 ---
 
-# CLAUDE.md
+# `queries/` replaces the runtime queries
 
-**No file here carries an `; extends` comment, so each one fully replaces the
-runtime query for its language rather than adding to it.** That is a decision,
-not an oversight, and it means anything the bundled query provided has to be
-reproduced. `queries/comment/highlights.scm` does exactly that, copying
-nvim-treesitter's own captures with the provenance URL inline; deleting them
-because they look redundant removes highlighting. `tests/test_queries.lua`
+**No file in `queries/` carries an `; extends` comment, so each one fully
+replaces the runtime query for its language rather than adding to it.** That is
+a decision, not an oversight, and it means anything the bundled query provided
+has to be reproduced. `queries/comment/highlights.scm` does exactly that,
+copying nvim-treesitter's own captures with the provenance URL inline; deleting
+them because they look redundant removes highlighting. `tests/test_queries.lua`
 records the `extends` state per file in a registry, so changing it is a
 deliberate edit there and not a silent one.
 
 `queries/comment/highlights.scm` is this repository's own, highlighting the file
-headers described under Conventions, and is the sole user of the three custom
-predicates `lua/util/treesitter.lua` registers (`adjacent?`, `last-matching?`,
-`header-line?`). Renaming or removing one breaks both this file and the parity
-gate that asserts every predicate and directive resolves after
-`util.treesitter.setup()` has run.
+headers described under Conventions in `.claude/CLAUDE.md`, and is the sole user
+of the three custom predicates `lua/util/treesitter.lua` registers (`adjacent?`,
+`last-matching?`, `header-line?`). Renaming or removing one breaks both this
+file and the parity gate that asserts every predicate and directive resolves
+after `util.treesitter.setup()` has run.
 
 Validation reaches three depths, because the grammars these target are not all
 available. Every file is parsed as the _query language_ using the `query`
@@ -51,16 +50,16 @@ When adding a predicate, note that `vim.treesitter.query.list_predicates()` and
 `list_directives()` return names already carrying their `?` or `!`. Appending
 one yields `eq??` and reports every core predicate as missing.
 
-**Do not hand-indent anything here.** `ts_query_ls format` owns the layout, the
-`Queries` CI job runs it as `--check`, and `.husky/pre-commit` runs it as a
-write. It indents at two spaces and offers no option to change that, which is
-why `.editorconfig` has a `[*.scm]` block and the modelines all say
+**Do not hand-indent anything in `queries/`.** `ts_query_ls format` owns the
+layout, the `Queries` CI job runs it as `--check`, and `.husky/pre-commit` runs
+it as a write. It indents at two spaces and offers no option to change that,
+which is why `.editorconfig` has a `[*.scm]` block and the modelines all say
 `shiftwidth=2`: they follow the formatter rather than the repository's usual 4.
 It also collapses every blank line in a leading comment run, so the header box
-here is contiguous where every other filetype separates the modeline, the SPDX
-line and the box. Expect lines past 80 columns as well, since it will join a
-wrapped predicate's arguments back onto one line and nothing caps the width of a
-`.scm` file.
+of a `.scm` file is contiguous where every other filetype separates the
+modeline, the SPDX line and the box. Expect lines past 80 columns as well, since
+it will join a wrapped predicate's arguments back onto one line and nothing caps
+the width of a `.scm` file.
 
 One surprise worth knowing before you debug a failing gate: a single `format`
 pass is not a fixed point. Joining those predicate arguments is a change the

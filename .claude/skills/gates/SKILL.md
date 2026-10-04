@@ -102,7 +102,7 @@ single line of it.
   eight files, where `check` would cover only the languages Neovim bundles a
   parser for. A single `format` write pass is not a fixed point, so
   `.husky/pre-commit` runs it twice and then asserts with `--check`;
-  `queries/CLAUDE.md` has the rest.
+  `.claude/rules/queries.md` has the rest.
 - **Lua typecheck**: `lua-language-server --check=. --checklevel=Warning`,
   repo-wide rather than per-file, needing `VIMRUNTIME` exported so
   `$VIMRUNTIME/lua` in `.luarc.json`'s `workspace.library` resolves.
