@@ -80,6 +80,7 @@
 - [lua.util.nex](modules/lua.util.nex.md)
 - [lua.util.shebang](modules/lua.util.shebang.md)
 - [lua.util.spec](modules/lua.util.spec.md)
+- [lua.util.spell](modules/lua.util.spell.md)
 - [lua.util.statusline](modules/lua.util.statusline.md)
 - [lua.util.test_report](modules/lua.util.test_report.md)
 - [lua.util.text](modules/lua.util.text.md)

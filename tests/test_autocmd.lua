@@ -42,6 +42,7 @@ local delegated = {
     ["util.nex"]              = "cgxx.nex",
     ["util.markdown_table"]   = "cgxx.mdtable",
     ["util.statusline"]       = "cgxx.statusline",
+    ["util.spell"]            = "cgxx.spell",
 }
 
 describe("autocmd.setup", function()

@@ -71,6 +71,7 @@ M.setup = function()
     require("util.nex").autocmd()
     require("util.markdown_table").autocmd()
     require("util.statusline").autocmd()
+    require("util.spell").autocmd()
 end
 
 return M

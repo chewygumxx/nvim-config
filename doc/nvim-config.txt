@@ -219,6 +219,7 @@ BufNewFile              Designates new file buffer for pending header
 BufReadPost             Move cursor to last position within file
 BufReadPost,BufEnter    For unmodifiable buffers: Keymap (nv) q->quit
 BufWinEnter             Fold Claude Code's last-response context, if present
+BufWritePost            Recompile a personal word list written by hand
 BufWritePost            Stage and commit a written nex note
 BufWritePost,BufLeave,FocusLost
                         Take a WIP snapshot at an editing checkpoint
@@ -230,4 +231,5 @@ FocusGained,VimResume,ShellCmdPost,TermClose
 InsertLeave,TextChanged Reformat the markdown table under the cursor
 TextChanged,TextChangedI
                         Debounce a WIP snapshot of the changed buffer
+VimEnter                Recompile a personal word list edited outside Neovim
 
