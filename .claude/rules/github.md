@@ -6,25 +6,23 @@ __cgxx: |
   #
   #
   # ~chewygumxx/nvim-config.git
-  # ::: :/.github/CLAUDE.md
+  # ::: :/.claude/rules/github.md
   #
   #
 
 ctime: 2026-09-27
-title: CLAUDE.md
-description: >-
-  Rules for the workflows and the composite actions they share, including how a
-  job installs a pinned tool and how one can go green over a gate that never
-  ran.
+title: GitHub Actions
+paths:
+  - ".github/**/*"
 tags:
   - llm
   - claude
 ---
 
-# CLAUDE.md
+# Every tool version lives in `mise.toml`
 
-Filed one level above `workflows/` on purpose, since most of what follows is
-about `actions/` as much as about a workflow file.
+Scoped to the whole of `.github/` rather than to `workflows/` on purpose, since
+most of what follows is about `actions/` as much as about a workflow file.
 
 Ensure that any workflow within this repository that utilises Node.js employ
 version 24 or later.

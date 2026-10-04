@@ -54,7 +54,7 @@ mechanical rather than advisory.
 | The repository-notation statusline                         | **`statusline` skill**                             |
 | WIP snapshots onto `refs/wip`                              | **`wip` skill**                                    |
 | Markdown list continuation and the Markdown keymaps        | **`markdown-continuation` skill**                  |
-| Workflows, composite actions, how a job reads a pin        | `.github/CLAUDE.md`                                |
+| Workflows, composite actions, how a job reads a pin        | `.claude/rules/github.md`                          |
 | Filetype detection and dispatch                            | `lua/filetype/CLAUDE.md`                           |
 | What belongs in a per-server file                          | `lsp/CLAUDE.md`                                    |
 | The shared helpers and their annotation habits             | `lua/util/CLAUDE.md`                               |
