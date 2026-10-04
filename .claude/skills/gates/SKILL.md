@@ -95,7 +95,10 @@ single line of it.
   `prettier` key inside `package.json` rather than a `.prettierrc`, and
   `.prettierignore` excludes `lazy-lock.json`. prettier reads `.editorconfig`,
   which is why `.luarc.json` is 4-space and passes; there is no `tabWidth`
-  anywhere.
+  anywhere. Biome is not a gate, but `.biome.jsonc` makes `util.biome` hand it
+  this repository's JSON in the editor, so format-on-save and the gate are two
+  tools that agree only while the two configs do. If they diverge, prettier is
+  the one CI enforces.
 - **Tree-sitter queries**: `ts_query_ls format --check queries` and
   `ts_query_ls lint queries` (`.tsqueryrc.json`), the `Queries` job. `lint`
   rather than `check` because it needs no parser objects and so reaches all
