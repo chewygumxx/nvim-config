@@ -1,0 +1,24 @@
+// vim:set expandtab shiftwidth=4 filetype=jsonc:
+// SPDX-License-Identifier: GPL-3.0-only
+
+//
+//
+// ~chewygumxx/nvim-config.git
+// ::: :/.biome.jsonc
+//
+//
+
+{
+    "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+    "extends": ["@chewygumxx/biome-config"],
+
+    "files": {
+        "includes": [
+            // lazy.nvim writes `lazy-lock.json` itself, one line per plugin at
+            // two-space indent
+            "lazy-lock.json",
+
+            "**"
+        ]
+    }
+}
