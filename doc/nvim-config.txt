@@ -161,6 +161,7 @@ Every option this configuration sets, with the value it sets.
 
 'clipboard'             unnamedplus
 'expandtab'             true
+'exrc'                  true
 'fillchars'             "fold: "
 'foldlevel'             2
 'foldmethod'            expr
