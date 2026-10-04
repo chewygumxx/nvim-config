@@ -57,7 +57,7 @@ mechanical rather than advisory.
 | Workflows, composite actions, how a job reads a pin        | `.claude/rules/github.md`                          |
 | Filetype detection and dispatch                            | `.claude/rules/filetype.md`                        |
 | What belongs in a per-server file                          | `.claude/rules/lsp.md`                             |
-| The shared helpers and their annotation habits             | `lua/util/CLAUDE.md`                               |
+| The shared helpers and their annotation habits             | `.claude/rules/util.md`                            |
 | Writing a test, and what the registry files police         | `tests/CLAUDE.md`                                  |
 | Tree-sitter queries and their layout                       | `queries/CLAUDE.md`                                |
 | `scripts/`, `types/`, `snippets/`, `.repo-metadata.jsonc`  | a rule in `.claude/rules/`, loaded on a read there |
@@ -96,8 +96,8 @@ reaches no narrower file.
 - **Indentation**: owned by `.editorconfig`, 4 spaces except 2 for `*.md` and
   `*.scm`, and Lua additionally by `luafmt`'s `max_line_width = 80`.
 - **Lua annotations vs. `luafmt`**: two habits exist because the formatter will
-  otherwise silently undo the annotation. `lua/util/CLAUDE.md` states both with
-  their reasons, and they apply to Lua anywhere in the repository, not only
+  otherwise silently undo the annotation. `.claude/rules/util.md` states both
+  with their reasons, and they apply to Lua anywhere in the repository, not only
   under `lua/util/`.
 - **Commit messages**: Conventional Commits, enforced by commitlint and husky.
   Scope is optional and several can be joined with `/`, but nothing outside

@@ -478,7 +478,7 @@ describe("util.statusline.value", function()
         -- same reason: `nvim_get_option_info2` types `default` as any
         -- option's value type, ie. `string|integer|boolean`, and
         -- 'statusline' is always a string. A `---@type` annotation cannot
-        -- narrow an assignment this wide, and `lua/util/CLAUDE.md` rules
+        -- narrow an assignment this wide, and `.claude/rules/util.md` rules
         -- out an inline cast, so `tostring` does it instead
         local default = tostring(info.default)
         local leader  = "%<%f"

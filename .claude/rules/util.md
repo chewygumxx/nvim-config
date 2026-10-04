@@ -6,28 +6,27 @@ __cgxx: |
   #
   #
   # ~chewygumxx/nvim-config.git
-  # ::: :/lua/util/CLAUDE.md
+  # ::: :/.claude/rules/util.md
   #
   #
 
 ctime: 2026-09-27
-title: CLAUDE.md
-description: >-
-  Conventions for the shared helper modules, including the two annotation habits
-  luafmt will otherwise undo.
+title: Shared helper modules
+paths:
+  - "lua/util/**/*"
 tags:
   - llm
   - claude
 ---
 
-# CLAUDE.md
+# `lua/util/` is a library first
 
-A module here opens `local M = {}` and closes `return M`. `M.setup` is _not_
-part of the contract, unlike `lua/filetype/`, where the dispatcher calls it:
-only some modules have one, and a `util` module is a library first. Put it here
-when two callers would otherwise each grow their own copy, and say so in the doc
-comment. `util.text.yaml_scalar` states the case plainly, that a second copy
-would be a second opinion on what YAML needs quoting.
+A module in `lua/util/` opens `local M = {}` and closes `return M`. `M.setup` is
+_not_ part of the contract, unlike `lua/filetype/`, where the dispatcher calls
+it: only some modules have one, and a `util` module is a library first. Put code
+in `lua/util/` when two callers would otherwise each grow their own copy, and
+say so in the doc comment. `util.text.yaml_scalar` states the case plainly, that
+a second copy would be a second opinion on what YAML needs quoting.
 
 **Two annotation habits exist because `luafmt` will otherwise silently undo the
 annotation.**
@@ -50,7 +49,7 @@ right to flag but which cannot be written around, for instance
 
 Annotate every export. `scripts/luals_untyped.lua` fails if LuaLS cannot infer
 anything more specific than `any` or `unknown` anywhere under `lua/`, so
-coverage here is enforced rather than aspirational, and
+coverage is enforced rather than aspirational, and
 `lua-language-server --check=.` runs at `Warning` with `luadoc`, `strict`,
 `strong` and `type-check` all at `Any`, so annotation drift fails the gate and
 not just genuine type errors.
