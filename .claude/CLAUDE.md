@@ -55,7 +55,7 @@ mechanical rather than advisory.
 | WIP snapshots onto `refs/wip`                              | **`wip` skill**                                    |
 | Markdown list continuation and the Markdown keymaps        | **`markdown-continuation` skill**                  |
 | Workflows, composite actions, how a job reads a pin        | `.claude/rules/github.md`                          |
-| Filetype detection and dispatch                            | `lua/filetype/CLAUDE.md`                           |
+| Filetype detection and dispatch                            | `.claude/rules/filetype.md`                        |
 | What belongs in a per-server file                          | `.claude/rules/lsp.md`                             |
 | The shared helpers and their annotation habits             | `lua/util/CLAUDE.md`                               |
 | Writing a test, and what the registry files police         | `tests/CLAUDE.md`                                  |
@@ -118,5 +118,5 @@ than an open question; re-check the relevant one after touching it.
 They are the statusline's colours and its truncation from the left, the
 `gitcommit` header overflow, `<leader>.` returning the same scratch buffer after
 a restart, and which-key's group labels. Each is described where it belongs: the
-**`statusline` skill**, `lua/filetype/CLAUDE.md`, the **`specs` skill** and the
-**`generated-output` skill** respectively.
+**`statusline` skill**, `.claude/rules/filetype.md`, the **`specs` skill** and
+the **`generated-output` skill** respectively.
