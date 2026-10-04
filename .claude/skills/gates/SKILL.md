@@ -113,7 +113,8 @@ single line of it.
 - **Tests**:
   `nvim --headless -u scripts/minimal_init.lua -l scripts/minitest.lua`.
 - **Commit message typecheck**: `bun run typecheck`, running `tsc` scoped to
-  `.commitlintrc.mts` only per `tsconfig.json`.
+  `.commitlintrc.mts` only per `tsconfig.json`. The exception to the heading:
+  no CI job and no `.husky/pre-commit` step runs it, only the battery does.
 
 ## The test suite
 
@@ -150,20 +151,21 @@ escaped or avoided.
 tag out of the spec rather than naming its own, so the pre-commit gate and CI
 cannot run different framework versions.
 
-## Sweeps that are not gates
+## Two LuaLS runs outside the pre-commit hook
 
-Neither runs automatically. Both go through Neovim so the child inherits
-`$VIMRUNTIME`.
+Neither runs in `.husky/pre-commit` or the battery. Both go through Neovim so
+the child inherits `$VIMRUNTIME`.
 
 - `nvim --headless -u scripts/minimal_init.lua -l scripts/typecheck_sensitive.lua`
   runs the same repo-wide check at `Hint`, ie. everything the gate ignores. It
-  is a sweep to read, not a gate to satisfy.
+  is a sweep to read, not a gate to satisfy, and nothing runs it automatically.
 - `nvim --headless -u scripts/minimal_init.lua -l scripts/luals_untyped.lua`
   fails if LuaLS cannot infer anything more specific than `any`/`unknown` under
-  `lua/`, `lsp/` or `init.lua`. Its pass signal is the absence of output, so it
-  fails closed: a failed or timed-out `inlayHint` request, a client that never
-  finished indexing, an empty file list from the wrong cwd, or a run that saw no
-  hints at all is fatal rather than an empty result.
+  `lua/`, `lsp/` or `init.lua`. It is a gate, but only in CI, as the `LuaCATS`
+  job's annotation-coverage step. Its pass signal is the absence of output, so
+  it fails closed: a failed or timed-out `inlayHint` request, a client that
+  never finished indexing, an empty file list from the wrong cwd, or a run that
+  saw no hints at all is fatal rather than an empty result.
 
 ## What `.husky/pre-commit` actually does
 
