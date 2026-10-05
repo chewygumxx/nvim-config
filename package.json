@@ -24,7 +24,8 @@
         "@chewygumxx/commitlint-config": "^1.1.0",
         "@chewygumxx/remark-preset": "^1.0.3",
         "@chewygumxx/yamllint-config": "^1.0.1",
-        "sync-header-metadata": "^2.4.2"
+        "sync-header-metadata": "^2.4.2",
+        "@chewygumxx/markdownlint-cli2-config": "^1.1.0"
     },
     "scripts": {
         "commit": "cz",

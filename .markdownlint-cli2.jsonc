@@ -12,10 +12,12 @@
 // buffer whose project has no markdownlint configuration of its own.
 {
     "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2/v0.23.3/schema/markdownlint-cli2-config-schema.json",
+    // The house style, which also stops a frontmatter `title:` counting as a
+    // heading: `util.frontmatter` keeps it equal to the first heading, so
+    // every such document would otherwise report two. `extends` resolves
+    // against this file, so the fallback finds the package here wherever the
+    // buffer is.
     "config": {
-        // A document's frontmatter `title:` is kept equal to its first
-        // heading by `util.frontmatter`, so counting the key as a heading
-        // reports every such document as having two.
-        "MD025": { "front_matter_title": "" }
+        "extends": "@chewygumxx/markdownlint-cli2-config"
     }
 }
