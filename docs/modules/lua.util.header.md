@@ -230,8 +230,9 @@ A fork is boxed upstream first and the fork beneath it, so when an
 own repository moves to `fork_slug`. Anything under `~/.config` is the
 dotfiles repository's, at the path chezmoi gives it there.
 
-Split out of `M.insert` because `util.frontmatter` re-derives the same
-box on every save, to follow a file that has been renamed or moved.
+Split out of `M.insert` because the box is re-derived on save, to
+follow a file that has been renamed or moved; `M.located` caches it for
+that.
 
 
 
@@ -261,6 +262,39 @@ function M.insert(
 Inserts a templated header into buf: the plain-comment form (modeline,
 SPDX line, repository box) at its head, or for a "markdown" buffer the
 frontmatter and box at its head and the modeline at its foot.
+
+
+
+
+
+
+
+
+### M.located
+---
+```lua
+function M.located(
+  buf: integer,
+  name: string
+) -> location util.HeaderLocation {
+    path = string,
+    slug = string?,
+    fork_slug = string?,
+    upstream = string?,
+}
+```
+
+
+
+
+
+`M.locate` of buf's file, remembered against the name it was looked up
+for.
+
+A lookup is up to three synchronous git spawns, and `M.apply` and
+`util.frontmatter.apply` run on every save of a file with a header, so
+it is answered once per buffer name. Keyed by name rather than flagged
+once, so a `:saveas` or `:file` that moves the buffer looks again.
 
 
 
