@@ -187,6 +187,37 @@ M.frontmatter = function(opt)
     return { head = trim_lines(head), tail = { modeline } }
 end
 
+--- The plain-comment box naming a file's repository and path, padded by
+--- two empty comment lines either side, each wrapped in commentstring.
+---
+--- The plain counterpart of `M.box`.
+---@param commentstring string
+---@param slug?         string
+---@param fork_slug?    string
+---@param path          string
+---@return string[] lines
+M.plain_box = function(commentstring, slug, fork_slug, path)
+    local empty = string.format(commentstring, "")
+    ---@type string[]
+    local lines = { empty, empty }
+
+    if slug then
+        lines[#lines + 1] = string.format(commentstring, "~" .. slug .. ".git")
+        if fork_slug then
+            lines[#lines + 1] = string.format(
+                commentstring,
+                "└─> ~" .. fork_slug .. ".git"
+            )
+        end
+        lines[#lines + 1] = string.format(commentstring, "::: " .. path)
+    else
+        lines[#lines + 1] = string.format(commentstring, path)
+    end
+
+    vim.list_extend(lines, { empty, empty })
+    return trim_lines(lines)
+end
+
 ---@class util.PlainHeaderOpt
 ---@field commentstring string           printf-style wrapper
 ---@field slug?         string           Repository, boxed as `~slug.git`
@@ -231,28 +262,10 @@ M.plain = function(opt)
 
     if opt.path then
         lines[#lines + 1] = ""
-        lines[#lines + 1] = string.format(commentstring, "")
-        lines[#lines + 1] = string.format(commentstring, "")
-        if opt.slug then
-            lines[#lines + 1] = string.format(
-                commentstring,
-                "~" .. opt.slug .. ".git"
-            )
-            if opt.fork_slug then
-                lines[#lines + 1] = string.format(
-                    commentstring,
-                    "└─> ~" .. opt.fork_slug .. ".git"
-                )
-            end
-            lines[#lines + 1] = string.format(
-                commentstring,
-                "::: " .. opt.path
-            )
-        else
-            lines[#lines + 1] = string.format(commentstring, opt.path)
-        end
-        lines[#lines + 1] = string.format(commentstring, "")
-        lines[#lines + 1] = string.format(commentstring, "")
+        vim.list_extend(
+            lines,
+            M.plain_box(commentstring, opt.slug, opt.fork_slug, opt.path)
+        )
     end
 
     lines[#lines + 1] = ""
