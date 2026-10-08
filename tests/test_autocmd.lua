@@ -36,6 +36,7 @@ local eq_at   = helpers.labelled_equality
 local delegated = {
     ["util.header (pending)"] = "cgxx.header_mark_pending",
     ["util.header (insert)"]  = "cgxx.header_apply_insert",
+    ["util.header (sync)"]    = "cgxx.header_sync_box",
     ["filetype"]              = "cgxx.filetype",
     ["util.agentprompt"]      = "cgxx.agentprompt",
     ["util.wip"]              = "cgxx.wip",

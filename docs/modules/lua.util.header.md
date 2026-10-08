@@ -113,6 +113,66 @@ the one description of the format, so a change here reaches both.
 
 
 
+### M.plain_box
+---
+```lua
+function M.plain_box(
+  commentstring: string,
+  slug: string?,
+  fork_slug: string?,
+  path: string
+) -> lines string[]
+```
+
+
+
+
+
+The plain-comment box naming a file's repository and path, padded by
+two empty comment lines either side, each wrapped in commentstring.
+
+The plain counterpart of `M.box`. Split out of `M.plain` because
+`M.apply` re-renders the box alone on every save, to follow a file that
+has been renamed or moved.
+
+
+
+
+
+
+
+
+### M.find_box
+---
+```lua
+function M.find_box(
+  lines: string[],
+  commentstring: string
+)
+ -> first integer?
+ -> last integer?
+
+```
+
+
+
+
+
+The 1-indexed first and last lines of the box `M.plain_box` renders, if
+lines carry one near their head.
+
+Recognised by shape rather than content: two empty comment lines, one
+to three that name a repository or path, ie. open on `~` or `:`, and two
+more empty ones. A padded comment of prose has the same frame and is
+left alone, since rewriting it would replace the prose with a path.
+
+
+
+
+
+
+
+
 ### M.plain
 ---
 ```lua
@@ -170,8 +230,9 @@ A fork is boxed upstream first and the fork beneath it, so when an
 own repository moves to `fork_slug`. Anything under `~/.config` is the
 dotfiles repository's, at the path chezmoi gives it there.
 
-Split out of `M.insert` because `util.frontmatter` re-derives the same
-box on every save, to follow a file that has been renamed or moved.
+Split out of `M.insert` because the box is re-derived on save, to
+follow a file that has been renamed or moved; `M.located` caches it for
+that.
 
 
 
@@ -201,6 +262,64 @@ function M.insert(
 Inserts a templated header into buf: the plain-comment form (modeline,
 SPDX line, repository box) at its head, or for a "markdown" buffer the
 frontmatter and box at its head and the modeline at its foot.
+
+
+
+
+
+
+
+
+### M.located
+---
+```lua
+function M.located(
+  buf: integer,
+  name: string
+) -> location util.HeaderLocation {
+    path = string,
+    slug = string?,
+    fork_slug = string?,
+    upstream = string?,
+}
+```
+
+
+
+
+
+`M.locate` of buf's file, remembered against the name it was looked up
+for.
+
+A lookup is up to three synchronous git spawns, and `M.apply` and
+`util.frontmatter.apply` run on every save of a file with a header, so
+it is answered once per buffer name. Keyed by name rather than flagged
+once, so a `:saveas` or `:file` that moves the buffer looks again.
+
+
+
+
+
+
+
+
+### M.apply
+---
+```lua
+function M.apply(buf: integer) ->  nil
+```
+
+
+
+
+
+Re-renders buf's plain-comment box for where its file now lives, if it
+carries one, as one undo step with whatever change is being saved.
+
+The plain counterpart of `util.frontmatter.apply`, which already does
+the same for a Markdown header's box, so Markdown is left to it. Only
+the box is touched: the SPDX line names a licence chosen when the file
+was written, which a move gives no reason to revisit.
 
 
 
@@ -239,7 +358,8 @@ function M.autocmd() ->  nil
 
 
 Registers the BufNewFile/FileType autocmd pair that defers header
-insertion on a new file buffer until its filetype is known.
+insertion on a new file buffer until its filetype is known, and the
+BufWritePre one that keeps an existing header's box true on save.
 
 
 
