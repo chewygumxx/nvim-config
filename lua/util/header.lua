@@ -343,8 +343,9 @@ end
 --- own repository moves to `fork_slug`. Anything under `~/.config` is the
 --- dotfiles repository's, at the path chezmoi gives it there.
 ---
---- Split out of `M.insert` because `util.frontmatter` re-derives the same
---- box on every save, to follow a file that has been renamed or moved.
+--- Split out of `M.insert` because the box is re-derived on save, to
+--- follow a file that has been renamed or moved; `M.located` caches it for
+--- that.
 ---@param file string
 ---@return util.HeaderLocation location
 M.locate = function(file)
@@ -462,14 +463,14 @@ end
 --- `M.locate` of buf's file, remembered against the name it was looked up
 --- for.
 ---
---- A lookup is up to three synchronous git spawns, and `M.apply` runs on
---- every save of every file with a header, so it is answered once per
---- buffer name. Keyed by name rather than flagged once, so a `:saveas` or
---- `:file` that moves the buffer looks again.
+--- A lookup is up to three synchronous git spawns, and `M.apply` and
+--- `util.frontmatter.apply` run on every save of a file with a header, so
+--- it is answered once per buffer name. Keyed by name rather than flagged
+--- once, so a `:saveas` or `:file` that moves the buffer looks again.
 ---@param buf  integer
 ---@param name string
 ---@return util.HeaderLocation location
-local located = function(buf, name)
+M.located = function(buf, name)
     ---@type { name: string, location: util.HeaderLocation }?
     local cached = vim.b[buf].cgxx_header_location
     if cached and cached.name == name then
@@ -506,7 +507,7 @@ M.apply = function(buf)
         return
     end
 
-    local location = located(buf, name)
+    local location = M.located(buf, name)
     local box      = M.plain_box(
         commentstring,
         location.slug,
