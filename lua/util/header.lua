@@ -190,7 +190,9 @@ end
 --- The plain-comment box naming a file's repository and path, padded by
 --- two empty comment lines either side, each wrapped in commentstring.
 ---
---- The plain counterpart of `M.box`.
+--- The plain counterpart of `M.box`. Split out of `M.plain` because
+--- `M.apply` re-renders the box alone on every save, to follow a file that
+--- has been renamed or moved.
 ---@param commentstring string
 ---@param slug?         string
 ---@param fork_slug?    string
@@ -216,6 +218,61 @@ M.plain_box = function(commentstring, slug, fork_slug, path)
 
     vim.list_extend(lines, { empty, empty })
     return trim_lines(lines)
+end
+
+--- How far down a file `M.find_box` looks for the first line of a box.
+--- `M.plain` opens one on line 5 at the latest, beneath a shebang, the
+--- modeline, the SPDX line and a blank; the rest is slack for a line added
+--- by hand, and too little to reach a lookalike in a file's body.
+---@type integer
+local box_limit = 8
+
+--- The 1-indexed first and last lines of the box `M.plain_box` renders, if
+--- lines carry one near their head.
+---
+--- Recognised by shape rather than content: two empty comment lines, one
+--- to three that name a repository or path, ie. open on `~` or `:`, and two
+--- more empty ones. A padded comment of prose has the same frame and is
+--- left alone, since rewriting it would replace the prose with a path.
+---@param lines         string[]
+---@param commentstring string
+---@return integer? first
+---@return integer? last
+M.find_box = function(lines, commentstring)
+    local empty          = vim.trim(string.format(commentstring, ""))
+    local prefix, suffix = commentstring:match("^(.-)%%s(.-)$")
+    if prefix == nil then
+        return nil
+    end
+
+    --- The text a comment line wraps, or nil if line is not one.
+    ---@param line string
+    ---@return string? text
+    local comment_text = function(line)
+        if not vim.startswith(line, prefix) or not vim.endswith(line, suffix)
+            or #line < #prefix + #suffix then
+            return nil
+        end
+        return vim.trim(line:sub(#prefix + 1, #line - #suffix))
+    end
+
+    for first = 1, math.min(#lines, box_limit) do
+        if lines[first] == empty and lines[first + 1] == empty then
+            local text = comment_text(lines[first + 2] or "")
+            if text and text:match("^[~:]") then
+                -- A slug, a fork and a path at most
+                local last = first + 2
+                while last < first + 5 and lines[last] ~= empty
+                    and comment_text(lines[last] or "") do
+                    last = last + 1
+                end
+                if lines[last] == empty and lines[last + 1] == empty then
+                    return first, last + 1
+                end
+            end
+        end
+    end
+    return nil
 end
 
 ---@class util.PlainHeaderOpt
@@ -402,6 +459,70 @@ M.insert = function(file, buf, opt)
     vim.api.nvim_buf_set_lines(buf, 0, 0, false, lines)
 end
 
+--- `M.locate` of buf's file, remembered against the name it was looked up
+--- for.
+---
+--- A lookup is up to three synchronous git spawns, and `M.apply` runs on
+--- every save of every file with a header, so it is answered once per
+--- buffer name. Keyed by name rather than flagged once, so a `:saveas` or
+--- `:file` that moves the buffer looks again.
+---@param buf  integer
+---@param name string
+---@return util.HeaderLocation location
+local located = function(buf, name)
+    ---@type { name: string, location: util.HeaderLocation }?
+    local cached = vim.b[buf].cgxx_header_location
+    if cached and cached.name == name then
+        return cached.location
+    end
+    local location                  = M.locate(name)
+    vim.b[buf].cgxx_header_location = { name = name, location = location }
+    return location
+end
+
+--- Re-renders buf's plain-comment box for where its file now lives, if it
+--- carries one, as one undo step with whatever change is being saved.
+---
+--- The plain counterpart of `util.frontmatter.apply`, which already does
+--- the same for a Markdown header's box, so Markdown is left to it. Only
+--- the box is touched: the SPDX line names a licence chosen when the file
+--- was written, which a move gives no reason to revisit.
+---@param buf integer
+---@return nil
+M.apply = function(buf)
+    local commentstring = vim.bo[buf].commentstring
+    local name          = vim.api.nvim_buf_get_name(buf)
+    local filetype      = vim.split(vim.bo[buf].filetype, ".", {
+        plain = true,
+    })[1]
+    if commentstring == "" or name == "" or filetype == "markdown" then
+        return
+    end
+
+    -- The box opens by `box_limit` and spans at most seven lines
+    local lines       = vim.api.nvim_buf_get_lines(buf, 0, box_limit + 6, false)
+    local first, last = M.find_box(lines, commentstring)
+    if first == nil or last == nil then
+        return
+    end
+
+    local location = located(buf, name)
+    local box      = M.plain_box(
+        commentstring,
+        location.slug,
+        location.fork_slug,
+        location.path
+    )
+    if vim.deep_equal(box, vim.list_slice(lines, first, last)) then
+        return
+    end
+
+    vim.api.nvim_buf_call(buf, function()
+        pcall(vim.cmd.undojoin)
+    end)
+    vim.api.nvim_buf_set_lines(buf, first - 1, last, false, box)
+end
+
 --- `XXInsertHeader` callback: inserts a header into the current buffer.
 ---@return nil
 M.command = function()
@@ -409,7 +530,8 @@ M.command = function()
 end
 
 --- Registers the BufNewFile/FileType autocmd pair that defers header
---- insertion on a new file buffer until its filetype is known.
+--- insertion on a new file buffer until its filetype is known, and the
+--- BufWritePre one that keeps an existing header's box true on save.
 ---@return nil
 M.autocmd = function()
     vim.api.nvim_create_autocmd("BufNewFile", {
@@ -432,6 +554,19 @@ M.autocmd = function()
                 vim.b[opts.buf].cgxx_pending_header = nil
                 M.insert(opts.file, opts.buf)
             end
+        end,
+    })
+
+    -- Not limited to a modified buffer, unlike `util.frontmatter`'s: a
+    -- moved file is typically opened and saved as is, and there is no
+    -- `mtime:` here for a no-op save to bump
+    vim.api.nvim_create_autocmd("BufWritePre", {
+        group    = vim.api.nvim_create_augroup("cgxx.header_sync_box", {
+            clear = true,
+        }),
+        desc     = "Re-box a plain header's repository and path on save",
+        callback = function(opts)
+            M.apply(opts.buf)
         end,
     })
 end

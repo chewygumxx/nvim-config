@@ -372,6 +372,169 @@ describe("util.header.frontmatter", function()
     end)
 end)
 
+--- A Lua header as `M.plain` writes it, boxing path rather than wherever
+--- the file now is: what a file carries after a `git mv`.
+---@param path string
+---@return string[] lines
+local stale_header = function(path)
+    return {
+        "-- vim:set expandtab shiftwidth=4 filetype=lua:",
+        "-- SPDX-License-Identifier: GPL-3.0-only",
+        "",
+        "--",
+        "--",
+        "-- ~example-owner/example-repo.git",
+        "-- ::: " .. path,
+        "--",
+        "--",
+        "",
+        "local x = 1",
+    }
+end
+
+describe("util.header.find_box", function()
+    it("spans the box from its first padding line to its last", function()
+        eq({ header.find_box(stale_header(":/a.lua"), "-- %s") }, { 4, 9 })
+    end)
+
+    it("finds a box beneath a shebang", function()
+        local lines = stale_header(":/a.lua")
+        table.insert(lines, 1, "#!/usr/bin/env lua")
+        eq({ header.find_box(lines, "-- %s") }, { 5, 10 })
+    end)
+
+    it("finds a fork's box and a bare path's", function()
+        eq({
+            header.find_box({
+                "#",
+                "#",
+                "# ~upstream/repo.git",
+                "# └─> ~chewygumxx/repo.git",
+                "# ::: :/a.yaml",
+                "#",
+                "#",
+            }, "# %s"),
+        }, { 1, 7 })
+        eq({
+            header.find_box({ "#", "#", "# ~/loose/a.yaml", "#", "#" }, "# %s"),
+        }, { 1, 5 })
+    end)
+
+    it("honours a commentstring with a closing half", function()
+        eq({
+            header.find_box({
+                "/*  */",
+                "/*  */",
+                "/* ~o/r.git */",
+                "/* ::: :/a.c */",
+                "/*  */",
+                "/*  */",
+            }, "/* %s */"),
+        }, { 1, 6 })
+    end)
+
+    it("ignores a padded comment that names no path", function()
+        -- The same padding around prose is a comment block, not a box:
+        -- rewriting it would replace the prose with a path
+        eq(
+            header.find_box({ "--", "--", "-- Prose.", "--", "--" }, "-- %s"),
+            nil
+        )
+    end)
+
+    it("ignores a box below the head of the file", function()
+        ---@type string[]
+        local lines = vim.fn["repeat"]({ "local x = 1" }, 20)
+        vim.list_extend(lines, stale_header(":/a.lua"))
+        eq(header.find_box(lines, "-- %s"), nil)
+    end)
+end)
+
+describe("util.header.apply", function()
+    ---@type string, string
+    local dir, file
+
+    ---@type integer
+    local bufnr
+
+    before_each(function()
+        dir, file = helpers.repo({
+            branch   = "hdr-test",
+            subdir   = "sub",
+            contents = stale_header(":/old/file.lua"),
+        })
+        bufnr     = vim.fn.bufadd(file)
+        vim.fn.bufload(bufnr)
+        vim.bo[bufnr].filetype = "lua"
+    end)
+
+    after_each(function()
+        vim.api.nvim_buf_delete(bufnr, { force = true })
+        vim.fn.delete(dir, "rf")
+    end)
+
+    ---@return string[] lines
+    local lines_of = function()
+        return vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    end
+
+    it("re-boxes a file to where it now lives", function()
+        header.apply(bufnr)
+        eq(lines_of(), stale_header(":/sub/file.lua"))
+    end)
+
+    it("leaves a true box, and the buffer, untouched", function()
+        header.apply(bufnr)
+        vim.bo[bufnr].modified = false
+
+        -- An unmodified buffer must stay so, or `:w` on a file that has
+        -- not moved would mark it changed for nothing
+        header.apply(bufnr)
+        eq(vim.bo[bufnr].modified, false)
+    end)
+
+    it("looks the location up once per buffer name", function()
+        -- Up to three git spawns a lookup, on every save of every file
+        -- with a header, is why this is cached at all
+        local real   = header.locate
+        local looked = 0
+        ---@diagnostic disable-next-line: duplicate-set-field
+        header.locate = function(name)
+            looked = looked + 1
+            return real(name)
+        end
+
+        local ok, err = pcall(function()
+            header.apply(bufnr)
+            header.apply(bufnr)
+            eq(looked, 1)
+
+            -- A `:saveas` or `:file` renames the buffer, which is the
+            -- case the cache must not hide
+            local moved = dir .. "/moved.lua"
+            vim.api.nvim_buf_set_name(bufnr, moved)
+            header.apply(bufnr)
+            eq(looked, 2)
+            eq(lines_of()[7], "-- ::: :/moved.lua")
+        end)
+        header.locate = real
+        assert(ok, err)
+    end)
+
+    it("leaves Markdown to util.frontmatter", function()
+        vim.bo[bufnr].filetype      = "markdown"
+        vim.bo[bufnr].commentstring = "-- %s"
+        header.apply(bufnr)
+        eq(lines_of(), stale_header(":/old/file.lua"))
+    end)
+
+    it("leaves a buffer with no commentstring alone", function()
+        vim.bo[bufnr].commentstring = ""
+        header.apply(bufnr)
+        eq(lines_of(), stale_header(":/old/file.lua"))
+    end)
+end)
+
 describe("util.header.setup", function()
     ---@type string
     local dir
@@ -384,10 +547,25 @@ describe("util.header.setup", function()
     after_each(function()
         vim.api.nvim_del_user_command("XXInsertHeader")
         -- Registered on a global augroup, so left in place they would
-        -- prepend a header to every new buffer the rest of the suite opens
+        -- prepend a header to every new buffer the rest of the suite opens,
+        -- and rewrite the box of every file it saves
         vim.api.nvim_del_augroup_by_name("cgxx.header_mark_pending")
         vim.api.nvim_del_augroup_by_name("cgxx.header_apply_insert")
+        vim.api.nvim_del_augroup_by_name("cgxx.header_sync_box")
         vim.fn.delete(dir, "rf")
+    end)
+
+    it("re-boxes a moved file when it is written", function()
+        local path = dir .. "/moved.lua"
+        vim.fn.writefile(stale_header(":/old/file.lua"), path)
+
+        vim.cmd.edit(vim.fn.fnameescape(path))
+        local bufnr = vim.api.nvim_get_current_buf()
+        -- Unmodified on purpose: a moved file is opened and saved as is
+        vim.cmd.write()
+
+        eq(vim.fn.readfile(path), stale_header(":/moved.lua"))
+        vim.api.nvim_buf_delete(bufnr, { force = true })
     end)
 
     it("registers the XXInsertHeader command", function()
