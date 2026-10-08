@@ -196,7 +196,7 @@ M.apply = function(buf)
     ---@type util.HeaderLocation?
     local location
     if name ~= "" then
-        location = util_header.locate(name)
+        location = util_header.located(buf, name)
     end
 
     local header, last = M.sync(

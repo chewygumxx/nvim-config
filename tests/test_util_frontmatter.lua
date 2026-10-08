@@ -209,3 +209,60 @@ describe("util.frontmatter.autocmd", function()
         eq(vim.fn.readfile(path), document())
     end)
 end)
+
+describe("util.frontmatter.apply", function()
+    ---@type string
+    local dir
+    ---@type integer
+    local bufnr
+
+    before_each(function()
+        dir = helpers.repo({ branch = "fm-apply" })
+        -- Made, since git cannot place a file in a directory it cannot
+        -- enter, and the box would fall back to an absolute path
+        vim.fn.mkdir(dir .. "/notes", "p")
+        bufnr = vim.api.nvim_create_buf(false, true)
+        vim.api.nvim_buf_set_name(bufnr, dir .. "/notes/new.md")
+        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, document())
+    end)
+
+    after_each(function()
+        if vim.api.nvim_buf_is_valid(bufnr) then
+            vim.api.nvim_buf_delete(bufnr, { force = true })
+        end
+        vim.fn.delete(dir, "rf")
+    end)
+
+    it("looks the location up once per buffer name", function()
+        -- Shared with `util.header.apply`'s cache, since a Markdown save
+        -- would otherwise spawn git every time just to re-render the box
+        local header = require("util.header")
+        local real   = header.locate
+        local looked = 0
+        ---@diagnostic disable-next-line: duplicate-set-field
+        header.locate = function(name)
+            looked = looked + 1
+            return real(name)
+        end
+
+        local ok, err = pcall(function()
+            frontmatter.apply(bufnr)
+            frontmatter.apply(bufnr)
+            eq(looked, 1)
+            eq(
+                vim.api.nvim_buf_get_lines(bufnr, 11, 12, false)[1],
+                "   - ::: :/notes/new.md"
+            )
+
+            vim.api.nvim_buf_set_name(bufnr, dir .. "/moved.md")
+            frontmatter.apply(bufnr)
+            eq(looked, 2)
+            eq(
+                vim.api.nvim_buf_get_lines(bufnr, 11, 12, false)[1],
+                "   - ::: :/moved.md"
+            )
+        end)
+        header.locate = real
+        assert(ok, err)
+    end)
+end)
