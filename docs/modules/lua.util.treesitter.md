@@ -133,6 +133,65 @@ Restricts TOML script injections to mise config filenames and directories.
 
 
 
+### M.shebang_lang
+---
+```lua
+function M.shebang_lang(text: string) -> lang string?
+```
+@param `text` - Script text, optionally still inside its TOML quotes
+
+
+
+
+
+
+Returns the parser a script's shebang names, or nil when it has none.
+`env`'s flags and assignments are skipped, so `#!/usr/bin/env -S uv run`
+names `uv`, and a version suffix is dropped, so `python3.12` is `python`.
+
+
+
+
+
+
+
+
+### M.set_lang_from_shebang
+---
+```lua
+function M.set_lang_from_shebang(
+  match: table<integer,TSNode[]>,
+  _pattern: integer,
+  source: (string|integer),
+  predicate: any[],
+  metadata: vim.treesitter.query.TSMetadata {
+    range = (Range2|Range4|Range6)?,
+    offset = Range4?,
+    conceal = string?,
+    bo.commentstring = string?,
+    [integer] = vim.treesitter.query.TSMetadata?,
+    [string] = (string|integer)?,
+}
+) ->  nil
+```
+@param `source` - Buffer number, or source text
+
+
+
+
+
+
+Treesitter query directive: `#set-lang-from-shebang! @capture default`
+Sets `injection.language` to the parser the captured script's shebang
+names, or to `default` when it has none.
+
+
+
+
+
+
+
+
 ### M.setup
 ---
 ```lua
@@ -143,9 +202,32 @@ function M.setup() ->  nil
 
 
 
-Registers this module's custom treesitter query predicates.
+Registers this module's custom treesitter query predicates and directives.
 
 
+
+
+
+
+
+
+
+
+
+## fields
+---
+
+### M.interpreters
+---
+```lua
+M.interpreters : table<string,string>
+```
+
+
+
+Interpreters a shebang can name whose parser goes by another name. A name
+absent here is taken to be its own parser's. `tsx` is the TypeScript
+runner, whose scripts the TSX parser's JSX grammar would misread.
 
 
 
