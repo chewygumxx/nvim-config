@@ -315,11 +315,14 @@ local ensure_installed = {
     -- https://github.com/georgeharker/tree-sitter-zsh
 }
 
+-- Register predicates before plugins can load queries during startup.
+M.init = function()
+    require("util.treesitter").setup()
+end
+
 -- Ripped from:
 -- https://www.reddit.com/r/neovim/comments/1pndf9e/my_new_nvimtreesitter_configuration_for_the_main/
 M.config = function()
-    require("util.treesitter").setup()
-
     -- Termux ships its compiler under `$PREFIX/bin`, not a system path.
     -- Without an explicit CC/CXX, `tree-sitter build`'s underlying Rust `cc`
     -- crate misdetects the host toolchain as a cross-compiler and looks for
