@@ -323,3 +323,78 @@ describe("util.treesitter.is_mise", function()
         eq(treesitter.is_mise({}, 0, "0", {}), false)
     end)
 end)
+
+describe("util.treesitter.shebang_lang", function()
+    it("names the parser a shebang's interpreter maps to", function()
+        ---@type table<string, string>
+        local cases = {
+            ['"""#!/usr/bin/env python3\nprint(1)\n"""'] = "python",
+            ["'''\n#!/usr/bin/env -S uv run --script\n'''"] = "python",
+            ['"""#!/usr/bin/env -S deno run -A\n"""'] = "typescript",
+            ['"""#!/usr/bin/env FOO=1 node\n"""'] = "javascript",
+            ['"""#!/usr/bin/env ts-node\n"""'] = "typescript",
+            ['"""#!/usr/bin/env tsx\n"""'] = "typescript",
+            ['"""#!/bin/bash -eu\n"""'] = "bash",
+            ['"""#!/bin/sh\n"""'] = "bash",
+            ['"""#!/usr/bin/python3.12\n"""'] = "python",
+            ['"""#!/usr/bin/env lua5.1\n"""'] = "lua",
+            ['"""#!/usr/bin/env fish\n"""'] = "fish",
+            ['"""#!/usr/bin/env Rscript\n"""'] = "r",
+            ["#!/usr/bin/env ruby\r\nputs 1"] = "ruby",
+        }
+        for text, lang in pairs(cases) do
+            eq({ text, treesitter.shebang_lang(text) }, { text, lang })
+        end
+    end)
+
+    it("returns nil when there is no usable shebang", function()
+        for _, text in ipairs({
+            '"""echo hi\n"""',
+            '"""echo hi\n#!/bin/bash\n"""',
+            '"""  #!/bin/bash\n"""',
+            '"""#!\n"""',
+            '"""#!/usr/bin/env -S\n"""',
+        }) do
+            eq({ text, treesitter.shebang_lang(text) }, { text, nil })
+        end
+    end)
+end)
+
+describe("util.treesitter.set_lang_from_shebang", function()
+    it(
+        "sets injection.language from a real capture, else the default",
+        function()
+            -- Lua's parser is bundled, so the directive can be driven through a
+            -- real tree without TOML's. Calling the handler directly keeps the
+            -- directive out of the session's registry, which test_queries.lua
+            -- snapshots.
+            ---@type string
+            local src    = "local a = [[#!/usr/bin/env -S deno run]]\n"
+                .. "local b = [[echo hi]]\n"
+            local parser = vim.treesitter.get_string_parser(src, "lua")
+            local root   = parser:parse()
+                [1]
+                :root()
+            local query  = vim.treesitter.query.parse(
+                "lua",
+                "(string_content) @script"
+            )
+
+            ---@type (string | nil)[]
+            local langs = {}
+            for pattern, match in query:iter_matches(root, src) do
+                ---@type vim.treesitter.query.TSMetadata
+                local metadata = {}
+                treesitter.set_lang_from_shebang(
+                    match,
+                    pattern,
+                    src,
+                    { "set-lang-from-shebang!", 1, "bash" },
+                    metadata
+                )
+                table.insert(langs, metadata["injection.language"])
+            end
+            eq(langs, { "typescript", "bash" })
+        end
+    )
+end)

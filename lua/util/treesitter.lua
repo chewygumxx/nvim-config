@@ -10,7 +10,7 @@
 --
 
 --
--- Custom treesitter query predicates
+-- Custom treesitter query predicates and directives
 --
 
 local M = {}
@@ -214,7 +214,94 @@ M.is_mise = function(_match, _pattern, source, _predicate)
         or path:match("/%.?mise/conf%.d/[^/]+%.toml$") ~= nil
 end
 
---- Registers this module's custom treesitter query predicates.
+--- Interpreters a shebang can name whose parser goes by another name. A name
+--- absent here is taken to be its own parser's. `tsx` is the TypeScript
+--- runner, whose scripts the TSX parser's JSX grammar would misread.
+---@type table<string, string>
+M.interpreters = {
+    ["ash"]     = "bash",
+    ["dash"]    = "bash",
+    ["ksh"]     = "bash",
+    ["mksh"]    = "bash",
+    ["sh"]      = "bash",
+    ["node"]    = "javascript",
+    ["nodejs"]  = "javascript",
+    ["bun"]     = "typescript",
+    ["deno"]    = "typescript",
+    ["ts-node"] = "typescript",
+    ["tsx"]     = "typescript",
+    ["pypy"]    = "python",
+    ["uv"]      = "python",
+    ["luajit"]  = "lua",
+    ["gawk"]    = "awk",
+    ["mawk"]    = "awk",
+    ["nawk"]    = "awk",
+    ["pwsh"]    = "powershell",
+    ["rscript"] = "r",
+}
+
+--- Returns the parser a script's shebang names, or nil when it has none.
+--- `env`'s flags and assignments are skipped, so `#!/usr/bin/env -S uv run`
+--- names `uv`, and a version suffix is dropped, so `python3.12` is `python`.
+---@param text string Script text, optionally still inside its TOML quotes
+---@return string? lang
+M.shebang_lang = function(text)
+    ---@type string?
+    local line = text:match("^['\"]*[\r\n]*#!([^\r\n]*)")
+    if not line then
+        return nil
+    end
+    ---@type string[]
+    local words = vim.split(vim.trim(line), "%s+", { trimempty = true })
+    ---@type string?
+    local interpreter = words[1] and vim.fs.basename(words[1])
+    if interpreter == "env" then
+        interpreter = nil
+        for i = 2, #words do
+            if not words[i]:match("^%-") and not words[i]:match("=") then
+                interpreter = vim.fs.basename(words[i])
+                break
+            end
+        end
+    end
+    if not interpreter or interpreter == "" then
+        return nil
+    end
+    ---@type string
+    local name = interpreter:lower()
+    ---@type string
+    local bare = name:gsub("[%d.]+$", "")
+    if bare == "" then
+        bare = name
+    end
+    return M.interpreters[name] or M.interpreters[bare] or bare
+end
+
+--- Treesitter query directive: `#set-lang-from-shebang! @capture default`
+--- Sets `injection.language` to the parser the captured script's shebang
+--- names, or to `default` when it has none.
+---@param match     table<integer, TSNode[]>
+---@param _pattern  integer
+---@param source    integer | string                Buffer number, or source text
+---@param predicate any[]
+---@param metadata  vim.treesitter.query.TSMetadata
+---@return nil
+M.set_lang_from_shebang = function(match, _pattern, source, predicate, metadata)
+    ---@type integer
+    local id = predicate[2]
+    ---@type TSNode?
+    local node = (match[id] or {})[1]
+    if not node then
+        return
+    end
+    ---@type string?
+    local default = predicate[3]
+    ---@type string
+    local text                     = vim.treesitter.get_node_text(node, source)
+    metadata["injection.language"] = M.shebang_lang(text) or default
+end
+
+--- Registers this module's custom treesitter query predicates and directives.
 ---@return nil
 M.setup = function()
     vim.treesitter.query.add_predicate("adjacent?", M.adjacent, {
@@ -229,6 +316,11 @@ M.setup = function()
     vim.treesitter.query.add_predicate("is-mise?", M.is_mise, {
         force = true,
     })
+    vim.treesitter.query.add_directive(
+        "set-lang-from-shebang!",
+        M.set_lang_from_shebang,
+        { force = true }
+    )
 end
 
 return M

@@ -9,37 +9,18 @@
 ;
 ;
 ; Based on https://mise.jdx.dev/mise-cookbook/neovim.html
-; Multiline scripts with /usr/bin/env <language> shebangs.
-(pair
-  (bare_key) @_key
-  (string) @injection.content @injection.language
-  (#eq? @_key "run")
-  (#is-mise?)
-  (#match? @injection.language "^['\"]{3}\n*#!(/\\w+)+/env\\s+\\w+")
-  (#gsub! @injection.language "^['\"]['\"]['\"]\n*#!/[^%s]+/env%s+([^%s]+).*" "%1")
-  (#offset! @injection.content 0 3 0 -3))
-
-; Multiline scripts with direct interpreter paths.
-(pair
-  (bare_key) @_key
-  (string) @injection.content @injection.language
-  (#eq? @_key "run")
-  (#is-mise?)
-  (#match? @injection.language "^['\"]{3}\n*#!(/\\w+)+\\s*\n")
-  (#gsub! @injection.language "^['\"]['\"]['\"]\n*#!/[^%s]*/([^/%s]+)%s*\n.*" "%1")
-  (#offset! @injection.content 0 3 0 -3))
-
-; Bash is the highlighting default for scripts without a shebang.
+; Multiline scripts take the language their shebang names, through `env` or
+; a direct path, and default to Bash. See util.treesitter.shebang_lang.
 (pair
   (bare_key) @_key
   (string) @injection.content
   (#eq? @_key "run")
   (#is-mise?)
   (#match? @injection.content "^['\"]{3}")
-  (#not-match? @injection.content "^['\"]{3}\n*#!")
   (#offset! @injection.content 0 3 0 -3)
-  (#set! injection.language "bash"))
+  (#set-lang-from-shebang! @injection.content "bash"))
 
+; Single-line scripts have no room for a shebang.
 (pair
   (bare_key) @_key
   (string) @injection.content

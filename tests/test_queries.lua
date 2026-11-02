@@ -97,6 +97,8 @@ local provided = {
         .. "pattern",
     ["header-line?"] = "matches captures on a repo-slug or path header line",
     ["is-mise?"] = "restricts embedded run scripts to mise TOML files",
+    ["set-lang-from-shebang!"] = "injects a run script as the language its "
+        .. "shebang names",
 }
 
 --- Query kinds Neovim itself resolves from the runtimepath. A file named
