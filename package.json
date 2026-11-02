@@ -29,6 +29,7 @@
     },
     "scripts": {
         "commit": "cz",
+        "commit:spell": "git commit -m 'tweak(asset): Spell additions' -- spell/en.utf-8.add",
         "prepare": "husky",
         "typecheck": "tsc"
     },
