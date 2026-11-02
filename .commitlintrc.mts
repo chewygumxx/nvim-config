@@ -10,60 +10,61 @@
 
 import { defineConfig } from "@chewygumxx/commitlint-config";
 
+const scopes = [
+    {
+        name: "hl",
+        fullName: "Highlight",
+        description: "Highlight and colourscheme configuration",
+    },
+    {
+        name: "opt",
+        fullName: "Option",
+        description: "Neovim option configuration",
+    },
+    {
+        name: "ft",
+        fullName: "Filetype",
+        description: "Neovim filetype handling",
+    },
+    {
+        name: "key",
+        fullName: "Keymap",
+        description: "Neovim keymap setup",
+    },
+    {
+        name: "ucmd",
+        fullName: "Usercmd",
+        description: "Neovim user command definition",
+    },
+    {
+        name: "acmd",
+        fullName: "Autocmd",
+        description: "Neovim auto command specification",
+    },
+    {
+        name: "lsp",
+        fullName: "LSP",
+        description: "Language Server Protocol",
+    },
+    {
+        name: "spec",
+        fullName: "Spec",
+        description: "Plugin load, specification, and integration",
+    },
+    {
+        name: "util",
+        fullName: "Utility",
+        description: "Composition of utilities beyond plugin specification",
+    },
+    {
+        name: "asset",
+        fullName: "Asset",
+        description: "Inclusion of assets ie. templates, snippets, spell, etc.",
+    },
+];
+
 // Types, limits and the prompt are shared; only the scopes are this
 // repository's own.
 export default defineConfig({
-    scopes: [
-        {
-            name: "hl",
-            fullName: "Highlight",
-            description: "Highlight and colourscheme configuration",
-        },
-        {
-            name: "opt",
-            fullName: "Option",
-            description: "Neovim option configuration",
-        },
-        {
-            name: "ft",
-            fullName: "Filetype",
-            description: "Neovim filetype handling",
-        },
-        {
-            name: "key",
-            fullName: "Keymap",
-            description: "Neovim keymap setup",
-        },
-        {
-            name: "ucmd",
-            fullName: "Usercmd",
-            description: "Neovim user command definition",
-        },
-        {
-            name: "acmd",
-            fullName: "Autocmd",
-            description: "Neovim auto command specification",
-        },
-        {
-            name: "lsp",
-            fullName: "LSP",
-            description: "Language Server Protocol",
-        },
-        {
-            name: "spec",
-            fullName: "Spec",
-            description: "Plugin load, specification, and integration",
-        },
-        {
-            name: "util",
-            fullName: "Utility",
-            description: "Composition of utilities beyond plugin specification",
-        },
-        {
-            name: "asset",
-            fullName: "Asset",
-            description:
-                "Inclusion of assets ie. templates, snippets, spell, etc.",
-        },
-    ],
+    scopes: scopes,
 });
