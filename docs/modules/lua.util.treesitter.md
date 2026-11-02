@@ -106,6 +106,33 @@ True if every captured node's expanded line matches one of
 
 
 
+### M.is_mise
+---
+```lua
+function M.is_mise(
+  _match: table<integer,TSNode[]>,
+  _pattern: integer,
+  source: (string|integer),
+  _predicate: string[]
+) ->  boolean
+```
+@param `source` - Buffer number, or anonymous source text
+
+
+
+
+
+
+Treesitter query predicate: `#is-mise?`
+Restricts TOML script injections to mise config filenames and directories.
+
+
+
+
+
+
+
+
 ### M.setup
 ---
 ```lua
