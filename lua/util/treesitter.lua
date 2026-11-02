@@ -193,6 +193,27 @@ M.header_line = function(match, _, source, predicate)
     return true
 end
 
+--- Treesitter query predicate: `#is-mise?`
+--- Restricts TOML script injections to mise config filenames and directories.
+---@param _match     table<integer, TSNode[]>
+---@param _pattern   integer
+---@param source     integer | string         Buffer number, or anonymous source text
+---@param _predicate string[]
+---@return boolean
+M.is_mise = function(_match, _pattern, source, _predicate)
+    -- A string parser has no filename; never borrow the current buffer's.
+    if type(source) ~= "number" then
+        return false
+    end
+    local path = vim.fs.normalize(vim.api.nvim_buf_get_name(source))
+    local name = vim.fs.basename(path)
+    return name:match("^%.?mise%.toml$") ~= nil
+        or name:match("^%.?mise%.[^/]+%.toml$") ~= nil
+        or path:match("/%.?mise/config%.toml$") ~= nil
+        or path:match("/%.?mise/config%.[^/]+%.toml$") ~= nil
+        or path:match("/%.?mise/conf%.d/[^/]+%.toml$") ~= nil
+end
+
 --- Registers this module's custom treesitter query predicates.
 ---@return nil
 M.setup = function()
@@ -203,6 +224,9 @@ M.setup = function()
         force = true,
     })
     vim.treesitter.query.add_predicate("header-line?", M.header_line, {
+        force = true,
+    })
+    vim.treesitter.query.add_predicate("is-mise?", M.is_mise, {
         force = true,
     })
 end

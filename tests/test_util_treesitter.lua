@@ -266,3 +266,60 @@ describe("util.treesitter.header_line", function()
         )
     end)
 end)
+
+describe("util.treesitter.is_mise", function()
+    ---@type integer
+    local buf
+
+    before_each(function()
+        buf = vim.api.nvim_create_buf(false, true)
+    end)
+
+    after_each(function()
+        vim.api.nvim_buf_delete(buf, { force = true })
+    end)
+
+    it("recognizes project, global, local and environment configs", function()
+        local paths = {
+            "mise.toml",
+            ".mise.toml",
+            "mise.local.toml",
+            ".mise.local.toml",
+            "mise.production.toml",
+            ".mise.production.local.toml",
+            "mise/config.toml",
+            ".mise/config.local.toml",
+            ".mise/config.production.toml",
+            ".config/mise/config.toml",
+            ".config/mise/mise.toml",
+            ".config/mise/mise.local.toml",
+            ".config/mise/conf.d/tools.toml",
+            ".mise/conf.d/tasks.toml",
+        }
+        for _, path in ipairs(paths) do
+            vim.api.nvim_buf_set_name(buf, "/project/" .. path)
+            eq({ path, treesitter.is_mise({}, 0, buf, {}) }, { path, true })
+        end
+    end)
+
+    it("rejects unrelated TOML files and unnamed buffers", function()
+        eq(treesitter.is_mise({}, 0, buf, {}), false)
+        for _, path in ipairs({
+            "pyproject.toml",
+            "config.toml",
+            "mise.toml.bak",
+            "miserable.toml",
+            ".config/other/config.toml",
+            ".mise/other.toml",
+            "mise/conf.d/nested/tools.toml",
+        }) do
+            vim.api.nvim_buf_set_name(buf, "/project/" .. path)
+            eq({ path, treesitter.is_mise({}, 0, buf, {}) }, { path, false })
+        end
+    end)
+
+    it("does not mistake anonymous source text for a buffer number", function()
+        eq(treesitter.is_mise({}, 0, "run = 'echo hello'", {}), false)
+        eq(treesitter.is_mise({}, 0, "0", {}), false)
+    end)
+end)

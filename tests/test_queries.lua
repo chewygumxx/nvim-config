@@ -21,15 +21,15 @@
 --
 --   1. Structure. Every file is parsed as the *query language*, using the
 --      `query` grammar Neovim bundles to highlight `.scm` files. That needs
---      none of the target grammars, so all eight files are covered, and it
+--      none of the target grammars, so all query files are covered, and it
 --      catches the faults that actually get written: an unbalanced paren, a
 --      stray line, a malformed predicate call.
 --
 --   2. Resolvability. Every `#predicate?` and `#directive!` a file uses has
---      to be one Neovim knows after `util.treesitter.setup()` has run. Three
---      of the six predicates in use here are this repository's own, so
+--      to be one Neovim knows after `util.treesitter.setup()` has run. Some
+--      predicates in use here are this repository's own, so
 --      "known to Neovim" is not the test; "known once we have registered
---      ours" is. This is the parity gate between `queries/comment` and
+--      ours" is. This is the parity gate between `queries/` and
 --      `lua/util/treesitter.lua`, in both directions.
 --
 --   3. Compilation. `vim.treesitter.query.parse` checks a query against the
@@ -41,7 +41,7 @@
 --
 -- Structure alone does not catch everything: a predicate called with the
 -- wrong number of arguments parses cleanly and only fails at depth 3, so
--- the six files with no bundled parser are genuinely less well covered
+-- the files with no bundled parser are genuinely less well covered
 -- than the two with one. That is a limit of the environment, and the
 -- registry is what keeps it visible.
 --
@@ -61,9 +61,13 @@ local eq       = MiniTest.expect.equality
 ---@type table<string, { bundled: boolean, extends: boolean }>
 local expected = {
     -- This repository's own: highlights the file headers described in
-    -- CLAUDE.md's Conventions, and the source of all three custom
+    -- CLAUDE.md's Conventions, and the source of the three header
     -- predicates.
     ["queries/comment/highlights.scm"] = { bundled = false, extends = false },
+
+    -- Mise injections add to the language's existing queries.
+    ["queries/bash/injections.scm"] = { bundled = false, extends = true },
+    ["queries/toml/injections.scm"] = { bundled = false, extends = true },
 
     ["queries/markdown/highlights.scm"] = { bundled = true, extends = false },
     ["queries/markdown_inline/highlights.scm"] = {
@@ -92,6 +96,7 @@ local provided = {
     ["last-matching?"] = "matches only the last capture satisfying a "
         .. "pattern",
     ["header-line?"] = "matches captures on a repo-slug or path header line",
+    ["is-mise?"] = "restricts embedded run scripts to mise TOML files",
 }
 
 --- Query kinds Neovim itself resolves from the runtimepath. A file named
@@ -134,7 +139,8 @@ end
 
 --- Returns the predicate and directive names text calls, each with its
 --- trailing `?` or `!` so a predicate cannot be confused with a directive
---- of the same name.
+--- of the same name. Negated predicates resolve to their positive handler,
+--- just as Neovim does; `list_predicates()` does not list `not-` variants.
 ---@param text string
 ---@return table<string, true> called
 local called = function(text)
@@ -160,7 +166,14 @@ local called = function(text)
                 end
             end
             if name then
-                names[name .. (kind or "")] = true
+                ---@type string
+                local handler = name
+                if kind == "?" then
+                    ---@type string
+                    local positive = name:gsub("^not%-", "")
+                    handler        = positive
+                end
+                names[handler .. (kind or "")] = true
             end
         end
         for child in node:iter_children() do
