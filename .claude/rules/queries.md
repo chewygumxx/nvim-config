@@ -17,11 +17,12 @@ tags:
    -
    -->
 
-# `queries/` replaces the runtime queries
+# `queries/` overrides and extensions
 
-**No file in `queries/` carries an `; extends` comment, so each one fully
-replaces the runtime query for its language rather than adding to it.** That is
-a decision, not an oversight, and it means anything the bundled query provided
+**Most files in `queries/` omit `; extends`, so they fully replace the runtime
+query for their language.** The mise injections in `queries/toml/injections.scm`
+and `queries/bash/injections.scm` carry `; extends` to retain existing language
+injections. For an override, anything the bundled query provided
 has to be reproduced. `queries/comment/highlights.scm` does exactly that,
 copying nvim-treesitter's own captures with the provenance URL inline; deleting
 them because they look redundant removes highlighting. `tests/test_queries.lua`
@@ -30,15 +31,20 @@ deliberate edit there and not a silent one.
 
 `queries/comment/highlights.scm` is this repository's own, highlighting the file
 headers described under Conventions in `.claude/CLAUDE.md`, and is the sole user
-of the three custom predicates `lua/util/treesitter.lua` registers (`adjacent?`,
+of the three header predicates `lua/util/treesitter.lua` registers (`adjacent?`,
 `last-matching?`, `header-line?`). Renaming or removing one breaks both this
 file and the parity gate that asserts every predicate and directive resolves
 after `util.treesitter.setup()` has run.
 
+The fourth predicate, `is-mise?`, restricts TOML `run` injections to mise config
+paths. Register predicates in the Tree-sitter spec's `init`, before plugins
+can load queries. Anonymous string sources have no path and must not inherit
+the current buffer's filename.
+
 Validation reaches three depths, because the grammars these target are not all
 available. Every file is parsed as the _query language_ using the `query`
 grammar Neovim bundles, which needs none of the target parsers and so covers all
-eight files. Predicates and directives are then checked for resolution. Finally
+query files. Predicates and directives are then checked for resolution. Finally
 `vim.treesitter.query.parse` compiles a file against its own grammar, which
 reaches only the languages Neovim ships a parser for; which those are is
 registered rather than discovered, so a parser arriving or leaving is a failure
@@ -65,7 +71,7 @@ tool's own `--check` demands but that one write pass will not make, so
 `.husky/pre-commit` runs it twice and then asserts with `--check`.
 
 `ts_query_ls lint` is the linter, chosen over `check` because it needs no parser
-objects and so reaches all eight files, where `check` would silently cover only
+objects and so reaches all query files, where `check` would silently cover only
 the languages Neovim bundles a parser for. It earned its place immediately: it
 found five `(#set! conceal "")` patterns in
 `queries/markdown_inline/highlights.scm` with no capture to attach to, which
@@ -80,7 +86,7 @@ would have undone deliberate work to fix an unrelated defect. Note `--fix`
 before taking it.
 
 `.tsqueryrc.json` is almost empty on purpose. `valid_predicates` replaces the
-tool's defaults rather than extending them, so declaring the three custom
+tool's defaults rather than extending them, so declaring only the custom
 predicates there would make every core `#eq?` an "unrecognized predicate".
 Predicate parity stays where it already was, in `tests/test_queries.lua` against
 `lua/util/treesitter.lua`.

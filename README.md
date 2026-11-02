@@ -66,7 +66,7 @@ lua/plugin.lua           Which plugins are enabled, disabled, or installed-but-u
 lua/spec/                One lazy.nvim spec per plugin, named for the plugin
 lua/util/                Shared helpers: git, headers, WIP snapshots, statusline, ...
 lsp/                     One config per language server (runtimepath convention)
-queries/                 Tree-sitter queries that replace the runtime ones
+queries/                 Tree-sitter query overrides and extensions
 snippets/                friendly-snippets-style manifest and per-language JSON
 types/                   ---@meta stubs for what LuaLS cannot see on its own
 tests/                   The mini.test suite, one file per module under test
@@ -137,6 +137,14 @@ satisfying: `scripts/typecheck_sensitive.lua` repeats the typecheck at `Hint`,
 ie. everything the gate ignores.
 
 ## Features worth knowing about
+
+**Mise script highlighting.** Tree-sitter highlights string-valued `run`
+commands in mise TOML files as Bash, or as the language named by a multiline
+script's direct or `/usr/bin/env` shebang. The interpreter name must match an
+installed parser; wrappers and versioned names need a mapping. Bash file tasks
+also highlight `#MISE` metadata as TOML and `#USAGE` blocks as KDL, including
+spaced and bracketed prefixes. The queries extend the existing language queries
+and follow the [mise Neovim cookbook](https://mise.jdx.dev/mise-cookbook/neovim.html).
 
 **WIP snapshots.** `lua/util/wip.lua` commits the in-memory text of a tracked
 buffer onto `refs/wip/<branch>` every couple of seconds, using git plumbing
