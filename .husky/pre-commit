@@ -41,10 +41,66 @@ get_files() {
     done
 }
 
+# A file staged only in part, ie. one whose working copy still differs from
+# the index, cannot be formatted in place: the `git add` that re-stages a
+# formatter's output adds the whole working copy, and with it every hunk that
+# was deliberately left unstaged. Such a file is instead linted and checked
+# exactly as staged, and never written to or re-added. `whole_of` and
+# `partial_of` split a newline-separated list from `get_files` accordingly.
+#
+# Both compare bytes with `--no-textconv`: a `diff.<driver>.textconv` such as
+# one normalising JSON would otherwise call a whitespace-only unstaged change
+# no change at all, and the file would be formatted and re-added whole.
+whole_of() {
+    printf '%s\n' "$1" | while IFS= read -r f; do
+        [ -n "$f" ] && git diff --quiet --no-textconv --no-ext-diff -- "$f" && printf '%s\n' "$f"
+    done
+}
+
+partial_of() {
+    printf '%s\n' "$1" | while IFS= read -r f; do
+        [ -n "$f" ] && ! git diff --quiet --no-textconv --no-ext-diff -- "$f" && printf '%s\n' "$f"
+    done
+}
+
+# Runs the command that follows with the staged copy of $1 on stdin.
+# `cat-file blob` rather than `show`, which can apply a textconv.
+with_staged() {
+    ws_file=$1
+    shift
+    git cat-file blob ":$ws_file" | "$@"
+}
+
+# Fails when formatting the staged copy of $1 with the command that follows,
+# which must read stdin and write stdout, would change it or fails outright.
+# The formatter's own status is checked, not only the comparison, because
+# luafmt hands unparseable input back unchanged.
+check_staged_format() {
+    cs_file=$1
+    shift
+    cs_staged=$(mktemp) || return 1
+    cs_formatted=$(mktemp) || { rm -f "$cs_staged"; return 1; }
+    git cat-file blob ":$cs_file" >"$cs_staged"
+    cs_rc=1
+    "$@" <"$cs_staged" >"$cs_formatted" 2>/dev/null \
+        && cmp -s "$cs_formatted" "$cs_staged" \
+        && cs_rc=0
+    rm -f "$cs_staged" "$cs_formatted"
+    [ "$cs_rc" -eq 0 ] && return 0
+    log "$cs_file is partly staged and its staged copy is unformatted or" \
+        "does not parse; fix the file and stage it again"
+    return 1
+}
+
 
 # ----------------
 # Lint and Format
 # ----------------
+
+# Each function below hands its fully staged files to the formatter in place
+# and re-stages them, and checks its partly staged ones as staged. A list is
+# fed to xargs with `printf '%s'`, never with a trailing newline: an empty
+# list would otherwise reach the command as one empty argument.
 
 lintfmt_lua() {
     lua_files=$(get_files '*.lua')
@@ -52,15 +108,31 @@ lintfmt_lua() {
 
     cmd_exist selene luafmt || return 0
 
+    lua_whole=$(whole_of "$lua_files")
+    lua_partial=$(partial_of "$lua_files")
+
     # types/*.d.lua are lua_ls-only ---@meta declaration stubs, never
     # required or executed; selene has no way to know that and flags
     # their intentional global declarations as real-code bugs.
-    selene_files=$(printf '%s\n' "$lua_files" | grep -v '^types/')
+    selene_files=$(printf '%s\n' "$lua_whole" | grep -v '^types/')
     [ -n "$selene_files" ] \
-        && { printf '%s\n' "$selene_files" | xargs -d '\n' selene || return 1; }
+        && { printf '%s' "$selene_files" | xargs -r -d '\n' selene || return 1; }
 
-    echo "$lua_files" | xargs -d '\n' luafmt --verify --write || return 1
-    echo "$lua_files" | xargs -d '\n' git add --
+    printf '%s' "$lua_whole" | xargs -r -d '\n' luafmt --verify --write || return 1
+    printf '%s' "$lua_whole" | xargs -r -d '\n' git add --
+
+    lua_rc=0
+    while IFS= read -r f <&3; do
+        [ -n "$f" ] || continue
+        case "$f" in
+            types/*) ;;
+            *) with_staged "$f" selene - || lua_rc=1 ;;
+        esac
+        check_staged_format "$f" luafmt --stdin --stdin-filename "$f" || lua_rc=1
+    done 3<<EOF
+$lua_partial
+EOF
+    return "$lua_rc"
 }
 
 lintfmt_toml() {
@@ -69,9 +141,26 @@ lintfmt_toml() {
 
     cmd_exist tombi || return 0
 
-    echo "$toml_files" | xargs -d '\n' tombi lint --error-on-warnings --offline || return 1
-    echo "$toml_files" | xargs -d '\n' tombi format --offline || return 1
-    echo "$toml_files" | xargs -d '\n' git add --
+    toml_whole=$(whole_of "$toml_files")
+    toml_partial=$(partial_of "$toml_files")
+
+    printf '%s' "$toml_whole" | xargs -r -d '\n' tombi lint --error-on-warnings --offline || return 1
+    printf '%s' "$toml_whole" | xargs -r -d '\n' tombi format --offline || return 1
+    printf '%s' "$toml_whole" | xargs -r -d '\n' git add --
+
+    # `--stdin-filename` keeps the real path, which is what tombi associates
+    # a schema with, so `mise.toml` is still linted against mise's.
+    toml_rc=0
+    while IFS= read -r f <&3; do
+        [ -n "$f" ] || continue
+        with_staged "$f" tombi lint --error-on-warnings --offline \
+            --stdin-filename "$f" - || toml_rc=1
+        check_staged_format "$f" tombi format --offline \
+            --stdin-filename "$f" - || toml_rc=1
+    done 3<<EOF
+$toml_partial
+EOF
+    return "$toml_rc"
 }
 
 lintfmt_json_yaml() {
@@ -80,8 +169,21 @@ lintfmt_json_yaml() {
 
     cmd_exist bunx || return 0
 
-    echo "$json_yaml_files" | xargs -d '\n' bunx --bun --no-install prettier --write || return 1
-    echo "$json_yaml_files" | xargs -d '\n' git add --
+    json_yaml_whole=$(whole_of "$json_yaml_files")
+    json_yaml_partial=$(partial_of "$json_yaml_files")
+
+    printf '%s' "$json_yaml_whole" | xargs -r -d '\n' bunx --bun --no-install prettier --write || return 1
+    printf '%s' "$json_yaml_whole" | xargs -r -d '\n' git add --
+
+    json_yaml_rc=0
+    while IFS= read -r f <&3; do
+        [ -n "$f" ] || continue
+        check_staged_format "$f" bunx --bun --no-install prettier \
+            --stdin-filepath "$f" || json_yaml_rc=1
+    done 3<<EOF
+$json_yaml_partial
+EOF
+    return "$json_yaml_rc"
 }
 
 lintfmt_query() {
@@ -89,6 +191,9 @@ lintfmt_query() {
     [ -z "$query_files" ] && return
 
     cmd_exist ts_query_ls || return 0
+
+    query_whole=$(whole_of "$query_files")
+    query_partial=$(partial_of "$query_files")
 
     # Formatted before linting, unlike the functions above, so that what is
     # linted is the bytes that get committed.
@@ -99,12 +204,34 @@ lintfmt_query() {
     # effective passes were enough for every file here, and the `--check`
     # that follows is what asserts that rather than trusting it, since a
     # tree left unconverged would fail CI on the next commit instead.
-    echo "$query_files" | xargs -d '\n' ts_query_ls format || return 1
-    echo "$query_files" | xargs -d '\n' ts_query_ls format || return 1
-    echo "$query_files" | xargs -d '\n' ts_query_ls format --check || return 1
+    if [ -n "$query_whole" ]; then
+        printf '%s' "$query_whole" | xargs -d '\n' ts_query_ls format || return 1
+        printf '%s' "$query_whole" | xargs -d '\n' ts_query_ls format || return 1
+        printf '%s' "$query_whole" | xargs -d '\n' ts_query_ls format --check || return 1
 
-    echo "$query_files" | xargs -d '\n' ts_query_ls lint || return 1
-    echo "$query_files" | xargs -d '\n' git add --
+        printf '%s' "$query_whole" | xargs -d '\n' ts_query_ls lint || return 1
+        printf '%s' "$query_whole" | xargs -d '\n' git add --
+    fi
+
+    # ts_query_ls reads no stdin, so the staged copy is written out under
+    # its own repo-relative path in a scratch tree and checked there.
+    query_rc=0
+    while IFS= read -r f <&3; do
+        [ -n "$f" ] || continue
+        query_tmp=$(mktemp -d) || return 1
+        mkdir -p "$query_tmp/$(dirname "$f")"
+        git cat-file blob ":$f" >"$query_tmp/$f"
+        if ! ts_query_ls format --check "$query_tmp/$f"; then
+            log "$f is partly staged and its staged copy is unformatted or" \
+                "does not parse; fix the file and stage it again"
+            query_rc=1
+        fi
+        ts_query_ls lint "$query_tmp/$f" || query_rc=1
+        rm -rf "$query_tmp"
+    done 3<<EOF
+$query_partial
+EOF
+    return "$query_rc"
 }
 
 
