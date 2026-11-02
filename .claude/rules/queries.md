@@ -37,9 +37,12 @@ file and the parity gate that asserts every predicate and directive resolves
 after `util.treesitter.setup()` has run.
 
 The fourth predicate, `is-mise?`, restricts TOML `run` injections to mise config
-paths. Register predicates in the Tree-sitter spec's `init`, before plugins
-can load queries. Anonymous string sources have no path and must not inherit
-the current buffer's filename.
+paths, and the directive `set-lang-from-shebang!` picks their language. The
+mapping is Lua rather than a `#gsub!` because `resolve_lang` rejects a name with
+a `.`, so a query alone cannot read `python3.12` or skip `env -S`. Register
+predicates in the Tree-sitter spec's `init`, before plugins can load queries.
+Anonymous string sources have no path and must not inherit the current buffer's
+filename.
 
 Validation reaches three depths, because the grammars these target are not all
 available. Every file is parsed as the _query language_ using the `query`

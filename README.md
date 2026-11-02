@@ -140,11 +140,12 @@ ie. everything the gate ignores.
 
 **Mise script highlighting.** Tree-sitter highlights string-valued `run`
 commands in mise TOML files as Bash, or as the language named by a multiline
-script's direct or `/usr/bin/env` shebang. The interpreter name must match an
-installed parser; wrappers and versioned names need a mapping. Bash file tasks
-also highlight `#MISE` metadata as TOML and `#USAGE` blocks as KDL, including
-spaced and bracketed prefixes. The queries extend the existing language queries
-and follow the [mise Neovim cookbook](https://mise.jdx.dev/mise-cookbook/neovim.html).
+script's shebang. `util.treesitter.shebang_lang` reads it through a direct path
+or `env` (flags such as `-S` included), drops version suffixes and maps runners
+to their language, so `uv` is Python and `deno` TypeScript. Bash file tasks also
+highlight `#MISE` metadata as TOML and `#USAGE` blocks as KDL, including spaced
+and bracketed prefixes. The queries extend the existing language queries and
+follow the [mise Neovim cookbook](https://mise.jdx.dev/mise-cookbook/neovim.html).
 
 **WIP snapshots.** `lua/util/wip.lua` commits the in-memory text of a tracked
 buffer onto `refs/wip/<branch>` every couple of seconds, using git plumbing
