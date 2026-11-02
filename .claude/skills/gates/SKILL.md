@@ -177,6 +177,20 @@ that formats _before_ it lints, so what is linted is the bytes being committed,
 and the one that runs its formatter twice followed by a `--check`, because a
 single pass does not converge.
 
+**Only a fully staged file is formatted in place.** Re-staging means `git add`,
+which adds the whole working copy, so a file staged in part would have every
+deliberately unstaged hunk committed with it. A file whose working copy still
+differs from the index is instead linted and format-checked as staged, through
+`git cat-file blob` and each tool's stdin mode (`ts_query_ls` has none, so a
+scratch copy), and the commit is refused if that copy is unformatted. Two traps
+shaped it. `git diff --quiet` honours a `diff.<driver>.textconv`, and this
+machine's global config normalises JSON through one, so without `--no-textconv`
+a whitespace-only unstaged change reads as none and the file is re-added whole.
+And `luafmt` hands unparseable input back unchanged, so the check reads the
+formatter's exit status rather than only comparing output. The whole-repo gates
+below still run against the working tree, so a partial commit is typechecked and
+tested as the tree stands, not as committed.
+
 It then gates on two whole-repo checks that ignore what was staged:
 `lua-language-server --check` at `Warning` whenever any `*.lua` file is staged,
 and the full suite whenever anything under `lua/`, `tests/`, `scripts/`, `lsp/`,
