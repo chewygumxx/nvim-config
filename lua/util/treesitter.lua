@@ -193,8 +193,49 @@ M.header_line = function(match, _, source, predicate)
     return true
 end
 
+--- Config filenames the environment adds to mise's defaults, ie. the custom
+--- names the cookbook says to adjust the predicate for. Each is a filename or
+--- a path relative to a project directory, except `MISE_GLOBAL_CONFIG_FILE`.
+---@return string[] names
+local function mise_custom_names()
+    ---@type string[]
+    local names = vim.split(
+        vim.env.MISE_OVERRIDE_CONFIG_FILENAMES or "",
+        ":",
+        { plain = true, trimempty = true }
+    )
+    table.insert(names, vim.env.MISE_DEFAULT_CONFIG_FILENAME)
+    table.insert(names, vim.env.MISE_GLOBAL_CONFIG_FILE)
+    return names
+end
+
+--- True if path names a mise config file: a default project, global, local,
+--- environment or `conf.d` config, or a name the environment configures.
+--- Shared by `#is-mise?` and anything else, such as an otter.nvim activation,
+--- that the cookbook says should check a buffer name against the same rules.
+---@param path string
+---@return boolean
+M.is_mise_path = function(path)
+    path       = vim.fs.normalize(path)
+    local name = vim.fs.basename(path)
+    if name:match("^%.?mise%.toml$") or name:match("^%.?mise%.[^/]+%.toml$")
+        or path:match("/%.?mise/config%.toml$")
+        or path:match("/%.?mise/config%.[^/]+%.toml$")
+        or path:match("/%.?mise/conf%.d/[^/]+%.toml$") then
+        return true
+    end
+    for _, custom in ipairs(mise_custom_names()) do
+        custom = vim.fs.normalize(custom)
+        if custom ~= ""
+            and (path == custom or vim.endswith(path, "/" .. custom)) then
+            return true
+        end
+    end
+    return false
+end
+
 --- Treesitter query predicate: `#is-mise?`
---- Restricts TOML script injections to mise config filenames and directories.
+--- Restricts TOML script injections to mise config files; see `is_mise_path`.
 ---@param _match     table<integer, TSNode[]>
 ---@param _pattern   integer
 ---@param source     integer | string         Buffer number, or anonymous source text
@@ -205,13 +246,8 @@ M.is_mise = function(_match, _pattern, source, _predicate)
     if type(source) ~= "number" then
         return false
     end
-    local path = vim.fs.normalize(vim.api.nvim_buf_get_name(source))
-    local name = vim.fs.basename(path)
-    return name:match("^%.?mise%.toml$") ~= nil
-        or name:match("^%.?mise%.[^/]+%.toml$") ~= nil
-        or path:match("/%.?mise/config%.toml$") ~= nil
-        or path:match("/%.?mise/config%.[^/]+%.toml$") ~= nil
-        or path:match("/%.?mise/conf%.d/[^/]+%.toml$") ~= nil
+    local path = vim.api.nvim_buf_get_name(source)
+    return path ~= "" and M.is_mise_path(path)
 end
 
 --- Interpreters a shebang can name whose parser goes by another name. A name

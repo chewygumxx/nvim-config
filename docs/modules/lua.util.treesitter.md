@@ -106,6 +106,28 @@ True if every captured node's expanded line matches one of
 
 
 
+### M.is_mise_path
+---
+```lua
+function M.is_mise_path(path: string) ->  boolean
+```
+
+
+
+
+
+True if path names a mise config file: a default project, global, local,
+environment or `conf.d` config, or a name the environment configures.
+Shared by `#is-mise?` and anything else, such as an otter.nvim activation,
+that the cookbook says should check a buffer name against the same rules.
+
+
+
+
+
+
+
+
 ### M.is_mise
 ---
 ```lua
@@ -124,7 +146,7 @@ function M.is_mise(
 
 
 Treesitter query predicate: `#is-mise?`
-Restricts TOML script injections to mise config filenames and directories.
+Restricts TOML script injections to mise config files; see `is_mise_path`.
 
 
 

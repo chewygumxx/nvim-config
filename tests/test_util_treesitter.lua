@@ -324,6 +324,57 @@ describe("util.treesitter.is_mise", function()
     end)
 end)
 
+describe("util.treesitter.is_mise_path", function()
+    local vars = {
+        "MISE_OVERRIDE_CONFIG_FILENAMES",
+        "MISE_DEFAULT_CONFIG_FILENAME",
+        "MISE_GLOBAL_CONFIG_FILE",
+    }
+    ---@type table<string, string?>
+    local saved = {}
+    ---@type table<string, string?>
+    local env = vim.env
+
+    before_each(function()
+        for _, var in ipairs(vars) do
+            saved[var], env[var] = env[var], nil
+        end
+    end)
+
+    after_each(function()
+        for _, var in ipairs(vars) do
+            env[var] = saved[var]
+        end
+    end)
+
+    it("rejects custom names the environment does not configure", function()
+        eq(treesitter.is_mise_path("/project/tasks.toml"), false)
+        eq(treesitter.is_mise_path("/project/.config/tools.toml"), false)
+        eq(treesitter.is_mise_path("/dotfiles/global.toml"), false)
+    end)
+
+    it("accepts the custom names mise reads from the environment", function()
+        vim.env.MISE_OVERRIDE_CONFIG_FILENAMES = "tasks.toml:.config/tools.toml"
+        vim.env.MISE_DEFAULT_CONFIG_FILENAME   = "project.toml"
+        vim.env.MISE_GLOBAL_CONFIG_FILE        = "/dotfiles/global.toml"
+        for _, path in ipairs({
+            "/project/tasks.toml",
+            "/project/.config/tools.toml",
+            "/project/project.toml",
+            "/dotfiles/global.toml",
+        }) do
+            eq({ path, treesitter.is_mise_path(path) }, { path, true })
+        end
+        for _, path in ipairs({
+            "/project/mytasks.toml",
+            "/project/tools.toml",
+            "/elsewhere/global.toml",
+        }) do
+            eq({ path, treesitter.is_mise_path(path) }, { path, false })
+        end
+    end)
+end)
+
 describe("util.treesitter.shebang_lang", function()
     it("names the parser a shebang's interpreter maps to", function()
         ---@type table<string, string>
